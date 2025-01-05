@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Convention: Codable, Identifiable, Comparable, Hashable {
+struct Convention: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
     let active: Bool
     let longName: String

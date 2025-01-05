@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct ShirtSize: Codable, Identifiable, Comparable, Hashable {
+struct ShirtSize: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
     let size: String
     let displayOrder: UInt32

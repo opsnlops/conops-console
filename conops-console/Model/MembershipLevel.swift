@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct MembershipLevel: Codable, Identifiable, Comparable, Hashable {
+struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
     let longName: String
     let shortName: String

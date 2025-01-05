@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct AuditLogItem: Codable, Identifiable, Comparable, Hashable {
+struct AuditLogItem: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
     let timestamp: Date
     let conventionID: UUID

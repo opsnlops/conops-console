@@ -9,7 +9,22 @@ import SwiftUI
 import SwiftData
 
 @main
-struct conops_consoleApp: App {
+struct ConopsConsoleApp: App {
+
+
+    init() {
+        initializeDefaults()
+    }
+
+    private func initializeDefaults() {
+            UserDefaults.standard.register(defaults: [
+            ServerConfiguration.hostnameKey: ServerConfiguration.defaultHostname,
+            ServerConfiguration.portKey: ServerConfiguration.defaultPort,
+            ServerConfiguration.useTLSKey: ServerConfiguration.defaultUseTLS
+        ])
+    }
+
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,8 +40,14 @@ struct conops_consoleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TopContentView()
         }
         .modelContainer(sharedModelContainer)
+
+        #if os(macOS)
+            Settings {
+                SettingsView()
+            }
+        #endif
     }
 }
