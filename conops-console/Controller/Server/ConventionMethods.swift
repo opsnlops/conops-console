@@ -28,4 +28,27 @@ extension ConopsServerClient {
             return .failure(error)
         }
     }
+
+    func createNewConvention(_ convention: Convention) async -> Result<String, ServerError> {
+
+        logger.info("saving a new convention to the server")
+
+        let result: Result<String, ServerError> = await sendData(
+            "convention",
+            method: .post,
+            body: convention,
+            returnType: String.self
+        )
+
+        switch result {
+        case .success(let message):
+            logger.info("success! server said: \(message)")
+            return .success(message)
+        case .failure(let error):
+            logger.warning(
+                "Server error while creating a new convention: \(error.localizedDescription)")
+            return .failure(error)
+        }
+
+    }
 }

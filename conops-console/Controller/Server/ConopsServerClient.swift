@@ -58,6 +58,7 @@ class ConopsServerClient: ConopsServerProtocol {
         do {
             let url = makeBaseURL(for: .http).appendingPathComponent(endpoint)
             let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
             let requestBody = try encoder.encode(body)
 
             var request = URLRequest(url: url)

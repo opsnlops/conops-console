@@ -9,7 +9,6 @@ import OSLog
 import SwiftUI
 
 struct TopContentView: View {
-
     @State private var conventions: [Convention] = []
     @State private var showingForm = false
 
@@ -19,16 +18,27 @@ struct TopContentView: View {
     let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "TopContentView")
 
     var body: some View {
-
         NavigationSplitView {
             List {
-                Section("Conventions") {
+                Section(
+                    header: HStack {
+                        Text("Conventions")
+                            .font(.headline)
+                        Spacer()
+                        Button {
+                            showingForm = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                ) {
                     ForEach(conventions) { convention in
                         NavigationLink(value: convention.id) {
                             Label(convention.shortName, systemImage: "pawprint.circle")
                         }
                     }
-                }  // End convention section
+                }
 
                 Section("Controls") {
                     NavigationLink {
@@ -36,32 +46,36 @@ struct TopContentView: View {
                     } label: {
                         Label("Settings", systemImage: "gear")
                     }
-                }  // end controls section
+                }
             }
         } detail: {
             Text("hi")
         }
         .alert(isPresented: $showErrorAlert) {
             Alert(
-                title: Text("Oooooh Shit"),
+                title: Text("Whoa, Shit!"),
                 message: Text(errorMessage),
                 dismissButton: .default(Text("Fuck"))
             )
         }
-        .task {
-
-            // TODO: Debugging code
-            do {
-                let emptyData = try JSONDecoder().decode(
-                    [Convention].self, from: "[]".data(using: .utf8)!)
-                logger.debug("Successfully decoded empty array: \(emptyData)")
-            } catch {
-                logger.error("Failed to decode empty array: \(error.localizedDescription)")
+        .sheet(isPresented: $showingForm) {
+            AddConventionView { newConvention in
+                Task {
+                    let client = ConopsServerClient()
+                    let saveResult = await client.createNewConvention(newConvention)
+                    switch saveResult {
+                    case .success(let newId):
+                        logger.debug("new convention has id \(newId)")
+                    case .failure(let error):
+                        logger.error("Failed to save convention: \(error)")
+                        errorMessage = error.localizedDescription
+                        showErrorAlert = true
+                    }
+                }
             }
-
-
+        }
+        .task {
             let client = ConopsServerClient()
-
             logger.info("attempting to load conventions")
             let conventionFetchResult = await client.getAllConventions()
 
@@ -72,12 +86,9 @@ struct TopContentView: View {
                 logger.error("Failed to fetch conventions: \(error)")
                 errorMessage = error.localizedDescription
                 showErrorAlert = true
-
             }
         }
     }
-
-
 }
 
 #Preview {
