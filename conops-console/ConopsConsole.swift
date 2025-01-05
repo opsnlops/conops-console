@@ -5,8 +5,8 @@
 //  Created by April White on 1/4/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct ConopsConsoleApp: App {
@@ -17,17 +17,17 @@ struct ConopsConsoleApp: App {
     }
 
     private func initializeDefaults() {
-            UserDefaults.standard.register(defaults: [
+        UserDefaults.standard.register(defaults: [
             ServerConfiguration.hostnameKey: ServerConfiguration.defaultHostname,
             ServerConfiguration.portKey: ServerConfiguration.defaultPort,
-            ServerConfiguration.useTLSKey: ServerConfiguration.defaultUseTLS
+            ServerConfiguration.useTLSKey: ServerConfiguration.defaultUseTLS,
         ])
     }
 
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Item.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

@@ -7,7 +7,7 @@
 //
 
 extension ConopsServerClient {
-    
+
     func getAllConventions() async -> Result<[Convention], ServerError> {
         // Notice we're passing `[Convention].self` here
         let result: Result<[Convention], ServerError> = await fetchData(
@@ -19,10 +19,12 @@ extension ConopsServerClient {
         // or a ServerError on .failure
         switch result {
         case .success(let conventions):
-            logger.debug("getAllConventions() was a success! Got \(conventions.count) convention(s).")
+            logger.debug(
+                "getAllConventions() was a success! Got \(conventions.count) convention(s).")
             return .success(conventions)
         case .failure(let error):
-            logger.warning("We couldn't get the data we wanted from the server: \(error.localizedDescription)")
+            logger.warning(
+                "We couldn't get the data we wanted from the server: \(error.localizedDescription)")
             return .failure(error)
         }
     }

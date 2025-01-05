@@ -10,7 +10,7 @@ import Foundation
 
 struct ServerStatus<T: Decodable>: Decodable {
     let status: String
-    let detailed_status: String? // Optional for errors
-    let message: String?         // Optional for additional information
-    let data: T?                 // Generic payload
+    let detailed_status: String?  // Optional for errors
+    let message: String?  // Optional for additional information
+    let data: T?  // Generic payload
 }

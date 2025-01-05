@@ -40,4 +40,3 @@ struct AuditLogItem: Codable, Identifiable, Comparable, Hashable, Sendable {
         )
     }
 }
-

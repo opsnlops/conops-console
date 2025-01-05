@@ -16,9 +16,9 @@ struct ServerSettingsView: View {
             Section(header: Text("Server Configuration")) {
                 TextField("Hostname", text: $viewModel.hostname)
                     .disableAutocorrection(true)
-                #if os(iOS)
-                    .textInputAutocapitalization(.none)
-                #endif
+                    #if os(iOS)
+                        .textInputAutocapitalization(.none)
+                    #endif
 
                 TextField("Port", value: $viewModel.port, format: .number)
 

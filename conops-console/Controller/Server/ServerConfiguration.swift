@@ -20,7 +20,9 @@ struct ServerConfiguration {
 
 extension UserDefaults {
     var serverHostname: String {
-        get { string(forKey: ServerConfiguration.hostnameKey) ?? ServerConfiguration.defaultHostname }
+        get {
+            string(forKey: ServerConfiguration.hostnameKey) ?? ServerConfiguration.defaultHostname
+        }
         set { set(newValue, forKey: ServerConfiguration.hostnameKey) }
     }
 
@@ -30,7 +32,10 @@ extension UserDefaults {
     }
 
     var useTLS: Bool {
-        get { object(forKey: ServerConfiguration.useTLSKey) as? Bool ?? ServerConfiguration.defaultUseTLS }
+        get {
+            object(forKey: ServerConfiguration.useTLSKey) as? Bool
+                ?? ServerConfiguration.defaultUseTLS
+        }
         set { set(newValue, forKey: ServerConfiguration.useTLSKey) }
     }
 }

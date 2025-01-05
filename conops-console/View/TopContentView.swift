@@ -28,7 +28,7 @@ struct TopContentView: View {
                             Label(convention.shortName, systemImage: "pawprint.circle")
                         }
                     }
-                } // End convention section
+                }  // End convention section
 
                 Section("Controls") {
                     NavigationLink {
@@ -36,7 +36,7 @@ struct TopContentView: View {
                     } label: {
                         Label("Settings", systemImage: "gear")
                     }
-                } // end controls section
+                }  // end controls section
             }
         } detail: {
             Text("hi")
@@ -52,7 +52,8 @@ struct TopContentView: View {
 
             // TODO: Debugging code
             do {
-                let emptyData = try JSONDecoder().decode([Convention].self, from: "[]".data(using: .utf8)!)
+                let emptyData = try JSONDecoder().decode(
+                    [Convention].self, from: "[]".data(using: .utf8)!)
                 logger.debug("Successfully decoded empty array: \(emptyData)")
             } catch {
                 logger.error("Failed to decode empty array: \(error.localizedDescription)")
@@ -66,7 +67,7 @@ struct TopContentView: View {
 
             switch conventionFetchResult {
             case .success(let convention):
-                self.conventions = convention;
+                self.conventions = convention
             case .failure(let error):
                 logger.error("Failed to fetch conventions: \(error)")
                 errorMessage = error.localizedDescription

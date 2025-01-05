@@ -25,10 +25,18 @@ struct ConventionFormView: View {
                         }
 
                         Section(header: Text("Dates")) {
-                            DatePicker("Start Date", selection: $viewModel.startDate, displayedComponents: .date)
-                            DatePicker("End Date", selection: $viewModel.endDate, displayedComponents: .date)
-                            DatePicker("Pre-Reg Start Date", selection: $viewModel.preRegStartDate, displayedComponents: .date)
-                            DatePicker("Pre-Reg End Date", selection: $viewModel.preRegEndDate, displayedComponents: .date)
+                            DatePicker(
+                                "Start Date", selection: $viewModel.startDate,
+                                displayedComponents: .date)
+                            DatePicker(
+                                "End Date", selection: $viewModel.endDate,
+                                displayedComponents: .date)
+                            DatePicker(
+                                "Pre-Reg Start Date", selection: $viewModel.preRegStartDate,
+                                displayedComponents: .date)
+                            DatePicker(
+                                "Pre-Reg End Date", selection: $viewModel.preRegEndDate,
+                                displayedComponents: .date)
                         }
 
                         Section(header: Text("Registration")) {
@@ -44,7 +52,9 @@ struct ConventionFormView: View {
                         }
 
                         Section(header: Text("Badge Numbers")) {
-                            TextField("Minimum Badge Number", value: $viewModel.minBadgeNumber, formatter: NumberFormatter())
+                            TextField(
+                                "Minimum Badge Number", value: $viewModel.minBadgeNumber,
+                                formatter: NumberFormatter())
                         }
 
                         Section(header: Text("Mail Templates")) {
@@ -52,10 +62,12 @@ struct ConventionFormView: View {
                                 HStack {
                                     Text(key)
                                     Spacer()
-                                    TextField("Template", text: Binding(
-                                        get: { viewModel.mailTemplates[key] ?? "" },
-                                        set: { viewModel.mailTemplates[key] = $0 }
-                                    ))
+                                    TextField(
+                                        "Template",
+                                        text: Binding(
+                                            get: { viewModel.mailTemplates[key] ?? "" },
+                                            set: { viewModel.mailTemplates[key] = $0 }
+                                        ))
                                 }
                             }
                         }

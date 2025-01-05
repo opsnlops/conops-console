@@ -14,14 +14,13 @@ enum UrlType {
     case websocket
 }
 
-/**
- A client for our server!
+/// A client for our server!
+///
+/// When making changes, take care to ensure that everything is thread safe. There should be no shared context between anything.
+class ConopsServerClient: ConopsServerProtocol {
 
- When making changes, take care to ensure that everything is thread safe. There should be no shared context between anything.
- */
-class ConopsServerClient : ConopsServerProtocol {
-
-    let logger = Logger(subsystem: "furry.enterprises.ConopsConsole", category: "ConopsServerClient")
+    let logger = Logger(
+        subsystem: "furry.enterprises.ConopsConsole", category: "ConopsServerClient")
 
     // Generate the base URL based on the stored configuration
     func makeBaseURL(for type: UrlType) -> URL {
@@ -39,7 +38,9 @@ class ConopsServerClient : ConopsServerProtocol {
     }
 
     // Fetch data from the server
-    func fetchData<T: Decodable>(_ endpoint: String, returnType: T.Type) async -> Result<T, ServerError> {
+    func fetchData<T: Decodable>(_ endpoint: String, returnType: T.Type) async -> Result<
+        T, ServerError
+    > {
         let url = makeBaseURL(for: .http).appendingPathComponent(endpoint)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -123,28 +124,28 @@ class ConopsServerClient : ConopsServerProtocol {
                 logger.warning("Unknown status: \(serverStatus.status)")
                 return .failure(.serverError("Unknown status"))
             }
-        }
-        catch let decodingError as DecodingError {
+        } catch let decodingError as DecodingError {
             let errorMessage = decodeErrorMessage(from: decodingError)
             logger.error("Decoding error: \(errorMessage)")
             return .failure(.serverError(errorMessage))
-        }
-        catch {
+        } catch {
             logger.error("Unexpected decoding error: \(error.localizedDescription)")
             return .failure(.serverError("Unexpected error"))
         }
     }
 
-    
+
     // Decode JSON decoding errors
     private func decodeErrorMessage(from decodingError: DecodingError) -> String {
         switch decodingError {
         case .typeMismatch(let type, let context):
             return "Type mismatch for \(type): \(context.debugDescription) - \(context.codingPath)"
         case .valueNotFound(let type, let context):
-            return "Value not found for \(type): \(context.debugDescription) - \(context.codingPath)"
+            return
+                "Value not found for \(type): \(context.debugDescription) - \(context.codingPath)"
         case .keyNotFound(let key, let context):
-            return "Key '\(key.stringValue)' not found: \(context.debugDescription) - \(context.codingPath)"
+            return
+                "Key '\(key.stringValue)' not found: \(context.debugDescription) - \(context.codingPath)"
         case .dataCorrupted(let context):
             return "Data corrupted: \(context.debugDescription) - \(context.codingPath)"
         @unknown default:

@@ -20,16 +20,16 @@ struct SettingsView: View {
                     Label("Server", systemImage: "network")
                 }
                 .tag(Tabs.network)
-//            InterfaceSettings()
-//                .tabItem {
-//                    Label("Interface", systemImage: "paintpalette")
-//                }
-//                .tag(Tabs.interface)
-//            AdvancedSettingsView()
-//                .tabItem {
-//                    Label("Advanced", systemImage: "wand.and.stars")
-//                }
-//                .tag(Tabs.advanced)
+            //            InterfaceSettings()
+            //                .tabItem {
+            //                    Label("Interface", systemImage: "paintpalette")
+            //                }
+            //                .tag(Tabs.interface)
+            //            AdvancedSettingsView()
+            //                .tabItem {
+            //                    Label("Advanced", systemImage: "wand.and.stars")
+            //                }
+            //                .tag(Tabs.advanced)
         }
         .padding(20)
         .navigationTitle("Settings")
