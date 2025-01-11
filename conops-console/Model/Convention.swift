@@ -7,99 +7,80 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Convention: Codable, Identifiable, Comparable, Hashable, Sendable {
-    let id: UUID
-    let active: Bool
-    let longName: String
-    let shortName: String
-    let startDate: Date
-    let endDate: Date
-    let preRegStartDate: Date
-    let preRegEndDate: Date
-    let registrationOpen: Bool
-    let headerExtras: String?
-    let footerExtras: String?
-    let contactEmailAddress: String?
-    let slackWebHook: String?
-    let postmarkServerToken: String?
-    let twilioAccountSID: String?
-    let twilioAuthToken: String?
-    let twilioOutgoingNumber: String?
-    let compareTo: UUID?
-    let minBadgeNumber: UInt32
-    let dealersDenPresent: Bool
-    let dealersDenRegText: String?
-    let paypalAPIUserName: String?
-    let paypalAPIPassword: String?
-    let paypalAPISignature: String?
-    let membershipLevels: [MembershipLevel]
-    let shirtSizes: [ShirtSize]
-    let mailTemplates: [String: String]
+/// This struct (or class) is your local SwiftData model.
+/// It's intentionally separate from the DTO.
+@Model
+class Convention {
+    // SwiftData typically wants `var` so it can mutate these properties
+    var id: UUID
+    var lastModified: Date
+    var active: Bool
+    var longName: String
+    var shortName: String
+    var startDate: Date
+    var endDate: Date
+    var preRegStartDate: Date
+    var preRegEndDate: Date
+    var registrationOpen: Bool
+    var headerExtras: String?
+    var footerExtras: String?
+    var contactEmailAddress: String?
+    var slackWebHook: String?
+    var postmarkServerToken: String?
+    var twilioAccountSID: String?
+    var twilioAuthToken: String?
+    var twilioOutgoingNumber: String?
+    var compareTo: UUID?
+    var minBadgeNumber: UInt32
+    var dealersDenPresent: Bool
+    var dealersDenRegText: String?
+    var paypalAPIUserName: String?
+    var paypalAPIPassword: String?
+    var paypalAPISignature: String?
 
-    enum CodingKeys: String, CodingKey {
-        case id
-        case active
-        case longName = "long_name"
-        case shortName = "short_name"
-        case startDate = "start_date"
-        case endDate = "end_date"
-        case preRegStartDate = "pre_reg_start_date"
-        case preRegEndDate = "pre_reg_end_date"
-        case registrationOpen = "registration_open"
-        case headerExtras = "header_extras"
-        case footerExtras = "footer_extras"
-        case contactEmailAddress = "contact_email_address"
-        case slackWebHook = "slack_web_hook"
-        case postmarkServerToken = "postmark_server_token"
-        case twilioAccountSID = "twilio_account_sid"
-        case twilioAuthToken = "twilio_auth_token"
-        case twilioOutgoingNumber = "twilio_outgoing_number"
-        case compareTo = "compare_to"
-        case minBadgeNumber = "min_badge_number"
-        case dealersDenPresent = "dealers_den_present"
-        case dealersDenRegText = "dealers_den_reg_text"
-        case paypalAPIUserName = "paypal_api_user_name"
-        case paypalAPIPassword = "paypal_api_password"
-        case paypalAPISignature = "paypal_api_signature"
-        case membershipLevels = "membership_levels"
-        case shirtSizes = "shirt_sizes"
-        case mailTemplates = "mail_templates"
-    }
+    // For membershipLevels, shirtSizes, and mailTemplates,
+    // SwiftData might require special handling.
+    // For now, let's just keep them as direct properties
+    // (You might convert them to separate @Model references or transformable data).
+    var membershipLevels: [MembershipLevel]
+    var shirtSizes: [ShirtSize]
+    var mailTemplates: [String: String]
 
-    static func < (lhs: Convention, rhs: Convention) -> Bool {
-        lhs.shortName.localizedCaseInsensitiveCompare(rhs.shortName) == .orderedAscending
-    }
+    // MARK: - Simple init for SwiftData
+    // Swift will auto-generate a memberwise init,
+    // but if you want a custom one, you can define it.
 
-    static func mock() -> Convention {
-        Convention(
-            id: UUID(),
-            active: true,
-            longName: "Mock Convention",
-            shortName: "MockCon",
-            startDate: Date(),
-            endDate: Date().addingTimeInterval(60 * 60 * 24 * 3),
-            preRegStartDate: Date().addingTimeInterval(-60 * 60 * 24 * 30),
-            preRegEndDate: Date().addingTimeInterval(-60 * 60 * 24 * 5),
-            registrationOpen: true,
-            headerExtras: "Mock Header",
-            footerExtras: "Mock Footer",
-            contactEmailAddress: "mock@convention.com",
-            slackWebHook: "https://mock.slack.webhook",
-            postmarkServerToken: "mock-postmark-token",
-            twilioAccountSID: "mock-sid",
-            twilioAuthToken: "mock-auth-token",
-            twilioOutgoingNumber: "+1234567890",
-            compareTo: nil,
-            minBadgeNumber: 100,
-            dealersDenPresent: false,
-            dealersDenRegText: nil,
-            paypalAPIUserName: nil,
-            paypalAPIPassword: nil,
-            paypalAPISignature: nil,
-            membershipLevels: [MembershipLevel.mock()],
-            shirtSizes: [ShirtSize.mock()],
-            mailTemplates: ["welcome": "Welcome to MockCon!"]
-        )
+    // MARK: - Converting from DTO
+    init(dto: ConventionDTO) {
+        self.id = dto.id
+        self.lastModified = dto.lastModified
+        self.active = dto.active
+        self.longName = dto.longName
+        self.shortName = dto.shortName
+        self.startDate = dto.startDate
+        self.endDate = dto.endDate
+        self.preRegStartDate = dto.preRegStartDate
+        self.preRegEndDate = dto.preRegEndDate
+        self.registrationOpen = dto.registrationOpen
+        self.headerExtras = dto.headerExtras
+        self.footerExtras = dto.footerExtras
+        self.contactEmailAddress = dto.contactEmailAddress
+        self.slackWebHook = dto.slackWebHook
+        self.postmarkServerToken = dto.postmarkServerToken
+        self.twilioAccountSID = dto.twilioAccountSID
+        self.twilioAuthToken = dto.twilioAuthToken
+        self.twilioOutgoingNumber = dto.twilioOutgoingNumber
+        self.compareTo = dto.compareTo
+        self.minBadgeNumber = dto.minBadgeNumber
+        self.dealersDenPresent = dto.dealersDenPresent
+        self.dealersDenRegText = dto.dealersDenRegText
+        self.paypalAPIUserName = dto.paypalAPIUserName
+        self.paypalAPIPassword = dto.paypalAPIPassword
+        self.paypalAPISignature = dto.paypalAPISignature
+        self.membershipLevels = dto.membershipLevels
+        self.shirtSizes = dto.shirtSizes
+        self.mailTemplates = dto.mailTemplates
     }
 }

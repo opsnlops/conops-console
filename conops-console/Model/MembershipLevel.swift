@@ -10,6 +10,7 @@ import Foundation
 
 struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
+    let lastModified: Date
     let longName: String
     let shortName: String
     let price: Float
@@ -19,6 +20,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case lastModified = "last_modified"
         case longName = "long_name"
         case shortName = "short_name"
         case price
@@ -34,6 +36,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     static func mock() -> MembershipLevel {
         MembershipLevel(
             id: UUID(),
+            lastModified: Date(),
             longName: "Mock Membership",
             shortName: "Mock",
             price: 49.99,

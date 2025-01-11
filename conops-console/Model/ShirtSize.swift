@@ -10,12 +10,14 @@ import Foundation
 
 struct ShirtSize: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
+    let lastModified: Date
     let size: String
     let displayOrder: UInt32
     let initialInventory: UInt32
 
     enum CodingKeys: String, CodingKey {
         case id
+        case lastModified = "last_modified"
         case size
         case displayOrder = "display_order"
         case initialInventory = "initial_inventory"
@@ -28,6 +30,7 @@ struct ShirtSize: Codable, Identifiable, Comparable, Hashable, Sendable {
     static func mock() -> ShirtSize {
         ShirtSize(
             id: UUID(),
+            lastModified: Date(),
             size: "Medium",
             displayOrder: 1,
             initialInventory: 100

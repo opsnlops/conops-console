@@ -97,20 +97,46 @@ class ConopsServerClient: ConopsServerProtocol {
         }
 
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+
+            // Standard ISO8601DateFormatter
+            let iso8601StandardFormatter = ISO8601DateFormatter()
+            iso8601StandardFormatter.formatOptions = [.withInternetDateTime]
+
+            // ISO8601DateFormatter with Fractional Seconds
+            let iso8601FractionalFormatter = ISO8601DateFormatter()
+            iso8601FractionalFormatter.formatOptions = [
+                .withInternetDateTime, .withFractionalSeconds,
+            ]
+
+            // Try parsing with both formatters
+            if let date = iso8601FractionalFormatter.date(from: dateString)
+                ?? iso8601StandardFormatter.date(from: dateString)
+            {
+                return date
+            }
+
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Date string does not match expected formats."
+            )
+        }
 
         if let rawJSON = String(data: data, encoding: .utf8) {
-            logger.debug("Raw JSON response: \(rawJSON)")
+            logger.trace("Raw JSON response: \(rawJSON)")
         }
 
         do {
             let serverStatus = try decoder.decode(ServerStatus<T>.self, from: data)
-            logger.debug("Successfully decoded ServerStatus: \(String(describing: serverStatus))")
+            logger.trace("Successfully decoded ServerStatus: \(String(describing: serverStatus))")
 
             switch serverStatus.status {
             case "success":
                 if let result = serverStatus.data {
-                    logger.debug("Decoding succeeded with data: \(String(describing: result))")
+                    logger.trace("Decoding succeeded with data: \(String(describing: result))")
                     return .success(result)
                 } else {
                     logger.warning("Success response but data is nil")

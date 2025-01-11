@@ -10,6 +10,7 @@ import Foundation
 
 struct Attendee: Codable, Identifiable, Comparable, Hashable {
     let id: UUID
+    let lastModified: Date
     let active: Bool
     let badgeNumber: UInt32
     let firstName: String
@@ -36,6 +37,7 @@ struct Attendee: Codable, Identifiable, Comparable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case lastModified = "last_modified"
         case active
         case badgeNumber = "badge_number"
         case firstName = "first_name"
@@ -68,6 +70,7 @@ struct Attendee: Codable, Identifiable, Comparable, Hashable {
     static func mock() -> Attendee {
         Attendee(
             id: UUID(),
+            lastModified: Date(),
             active: true,
             badgeNumber: 1234,
             firstName: "Mock",

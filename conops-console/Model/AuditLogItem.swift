@@ -10,6 +10,7 @@ import Foundation
 
 struct AuditLogItem: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
+    let lastModified: Date
     let timestamp: Date
     let conventionID: UUID
     let systemProduced: Bool
@@ -18,6 +19,7 @@ struct AuditLogItem: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case lastModified = "last_modified"
         case timestamp
         case conventionID = "convention_id"
         case systemProduced = "system_produced"
@@ -32,6 +34,7 @@ struct AuditLogItem: Codable, Identifiable, Comparable, Hashable, Sendable {
     static func mock() -> AuditLogItem {
         AuditLogItem(
             id: UUID(),
+            lastModified: Date(),
             timestamp: Date(),
             conventionID: UUID(),
             systemProduced: true,

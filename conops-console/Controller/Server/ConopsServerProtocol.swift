@@ -14,4 +14,5 @@ import Foundation
 protocol ConopsServerProtocol: AnyObject {
 
     func getAllConventions() async -> Result<[Convention], ServerError>
+    func createNewConvention(_ convention: Convention) async -> Result<Convention, ServerError>
 }

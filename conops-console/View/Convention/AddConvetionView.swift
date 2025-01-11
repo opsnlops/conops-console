@@ -40,6 +40,7 @@ struct AddConventionView: View {
                         Button("Save") {
                             let newConvention = Convention(
                                 id: UUID(),
+                                lastModified: Date(),
                                 active: active,
                                 longName: longName,
                                 shortName: shortName,

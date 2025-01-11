@@ -64,8 +64,9 @@ struct TopContentView: View {
                     let client = ConopsServerClient()
                     let saveResult = await client.createNewConvention(newConvention)
                     switch saveResult {
-                    case .success(let newId):
-                        logger.debug("new convention has id \(newId)")
+                    case .success(let c):
+                        logger.debug("new convention has id \(c.id)")
+                        conventions.append(c)
                     case .failure(let error):
                         logger.error("Failed to save convention: \(error)")
                         errorMessage = error.localizedDescription

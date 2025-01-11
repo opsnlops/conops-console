@@ -24,7 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		11F772C52D29E8AC0054529F /* conops-console.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "conops-console.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		11F772C52D29E8AC0054529F /* Conops Console.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Conops Console.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		11F772D82D29E8AD0054529F /* conops-consoleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "conops-consoleTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		11F772E22D29E8AD0054529F /* conops-consoleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "conops-consoleUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -85,7 +85,7 @@
 		11F772C62D29E8AC0054529F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				11F772C52D29E8AC0054529F /* conops-console.app */,
+				11F772C52D29E8AC0054529F /* Conops Console.app */,
 				11F772D82D29E8AD0054529F /* conops-consoleTests.xctest */,
 				11F772E22D29E8AD0054529F /* conops-consoleUITests.xctest */,
 			);
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		11F772C42D29E8AC0054529F /* conops-console */ = {
+		11F772C42D29E8AC0054529F /* Conops Console */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 11F772EC2D29E8AD0054529F /* Build configuration list for PBXNativeTarget "conops-console" */;
+			buildConfigurationList = 11F772EC2D29E8AD0054529F /* Build configuration list for PBXNativeTarget "Conops Console" */;
 			buildPhases = (
 				11F772C12D29E8AC0054529F /* Sources */,
 				11F772C22D29E8AC0054529F /* Frameworks */,
@@ -110,11 +110,11 @@
 			fileSystemSynchronizedGroups = (
 				11F772C72D29E8AC0054529F /* conops-console */,
 			);
-			name = "conops-console";
+			name = "Conops Console";
 			packageProductDependencies = (
 			);
 			productName = "conops-console";
-			productReference = 11F772C52D29E8AC0054529F /* conops-console.app */;
+			productReference = 11F772C52D29E8AC0054529F /* Conops Console.app */;
 			productType = "com.apple.product-type.application";
 		};
 		11F772D72D29E8AD0054529F /* conops-consoleTests */ = {
@@ -202,7 +202,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				11F772C42D29E8AC0054529F /* conops-console */,
+				11F772C42D29E8AC0054529F /* Conops Console */,
 				11F772D72D29E8AD0054529F /* conops-consoleTests */,
 				11F772E12D29E8AD0054529F /* conops-consoleUITests */,
 			);
@@ -260,12 +260,12 @@
 /* Begin PBXTargetDependency section */
 		11F772DA2D29E8AD0054529F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 11F772C42D29E8AC0054529F /* conops-console */;
+			target = 11F772C42D29E8AC0054529F /* Conops Console */;
 			targetProxy = 11F772D92D29E8AD0054529F /* PBXContainerItemProxy */;
 		};
 		11F772E42D29E8AD0054529F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 11F772C42D29E8AC0054529F /* conops-console */;
+			target = 11F772C42D29E8AC0054529F /* Conops Console */;
 			targetProxy = 11F772E32D29E8AD0054529F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -422,7 +422,7 @@
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3";
 				XROS_DEPLOYMENT_TARGET = 2.2;
 			};
@@ -465,7 +465,7 @@
 				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3";
 				XROS_DEPLOYMENT_TARGET = 2.2;
 			};
@@ -573,7 +573,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		11F772EC2D29E8AD0054529F /* Build configuration list for PBXNativeTarget "conops-console" */ = {
+		11F772EC2D29E8AD0054529F /* Build configuration list for PBXNativeTarget "Conops Console" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				11F772ED2D29E8AD0054529F /* Debug */,
