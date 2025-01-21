@@ -6,6 +6,7 @@
 //
 
 import OSLog
+import SwiftData
 import SwiftUI
 
 struct TopContentView: View {
@@ -64,9 +65,10 @@ struct TopContentView: View {
                     let client = ConopsServerClient()
                     let saveResult = await client.createNewConvention(newConvention)
                     switch saveResult {
-                    case .success(let c):
-                        logger.debug("new convention has id \(c.id)")
-                        conventions.append(c)
+                    case .success(let dto):
+                        logger.debug("new convention has id \(dto.id)")
+                        let convention = Convention.fromDTO(dto)
+                        conventions.append(convention)
                     case .failure(let error):
                         logger.error("Failed to save convention: \(error)")
                         errorMessage = error.localizedDescription
@@ -81,8 +83,9 @@ struct TopContentView: View {
             let conventionFetchResult = await client.getAllConventions()
 
             switch conventionFetchResult {
-            case .success(let convention):
-                self.conventions = convention
+            case .success(let dtos):
+                // Map DTOs to Conventions on the main actor
+                self.conventions = dtos.map { Convention.fromDTO($0) }
             case .failure(let error):
                 logger.error("Failed to fetch conventions: \(error)")
                 errorMessage = error.localizedDescription

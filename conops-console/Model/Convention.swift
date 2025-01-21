@@ -48,39 +48,136 @@ class Convention {
     var shirtSizes: [ShirtSize]
     var mailTemplates: [String: String]
 
-    // MARK: - Simple init for SwiftData
-    // Swift will auto-generate a memberwise init,
-    // but if you want a custom one, you can define it.
+    // MARK: - Simple init
+    init(
+        id: UUID,
+        lastModified: Date,
+        active: Bool,
+        longName: String,
+        shortName: String,
+        startDate: Date,
+        endDate: Date,
+        preRegStartDate: Date,
+        preRegEndDate: Date,
+        registrationOpen: Bool,
+        headerExtras: String? = nil,
+        footerExtras: String? = nil,
+        contactEmailAddress: String? = nil,
+        slackWebHook: String? = nil,
+        postmarkServerToken: String? = nil,
+        twilioAccountSID: String? = nil,
+        twilioAuthToken: String? = nil,
+        twilioOutgoingNumber: String? = nil,
+        compareTo: UUID? = nil,
+        minBadgeNumber: UInt32,
+        dealersDenPresent: Bool,
+        dealersDenRegText: String? = nil,
+        paypalAPIUserName: String? = nil,
+        paypalAPIPassword: String? = nil,
+        paypalAPISignature: String? = nil,
+        membershipLevels: [MembershipLevel],
+        shirtSizes: [ShirtSize],
+        mailTemplates: [String: String]
+    ) {
+        self.id = id
+        self.lastModified = lastModified
+        self.active = active
+        self.longName = longName
+        self.shortName = shortName
+        self.startDate = startDate
+        self.endDate = endDate
+        self.preRegStartDate = preRegStartDate
+        self.preRegEndDate = preRegEndDate
+        self.registrationOpen = registrationOpen
+        self.headerExtras = headerExtras
+        self.footerExtras = footerExtras
+        self.contactEmailAddress = contactEmailAddress
+        self.slackWebHook = slackWebHook
+        self.postmarkServerToken = postmarkServerToken
+        self.twilioAccountSID = twilioAccountSID
+        self.twilioAuthToken = twilioAuthToken
+        self.twilioOutgoingNumber = twilioOutgoingNumber
+        self.compareTo = compareTo
+        self.minBadgeNumber = minBadgeNumber
+        self.dealersDenPresent = dealersDenPresent
+        self.dealersDenRegText = dealersDenRegText
+        self.paypalAPIUserName = paypalAPIUserName
+        self.paypalAPIPassword = paypalAPIPassword
+        self.paypalAPISignature = paypalAPISignature
+        self.membershipLevels = membershipLevels
+        self.shirtSizes = shirtSizes
+        self.mailTemplates = mailTemplates
+    }
+}
 
-    // MARK: - Converting from DTO
-    init(dto: ConventionDTO) {
-        self.id = dto.id
-        self.lastModified = dto.lastModified
-        self.active = dto.active
-        self.longName = dto.longName
-        self.shortName = dto.shortName
-        self.startDate = dto.startDate
-        self.endDate = dto.endDate
-        self.preRegStartDate = dto.preRegStartDate
-        self.preRegEndDate = dto.preRegEndDate
-        self.registrationOpen = dto.registrationOpen
-        self.headerExtras = dto.headerExtras
-        self.footerExtras = dto.footerExtras
-        self.contactEmailAddress = dto.contactEmailAddress
-        self.slackWebHook = dto.slackWebHook
-        self.postmarkServerToken = dto.postmarkServerToken
-        self.twilioAccountSID = dto.twilioAccountSID
-        self.twilioAuthToken = dto.twilioAuthToken
-        self.twilioOutgoingNumber = dto.twilioOutgoingNumber
-        self.compareTo = dto.compareTo
-        self.minBadgeNumber = dto.minBadgeNumber
-        self.dealersDenPresent = dto.dealersDenPresent
-        self.dealersDenRegText = dto.dealersDenRegText
-        self.paypalAPIUserName = dto.paypalAPIUserName
-        self.paypalAPIPassword = dto.paypalAPIPassword
-        self.paypalAPISignature = dto.paypalAPISignature
-        self.membershipLevels = dto.membershipLevels
-        self.shirtSizes = dto.shirtSizes
-        self.mailTemplates = dto.mailTemplates
+
+// MARK: - DTO conversions
+extension Convention {
+
+    static func fromDTO(_ dto: ConventionDTO) -> Convention {
+        return Convention(
+            id: dto.id,
+            lastModified: dto.lastModified,
+            active: dto.active,
+            longName: dto.longName,
+            shortName: dto.shortName,
+            startDate: dto.startDate,
+            endDate: dto.endDate,
+            preRegStartDate: dto.preRegStartDate,
+            preRegEndDate: dto.preRegEndDate,
+            registrationOpen: dto.registrationOpen,
+            headerExtras: dto.headerExtras,
+            footerExtras: dto.footerExtras,
+            contactEmailAddress: dto.contactEmailAddress,
+            slackWebHook: dto.slackWebHook,
+            postmarkServerToken: dto.postmarkServerToken,
+            twilioAccountSID: dto.twilioAccountSID,
+            twilioAuthToken: dto.twilioAuthToken,
+            twilioOutgoingNumber: dto.twilioOutgoingNumber,
+            compareTo: dto.compareTo,
+            minBadgeNumber: dto.minBadgeNumber,
+            dealersDenPresent: dto.dealersDenPresent,
+            dealersDenRegText: dto.dealersDenRegText,
+            paypalAPIUserName: dto.paypalAPIUserName,
+            paypalAPIPassword: dto.paypalAPIPassword,
+            paypalAPISignature: dto.paypalAPISignature,
+            membershipLevels: dto.membershipLevels,
+            shirtSizes: dto.shirtSizes,
+            mailTemplates: dto.mailTemplates
+        )
+
+    }
+
+    func toDTO() -> ConventionDTO {
+        ConventionDTO(
+            id: self.id,
+            lastModified: self.lastModified,
+            active: self.active,
+            longName: self.longName,
+            shortName: self.shortName,
+            startDate: self.startDate,
+            endDate: self.endDate,
+            preRegStartDate: self.preRegStartDate,
+            preRegEndDate: self.preRegEndDate,
+            registrationOpen: self.registrationOpen,
+            headerExtras: self.headerExtras,
+            footerExtras: self.footerExtras,
+            contactEmailAddress: self.contactEmailAddress,
+            slackWebHook: self.slackWebHook,
+            postmarkServerToken: self.postmarkServerToken,
+            twilioAccountSID: self.twilioAccountSID,
+            twilioAuthToken: self.twilioAuthToken,
+            twilioOutgoingNumber: self.twilioOutgoingNumber,
+            compareTo: self.compareTo,
+            minBadgeNumber: self.minBadgeNumber,
+            dealersDenPresent: self.dealersDenPresent,
+            dealersDenRegText: self.dealersDenRegText,
+            paypalAPIUserName: self.paypalAPIUserName,
+            paypalAPIPassword: self.paypalAPIPassword,
+            paypalAPISignature: self.paypalAPISignature,
+            membershipLevels: self.membershipLevels,
+            shirtSizes: self.shirtSizes,
+            mailTemplates: self.mailTemplates
+        )
     }
 }

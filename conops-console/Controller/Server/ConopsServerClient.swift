@@ -38,23 +38,36 @@ class ConopsServerClient: ConopsServerProtocol {
     }
 
     // Fetch data from the server
-    func fetchData<T: Decodable>(_ endpoint: String, returnType: T.Type) async -> Result<
-        T, ServerError
-    > {
+    func fetchData<DTO: Decodable, Object>(
+        _ endpoint: String,
+        dtoType: DTO.Type,
+        returnType: Object.Type,
+        transform: @escaping (DTO) -> Object
+    ) async -> Result<Object, ServerError> {
         let url = makeBaseURL(for: .http).appendingPathComponent(endpoint)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        return await performRequest(request, returnType: returnType)
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            // Correctly passing dtoType and transform to handleResponse
+            return handleResponse(
+                data: data, response: response, dtoType: dtoType, transform: transform)
+        } catch {
+            return .failure(.serverError("Request error: \(error.localizedDescription)"))
+        }
     }
 
     // Send data to the server
-    func sendData<T: Decodable, U: Encodable>(
+    func sendData<DTO: Decodable, Body: Encodable, Object>(
         _ endpoint: String,
         method: HTTPMethod,
-        body: U,
-        returnType: T.Type
-    ) async -> Result<T, ServerError> {
+        body: Body,
+        dtoType: DTO.Type,
+        returnType: Object.Type,
+        transform: @escaping (DTO) -> Object
+    ) async -> Result<Object, ServerError> {
         do {
             let url = makeBaseURL(for: .http).appendingPathComponent(endpoint)
             let encoder = JSONEncoder()
@@ -66,31 +79,37 @@ class ConopsServerClient: ConopsServerProtocol {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = requestBody
 
-            return await performRequest(request, returnType: returnType)
+            // Use performRequest with the correct parameters
+            return await performRequest(
+                request, dtoType: dtoType, returnType: returnType, transform: transform)
         } catch {
             return .failure(.serverError("Encoding error: \(error.localizedDescription)"))
         }
     }
 
     // Perform a network request
-    private func performRequest<T: Decodable>(
+    private func performRequest<DTO: Decodable, Object>(
         _ request: URLRequest,
-        returnType: T.Type
-    ) async -> Result<T, ServerError> {
+        dtoType: DTO.Type,
+        returnType: Object.Type,
+        transform: @escaping (DTO) -> Object
+    ) async -> Result<Object, ServerError> {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            return handleResponse(data: data, response: response, returnType: returnType)
+            return handleResponse(
+                data: data, response: response, dtoType: dtoType, transform: transform)
         } catch {
             return .failure(.serverError("Request error: \(error.localizedDescription)"))
         }
     }
 
     // Handle the server response
-    private func handleResponse<T: Decodable>(
+    private func handleResponse<DTO: Decodable, Object>(
         data: Data,
         response: URLResponse,
-        returnType: T.Type
-    ) -> Result<T, ServerError> {
+        dtoType: DTO.Type,
+        transform: (DTO) -> Object
+    ) -> Result<Object, ServerError> {
         guard response is HTTPURLResponse else {
             logger.error("Response is not of type HTTPURLResponse")
             return .failure(.serverError("Invalid response"))
@@ -98,21 +117,20 @@ class ConopsServerClient: ConopsServerProtocol {
 
         let decoder = JSONDecoder()
 
+        // Custom date-decoding strategy
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let dateString = try container.decode(String.self)
 
-            // Standard ISO8601DateFormatter
             let iso8601StandardFormatter = ISO8601DateFormatter()
             iso8601StandardFormatter.formatOptions = [.withInternetDateTime]
 
-            // ISO8601DateFormatter with Fractional Seconds
             let iso8601FractionalFormatter = ISO8601DateFormatter()
             iso8601FractionalFormatter.formatOptions = [
                 .withInternetDateTime, .withFractionalSeconds,
             ]
 
-            // Try parsing with both formatters
+            // Try fractional first, fallback to standard ISO8601
             if let date = iso8601FractionalFormatter.date(from: dateString)
                 ?? iso8601StandardFormatter.date(from: dateString)
             {
@@ -121,46 +139,39 @@ class ConopsServerClient: ConopsServerProtocol {
 
             throw DecodingError.dataCorruptedError(
                 in: container,
-                debugDescription: "Date string does not match expected formats."
+                debugDescription: "Date string does not match expected ISO8601 formats."
             )
         }
 
-        if let rawJSON = String(data: data, encoding: .utf8) {
-            logger.trace("Raw JSON response: \(rawJSON)")
-        }
-
         do {
-            let serverStatus = try decoder.decode(ServerStatus<T>.self, from: data)
-            logger.trace("Successfully decoded ServerStatus: \(String(describing: serverStatus))")
+            // Decode the server response
+            let serverStatus = try decoder.decode(ServerStatus<DTO>.self, from: data)
 
-            switch serverStatus.status {
-            case "success":
-                if let result = serverStatus.data {
-                    logger.trace("Decoding succeeded with data: \(String(describing: result))")
-                    return .success(result)
-                } else {
-                    logger.warning("Success response but data is nil")
-                    return .failure(.serverError("Expected data but received nil"))
-                }
-
-            case "error":
-                logger.warning("Error response: \(serverStatus.message ?? "No message")")
-                return .failure(.serverError(serverStatus.message ?? "Unknown error"))
-
-            default:
-                logger.warning("Unknown status: \(serverStatus.status)")
-                return .failure(.serverError("Unknown status"))
+            // Validate the server status
+            guard serverStatus.status == "success" else {
+                let errorMessage = serverStatus.message ?? "Unknown server error"
+                return .failure(.serverError(errorMessage))
             }
+
+            // Ensure data exists
+            guard let payload = serverStatus.data else {
+                return .failure(.serverError("Missing data in response"))
+            }
+
+            // Transform the data
+            let object = transform(payload)
+            return .success(object)
         } catch let decodingError as DecodingError {
+            // Provide detailed decoding error messages
             let errorMessage = decodeErrorMessage(from: decodingError)
             logger.error("Decoding error: \(errorMessage)")
             return .failure(.serverError(errorMessage))
         } catch {
+            // Catch-all for unexpected errors
             logger.error("Unexpected decoding error: \(error.localizedDescription)")
             return .failure(.serverError("Unexpected error"))
         }
     }
-
 
     // Decode JSON decoding errors
     private func decodeErrorMessage(from decodingError: DecodingError) -> String {

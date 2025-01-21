@@ -13,6 +13,6 @@ import Foundation
 /// that's broken up into a bunch of files via extentions.
 protocol ConopsServerProtocol: AnyObject {
 
-    func getAllConventions() async -> Result<[Convention], ServerError>
-    func createNewConvention(_ convention: Convention) async -> Result<Convention, ServerError>
+    func getAllConventions() async -> Result<[ConventionDTO], ServerError>
+    func createNewConvention(_ convention: Convention) async -> Result<ConventionDTO, ServerError>
 }

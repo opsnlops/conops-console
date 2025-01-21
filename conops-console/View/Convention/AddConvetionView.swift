@@ -30,7 +30,7 @@ struct AddConventionView: View {
             // Use our computed property that conditionally wraps the form
             formContent
                 .navigationTitle("Add Convention")
-                .toolbar {
+                .toolbar(content: {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel") {
                             dismiss()
@@ -38,7 +38,8 @@ struct AddConventionView: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Save") {
-                            let newConvention = Convention(
+                            // Create a new DTO with user-entered data
+                            let newDTO = ConventionDTO(
                                 id: UUID(),
                                 lastModified: Date(),
                                 active: active,
@@ -69,11 +70,18 @@ struct AddConventionView: View {
                                 shirtSizes: [],
                                 mailTemplates: [:]
                             )
+
+                            // Convert the DTO to a local model object
+                            let newConvention = Convention.fromDTO(newDTO)
+
+                            // Perform the save operation
                             onSave(newConvention)
+
+                            // Dismiss the view
                             dismiss()
                         }
                     }
-                }
+                })
                 #if os(iOS)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
