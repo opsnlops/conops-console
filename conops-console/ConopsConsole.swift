@@ -5,6 +5,7 @@
 //  Created by April White on 1/4/25.
 //
 
+import Foundation
 import SwiftData
 import SwiftUI
 
@@ -41,6 +42,7 @@ struct ConopsConsoleApp: App {
     var body: some Scene {
         WindowGroup {
             TopContentView()
+                .modelContainer(for: Convention.self)
         }
         .modelContainer(sharedModelContainer)
 

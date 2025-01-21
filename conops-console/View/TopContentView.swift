@@ -10,6 +10,9 @@ import SwiftData
 import SwiftUI
 
 struct TopContentView: View {
+
+    @Environment(\.modelContext) var context
+
     @State private var conventions: [Convention] = []
     @State private var showingForm = false
 
@@ -50,7 +53,7 @@ struct TopContentView: View {
                 }
             }
         } detail: {
-            Text("hi")
+            Text(context.container.configurations.debugDescription)
         }
         .alert(isPresented: $showErrorAlert) {
             Alert(
