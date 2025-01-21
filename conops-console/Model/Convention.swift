@@ -12,7 +12,7 @@ import SwiftData
 /// This struct (or class) is your local SwiftData model.
 /// It's intentionally separate from the DTO.
 @Model
-class Convention {
+final class Convention {
     // SwiftData typically wants `var` so it can mutate these properties
     var id: UUID
     var lastModified: Date
