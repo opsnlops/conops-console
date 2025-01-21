@@ -11,7 +11,7 @@ import SwiftData
 
 @Model
 final class Attendee {
-    var id: UUID
+    var id: AttendeeIdentifier
     var lastModified: Date
     var active: Bool
     var badgeNumber: UInt32
@@ -38,7 +38,7 @@ final class Attendee {
     var transactions: [Transaction]
 
     init(
-        id: UUID,
+        id: AttendeeIdentifier,
         lastModified: Date,
         active: Bool,
         badgeNumber: UInt32,

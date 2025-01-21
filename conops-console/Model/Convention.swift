@@ -14,7 +14,7 @@ import SwiftData
 @Model
 final class Convention {
     // SwiftData typically wants `var` so it can mutate these properties
-    var id: UUID
+    var id: ConventionIdentifier
     var lastModified: Date
     var active: Bool
     var longName: String
@@ -50,7 +50,7 @@ final class Convention {
 
     // MARK: - Simple init
     init(
-        id: UUID,
+        id: ConventionIdentifier,
         lastModified: Date,
         active: Bool,
         longName: String,

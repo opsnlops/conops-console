@@ -9,7 +9,7 @@
 import Foundation
 
 struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
-    let id: UUID
+    let id: ConventionIdentifier
     let lastModified: Date
     let active: Bool
     let longName: String
@@ -75,7 +75,7 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     static func mock() -> ConventionDTO {
         ConventionDTO(
-            id: UUID(),
+            id: ConventionIdentifier(),
             lastModified: Date(),
             active: true,
             longName: "Mock Convention",
