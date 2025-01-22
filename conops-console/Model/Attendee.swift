@@ -11,7 +11,8 @@ import SwiftData
 
 @Model
 final class Attendee {
-    var id: AttendeeIdentifier
+    @Attribute(.unique) var id: AttendeeIdentifier
+    var convention: Convention?
     var lastModified: Date
     var active: Bool
     var badgeNumber: UInt32
@@ -39,6 +40,7 @@ final class Attendee {
 
     init(
         id: AttendeeIdentifier,
+        convention: Convention?,
         lastModified: Date,
         active: Bool,
         badgeNumber: UInt32,
@@ -97,6 +99,10 @@ extension Attendee {
     static func fromDTO(_ dto: AttendeeDTO) -> Attendee {
         return Attendee(
             id: dto.id,
+
+            //TODO: Figure out how to get this out of the model
+            convention: nil,
+
             lastModified: dto.lastModified,
             active: dto.active,
             badgeNumber: dto.badgeNumber,
@@ -151,6 +157,90 @@ extension Attendee {
             codeOfConductAccepted: self.codeOfConductAccepted,
             secretCode: self.secretCode,
             transactions: self.transactions
+        )
+    }
+}
+
+// MARK: - Preview
+extension Attendee {
+
+    @MainActor
+    static var preview: ModelContainer {
+        let container = try! ModelContainer(
+            for: Attendee.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+
+        for i in 0..<100 {
+            let number = Double(i)
+
+            container.mainContext.insert(
+                Attendee(
+                    id: UUID(),
+                    convention: nil,
+                    lastModified: Date(),
+                    active: true,
+                    badgeNumber: UInt32(i),
+                    firstName: "SampleFirstName\(i)",
+                    lastName: "SampleLastName\(i)",
+                    badgeName: "BadgeName\(i)",
+                    membershipLevel: MembershipLevel.mock(),
+                    birthday: Date().addingTimeInterval(-60 * 60 * 24 * 365 * (18 + number)),  // Mock age 18+
+                    addressLine1: "123 Example St",
+                    addressLine2: Optional<String>.none,
+                    city: "ExampleCity",
+                    state: "EX",
+                    postalCode: "12345",
+                    shirtSize: Optional<String>.none,
+                    emailAddress: "example\(i)@mockmail.com",
+                    emergencyContact: Optional<String>.none,
+                    phoneNumber: Optional<String>.none,
+                    registrationDate: Date().addingTimeInterval(-60 * 60 * 24 * (10 + number)),  // Mock registered 10+ days ago
+                    checkInTime: Optional<Date>.none,
+                    staff: i % 2 == 0,  // Alternate staff status
+                    dealer: i % 3 == 0,  // Alternate dealer status
+                    codeOfConductAccepted: true,
+                    secretCode: Optional<String>.none,
+                    transactions: []
+                )
+            )
+        }
+
+        return container
+    }
+}
+
+
+// MARK: - Mock
+extension Attendee {
+    static func mock() -> Attendee {
+        return Attendee(
+            id: UUID(),
+            convention: .mock(),
+            lastModified: Date(),
+            active: true,
+            badgeNumber: 1234,
+            firstName: "Mock",
+            lastName: "Attendee",
+            badgeName: "Mocky McFunnyEars",
+            membershipLevel: MembershipLevel.mock(),
+            birthday: Date().addingTimeInterval(-60 * 60 * 24 * 365 * 25),  // 25 years ago
+            addressLine1: "123 Mock St",
+            addressLine2: "Apt 4B",
+            city: "Mock City",
+            state: "MO",
+            postalCode: "12345",
+            shirtSize: "Medium",
+            emailAddress: "mock@example.com",
+            emergencyContact: "Jane Doe",
+            phoneNumber: "123-456-7890",
+            registrationDate: Date().addingTimeInterval(-60 * 60 * 24 * 7),  // Registered 7 days ago
+            checkInTime: Date().addingTimeInterval(-60 * 60 * 2),  // Checked in 2 hours ago
+            staff: false,
+            dealer: true,
+            codeOfConductAccepted: true,
+            secretCode: "MockSecret",
+            transactions: [Transaction.mock()]
         )
     }
 }

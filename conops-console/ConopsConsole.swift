@@ -29,7 +29,10 @@ struct ConopsConsoleApp: App {
     var body: some Scene {
         WindowGroup {
             TopContentView()
-                .modelContainer(for: Convention.self)
+                .modelContainer(for: [
+                    Convention.self, Attendee.self,
+                ]
+                )
         }
 
         #if os(macOS)

@@ -13,9 +13,10 @@ struct TopContentView: View {
 
     @Environment(\.modelContext) var context
 
-    @State private var conventions: [Convention] = []
-    @State private var showingForm = false
+    @Query(sort: \Convention.startDate, order: .forward)
+    private var conventions: [Convention]
 
+    @State private var showingForm = false
     @State private var showErrorAlert: Bool = false
     @State private var errorMessage: String = ""
 
@@ -38,7 +39,7 @@ struct TopContentView: View {
                     }
                 ) {
                     ForEach(conventions) { convention in
-                        NavigationLink(value: convention.id) {
+                        NavigationLink(value: convention) {
                             Label(convention.shortName, systemImage: "pawprint.circle")
                         }
                     }
@@ -52,9 +53,14 @@ struct TopContentView: View {
                     }
                 }
             }
+            .navigationDestination(for: Convention.self) { convention in
+                createConventionDetailView(for: convention)
+            }
+
         } detail: {
             Text(context.container.configurations.debugDescription)
         }
+
         .alert(isPresented: $showErrorAlert) {
             Alert(
                 title: Text("Whoa, Shit!"),
@@ -71,9 +77,16 @@ struct TopContentView: View {
                     case .success(let dto):
                         logger.debug("new convention has id \(dto.id)")
                         let convention = Convention.fromDTO(dto)
-                        conventions.append(convention)
+                        do {
+                            context.insert(convention)
+                            try context.save()
+                        } catch {
+                            logger.error("Failed to save convention to SwiftData: \(error)")
+                            errorMessage = error.localizedDescription
+                            showErrorAlert = true
+                        }
                     case .failure(let error):
-                        logger.error("Failed to save convention: \(error)")
+                        logger.error("Failed to save convention to server: \(error)")
                         errorMessage = error.localizedDescription
                         showErrorAlert = true
                     }
@@ -81,23 +94,30 @@ struct TopContentView: View {
             }
         }
         .task {
-            let client = ConopsServerClient()
-            logger.info("attempting to load conventions")
-            let conventionFetchResult = await client.getAllConventions()
 
-            switch conventionFetchResult {
-            case .success(let dtos):
-                // Map DTOs to Conventions on the main actor
-                self.conventions = dtos.map { Convention.fromDTO($0) }
+
+            let syncResult = await performFullSync()
+            switch syncResult {
+            case .success(let message):
+                logger.debug("\(message)")
             case .failure(let error):
-                logger.error("Failed to fetch conventions: \(error)")
+                logger.error("Failed to perform full sync: \(error)")
                 errorMessage = error.localizedDescription
                 showErrorAlert = true
             }
+
         }
     }
+
+    func createConventionDetailView(for convention: Convention) -> some View {
+        return AnyView(ConventionDetailView(convention: convention))
+
+    }
+
+    // Full Sync is in FullSync.swift
+
 }
 
-#Preview {
+#Preview(traits: .modifier(ConventionPreviewModifier())) {
     TopContentView()
 }

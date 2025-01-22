@@ -134,6 +134,7 @@ struct AddConventionView: View {
                 TextField("Min Badge Number", value: $minBadgeNumber, format: .number)
             }
         }
+        .textFieldStyle(.roundedBorder)
     }
 }
 

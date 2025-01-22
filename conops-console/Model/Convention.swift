@@ -14,11 +14,11 @@ import SwiftData
 @Model
 final class Convention {
     // SwiftData typically wants `var` so it can mutate these properties
-    var id: ConventionIdentifier
+    @Attribute(.unique) var id: ConventionIdentifier
     var lastModified: Date
     var active: Bool
     var longName: String
-    var shortName: String
+    @Attribute(.unique) var shortName: String
     var startDate: Date
     var endDate: Date
     var preRegStartDate: Date
@@ -47,6 +47,11 @@ final class Convention {
     var membershipLevels: [MembershipLevel]
     var shirtSizes: [ShirtSize]
     var mailTemplates: [String: String]
+
+    // One to many, hopefully every covention has lots of these!
+    @Relationship(deleteRule: .cascade, inverse: \Attendee.convention)
+    var attendees = [Attendee]()
+
 
     // MARK: - Simple init
     init(
@@ -178,6 +183,96 @@ extension Convention {
             membershipLevels: self.membershipLevels,
             shirtSizes: self.shirtSizes,
             mailTemplates: self.mailTemplates
+        )
+    }
+}
+
+// MARK: - Preview
+extension Convention {
+
+    @MainActor
+    static var preview: ModelContainer {
+        let container = try! ModelContainer(
+            for: Convention.self,
+            configurations: ModelConfiguration(
+                isStoredInMemoryOnly: true)
+        )
+
+        for i in 0..<10 {
+
+            let number = Double(i)
+
+            container.mainContext.insert(
+                Convention(
+                    id: UUID(),
+                    lastModified: Date(),
+                    active: true,
+                    longName: "Sample Convention \(i)",
+                    shortName: "SC\(i)",
+                    startDate: Date().addingTimeInterval(60 * 60 * 24 * number),
+                    endDate: Date().addingTimeInterval(60 * 60 * 24 * (10 * number)),
+                    preRegStartDate: Date().addingTimeInterval(60 * 60 * 24 * (20 * number)),
+                    preRegEndDate: Date().addingTimeInterval(60 * 60 * 24 * (30 * number)),
+                    registrationOpen: true,
+                    headerExtras: Optional<String>.none,
+                    footerExtras: Optional<String>.none,
+                    contactEmailAddress: "bunny\(i)@example.com",
+                    slackWebHook: Optional<String>.none,
+                    postmarkServerToken: Optional<String>.none,
+                    twilioAccountSID: Optional<String>.none,
+                    twilioAuthToken: Optional<String>.none,
+                    twilioOutgoingNumber: Optional<String>.none,
+                    compareTo: Optional<UUID>.none,
+                    minBadgeNumber: UInt32(i),
+                    dealersDenPresent: false,
+                    dealersDenRegText: Optional<String>.none,
+                    paypalAPIUserName: Optional<String>.none,
+                    paypalAPIPassword: Optional<String>.none,
+                    paypalAPISignature: Optional<String>.none,
+                    membershipLevels: [],
+                    shirtSizes: [],
+                    mailTemplates: [:]
+                )
+            )
+        }
+
+        return container
+    }
+}
+
+
+// MARK: - Mock
+extension Convention {
+    static func mock() -> Convention {
+        return Convention(
+            id: UUID(),
+            lastModified: Date(),
+            active: true,
+            longName: "Mock Convention",
+            shortName: "MockCon",
+            startDate: Date().addingTimeInterval(60 * 60 * 24 * 30),  // 30 days from now
+            endDate: Date().addingTimeInterval(60 * 60 * 24 * 33),  // 3 days duration
+            preRegStartDate: Date().addingTimeInterval(-60 * 60 * 24 * 60),  // 60 days ago
+            preRegEndDate: Date().addingTimeInterval(-60 * 60 * 24 * 10),  // 10 days ago
+            registrationOpen: true,
+            headerExtras: "Welcome to MockCon!",
+            footerExtras: "Thanks for joining us!",
+            contactEmailAddress: "contact@mockcon.com",
+            slackWebHook: nil,
+            postmarkServerToken: nil,
+            twilioAccountSID: nil,
+            twilioAuthToken: nil,
+            twilioOutgoingNumber: nil,
+            compareTo: nil,
+            minBadgeNumber: 1000,
+            dealersDenPresent: false,
+            dealersDenRegText: nil,
+            paypalAPIUserName: nil,
+            paypalAPIPassword: nil,
+            paypalAPISignature: nil,
+            membershipLevels: [MembershipLevel.mock()],
+            shirtSizes: [ShirtSize.mock()],
+            mailTemplates: ["welcome": "Welcome to MockCon!"]
         )
     }
 }
