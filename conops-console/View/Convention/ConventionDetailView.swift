@@ -39,21 +39,14 @@ struct ConventionDetailView: View {
                 }
                 .buttonStyle(.borderless)
             }
-
-//            ToolbarItem(id: "findAttendee", placement: .primaryAction) {
-//                Button {
-//                    showingRegisterSheet = true
-//                } label: {
-//                    Image(systemName: "person.crop.badge.magnifyingglass")
-//                }
-//                .buttonStyle(.borderless)
-//            }
         }
         .sheet(isPresented: $showingRegisterSheet) {
             RegisterNewAttendeeView { newAttendee in
                 Task {
-
                     do {
+                        logger.info("saving new attendee")
+                        newAttendee.convention = convention
+                        logger.debug("Attendee saved: \(newAttendee)")
                         context.insert(newAttendee)
                         try context.save()
                     } catch {
@@ -61,7 +54,6 @@ struct ConventionDetailView: View {
                         errorMessage = error.localizedDescription
                         showErrorAlert = true
                     }
-
                 }
             }
         }

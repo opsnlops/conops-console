@@ -1,5 +1,5 @@
 //
-//  conops_consoleApp.swift
+//  Conops Console.swift
 //  conops-console
 //
 //  Created by April White on 1/4/25.
@@ -29,11 +29,8 @@ struct ConopsConsoleApp: App {
     var body: some Scene {
         WindowGroup {
             TopContentView()
-                .modelContainer(for: [
-                    Convention.self, Attendee.self,
-                ]
-                )
         }
+        .modelContainer(for: [Attendee.self, Convention.self])
 
         #if os(macOS)
             Settings {

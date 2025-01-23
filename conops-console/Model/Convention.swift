@@ -43,7 +43,6 @@ final class Convention {
     // For membershipLevels, shirtSizes, and mailTemplates,
     // SwiftData might require special handling.
     // For now, let's just keep them as direct properties
-    // (You might convert them to separate @Model references or transformable data).
     var membershipLevels: [MembershipLevel]
     var shirtSizes: [ShirtSize]
     var mailTemplates: [String: String]

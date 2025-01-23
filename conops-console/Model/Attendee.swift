@@ -19,7 +19,7 @@ final class Attendee {
     var firstName: String
     var lastName: String
     var badgeName: String
-    var membershipLevel: MembershipLevel
+    var membershipLevel: MembershipLevel = MembershipLevel.mock()
     var birthday: Date
     var addressLine1: String
     var addressLine2: String?
@@ -242,5 +242,41 @@ extension Attendee {
             secretCode: "MockSecret",
             transactions: [Transaction.mock()]
         )
+    }
+}
+
+// MARK: - CustomStringConvertible for Debugging
+extension Attendee: CustomStringConvertible {
+    var description: String {
+        """
+        Attendee(
+            id: \(id),
+            convention: \(convention?.shortName ?? "nil"),
+            lastModified: \(lastModified),
+            active: \(active),
+            badgeNumber: \(badgeNumber),
+            firstName: "\(firstName)",
+            lastName: "\(lastName)",
+            badgeName: "\(badgeName)",
+            membershipLevel: \(membershipLevel),
+            birthday: \(birthday),
+            addressLine1: "\(addressLine1)",
+            addressLine2: "\(addressLine2 ?? "nil")",
+            city: "\(city)",
+            state: "\(state)",
+            postalCode: "\(postalCode)",
+            shirtSize: "\(shirtSize ?? "nil")",
+            emailAddress: "\(emailAddress)",
+            emergencyContact: "\(emergencyContact ?? "nil")",
+            phoneNumber: "\(phoneNumber ?? "nil")",
+            registrationDate: \(registrationDate),
+            checkInTime: \(checkInTime.map {"\($0)"} ?? "nil"),
+            staff: \(staff),
+            dealer: \(dealer),
+            codeOfConductAccepted: \(codeOfConductAccepted),
+            secretCode: "\(secretCode ?? "nil")",
+            transactions: \(transactions.count) total
+        )
+        """
     }
 }
