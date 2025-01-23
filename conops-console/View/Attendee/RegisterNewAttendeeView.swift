@@ -21,7 +21,7 @@ struct RegisterNewAttendeeView: View {
     @State private var lastName: String = ""
     @State private var badgeName: String = ""
     //TODO: Fix this
-    @State private var membershipLevel: MembershipLevel = .mock()
+    @State private var membershipLevel: MembershipLevelIdentifier = UUID()
     @State private var birthday: Date = Date()
     @State private var addressLine1: String = ""
     @State private var addressLine2: String = ""

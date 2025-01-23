@@ -14,3 +14,4 @@ import Foundation
 
 public typealias ConventionIdentifier = UUID
 public typealias AttendeeIdentifier = UUID
+public typealias MembershipLevelIdentifier = UUID

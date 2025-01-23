@@ -19,7 +19,7 @@ final class Attendee {
     var firstName: String
     var lastName: String
     var badgeName: String
-    var membershipLevel: MembershipLevel = MembershipLevel.mock()
+    var membershipLevel: MembershipLevelIdentifier
     var birthday: Date
     var addressLine1: String
     var addressLine2: String?
@@ -47,7 +47,7 @@ final class Attendee {
         firstName: String,
         lastName: String,
         badgeName: String,
-        membershipLevel: MembershipLevel,
+        membershipLevel: MembershipLevelIdentifier,
         birthday: Date,
         addressLine1: String,
         addressLine2: String?,
@@ -184,7 +184,7 @@ extension Attendee {
                     firstName: "SampleFirstName\(i)",
                     lastName: "SampleLastName\(i)",
                     badgeName: "BadgeName\(i)",
-                    membershipLevel: MembershipLevel.mock(),
+                    membershipLevel: UUID(),
                     birthday: Date().addingTimeInterval(-60 * 60 * 24 * 365 * (18 + number)),  // Mock age 18+
                     addressLine1: "123 Example St",
                     addressLine2: Optional<String>.none,
@@ -223,7 +223,7 @@ extension Attendee {
             firstName: "Mock",
             lastName: "Attendee",
             badgeName: "Mocky McFunnyEars",
-            membershipLevel: MembershipLevel.mock(),
+            membershipLevel: UUID(),
             birthday: Date().addingTimeInterval(-60 * 60 * 24 * 365 * 25),  // 25 years ago
             addressLine1: "123 Mock St",
             addressLine2: "Apt 4B",

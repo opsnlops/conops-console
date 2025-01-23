@@ -9,14 +9,14 @@
 import Foundation
 
 struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
-    let id: UUID
+    let id: AttendeeIdentifier
     let lastModified: Date
     let active: Bool
     let badgeNumber: UInt32
     let firstName: String
     let lastName: String
     let badgeName: String
-    let membershipLevel: MembershipLevel
+    let membershipLevel: MembershipLevelIdentifier
     let birthday: Date
     let addressLine1: String
     let addressLine2: String?
@@ -76,7 +76,7 @@ struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
             firstName: "Mock",
             lastName: "Attendee",
             badgeName: "Mocky",
-            membershipLevel: MembershipLevel.mock(),
+            membershipLevel: UUID(),
             birthday: Date(),
             addressLine1: "123 Mock St",
             addressLine2: "Apt 4B",
