@@ -16,6 +16,8 @@ struct TopContentView: View {
     @Query(sort: \Convention.startDate, order: .forward)
     private var conventions: [Convention]
 
+    @State private var selectedConvention: Convention?
+
     @State private var showingForm = false
     @State private var showErrorAlert: Bool = false
     @State private var errorMessage: String = ""
@@ -24,23 +26,12 @@ struct TopContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            List {
-                Section(
-                    header: HStack {
-                        Text("Conventions")
-                            .font(.headline)
-                        Spacer()
-                        Button {
-                            showingForm = true
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-                        .buttonStyle(.borderless)
-                    }
-                ) {
+            List(selection: $selectedConvention) {
+                Section("Conventions") {
                     ForEach(conventions) { convention in
                         NavigationLink(value: convention) {
-                            Label(convention.shortName, systemImage: "pawprint.circle")
+                            Label(convention.shortName, systemImage: "person.2.fill")
+                                .symbolRenderingMode(.hierarchical)
                         }
                     }
                 }
@@ -59,8 +50,8 @@ struct TopContentView: View {
 
         } detail: {
             Text(context.container.configurations.debugDescription)
+                .padding()
         }
-
         .alert(isPresented: $showErrorAlert) {
             Alert(
                 title: Text("Whoa, Shit!"),
@@ -110,8 +101,7 @@ struct TopContentView: View {
     }
 
     func createConventionDetailView(for convention: Convention) -> some View {
-        return AnyView(ConventionDetailView(convention: convention))
-
+        ConventionDetailView(convention: convention)
     }
 
     // Full Sync is in FullSync.swift

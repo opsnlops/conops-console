@@ -203,7 +203,7 @@ extension Attendee {
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
 
-        for i in 0..<100 {
+        for i in 100..<1000 {
             let number = Double(i)
 
             container.mainContext.insert(

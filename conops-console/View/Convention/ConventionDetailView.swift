@@ -51,14 +51,18 @@ struct ConventionDetailView: View {
                     Image(systemName: "magnifyingglass")
                 }
                 .symbolRenderingMode(.hierarchical)
+                .symbolEffect(
+                    .wiggle.byLayer, options: .repeat(.periodic(delay: 2.0)),
+                    isActive: !searchText.isEmpty
+                )
                 .popover(isPresented: $isShowingSearchPopover) {
                     VStack {
                         TextField("Search Attendees", text: $searchText)
                             .padding()
-                            .frame(width: 320)
+                            .frame(width: 300)
                     }
-
                 }.textFieldStyle(.roundedBorder)
+
             }
         }
         .sheet(isPresented: $showingRegisterSheet) {
@@ -76,6 +80,9 @@ struct ConventionDetailView: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            logger.debug("ConventionDetailView appeared for \(convention.longName)")
         }
     }
 
