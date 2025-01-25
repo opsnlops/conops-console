@@ -30,11 +30,6 @@ struct ConventionDetailView: View {
     var body: some View {
 
         VStack {
-//            NavigationStack {
-//                Text("Searching for \(searchText)")
-//                    .navigationTitle("Searchable Example")
-//            }
-//            .searchable(text: $searchText)
             AttendeeTable()
         }
         .navigationTitle(convention.longName)
@@ -65,9 +60,6 @@ struct ConventionDetailView: View {
 
                 }.textFieldStyle(.roundedBorder)
             }
-
-
-
         }
         .sheet(isPresented: $showingRegisterSheet) {
             RegisterNewAttendeeView { newAttendee in
@@ -89,6 +81,6 @@ struct ConventionDetailView: View {
 
 }
 
-#Preview {
+#Preview(traits: .modifier(AttendeePreviewModifier())) {
     ConventionDetailView(convention: .mock())
 }

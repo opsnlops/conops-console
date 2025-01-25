@@ -17,53 +17,56 @@ struct EditAttendeeView: View {
         NavigationStack {
             content
                 .navigationTitle("Edit Attendee")
-                .toolbar(id: "editAttendeeToolbar", content: {
+                .toolbar(
+                    id: "editAttendeeToolbar",
+                    content: {
 
-                    ToolbarItem(id: "printRegSlip", placement: .secondaryAction) {
-                        Button {
-                            // Do the thing
-                        } label: {
-                            Image(systemName: "printer.dotmatrix")
+                        ToolbarItem(id: "printRegSlip", placement: .secondaryAction) {
+                            Button {
+                                // Do the thing
+                            } label: {
+                                Image(systemName: "printer.dotmatrix")
+                            }
+                            .symbolRenderingMode(.hierarchical)
                         }
-                        .symbolRenderingMode(.hierarchical)
-                    }
 
-                    ToolbarItem(id: "ban", placement: .secondaryAction) {
-                        Button {
-                            // Do the thing
-                        } label: {
-                            Image(systemName: "hammer")
+                        ToolbarItem(id: "ban", placement: .secondaryAction) {
+                            Button {
+                                // Do the thing
+                            } label: {
+                                Image(systemName: "hammer")
+                            }
+                            .symbolRenderingMode(.hierarchical)
                         }
-                        .symbolRenderingMode(.hierarchical)
-                    }
 
-                    ToolbarItem(id: "checkInAttendee", placement: .secondaryAction) {
-                        Button {
-                            // Do the checkin
-                        } label: {
-                            Image(systemName: "person.fill.checkmark")
+                        ToolbarItem(id: "checkInAttendee", placement: .secondaryAction) {
+                            Button {
+                                // Do the checkin
+                            } label: {
+                                Image(systemName: "person.fill.checkmark")
+                            }
+                            .symbolRenderingMode(.hierarchical)
                         }
-                        .symbolRenderingMode(.hierarchical)
                     }
-                }).toolbarRole(.editor)
+                ).toolbarRole(.editor)
         }
     }
 
     @ViewBuilder
     private var content: some View {
-#if os(macOS)
-        ScrollView {
+        #if os(macOS)
+            ScrollView {
+                AttendeeForm(attendee: $attendee) {
+                    // Save action
+                    // Pop the view by using the back navigation gesture or back button
+                }.padding()
+            }
+        #else
             AttendeeForm(attendee: $attendee) {
                 // Save action
                 // Pop the view by using the back navigation gesture or back button
-            }.padding()
-        }
-#else
-        AttendeeForm(attendee: $attendee) {
-            // Save action
-            // Pop the view by using the back navigation gesture or back button
-        }
-#endif
+            }
+        #endif
     }
 }
 

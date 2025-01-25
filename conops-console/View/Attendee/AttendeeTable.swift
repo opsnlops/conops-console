@@ -19,7 +19,7 @@ struct AttendeeTable: View {
     private var attendees: [Attendee]
 
 
-    @State private var selectedAttendee: Attendee? // Tracks the attendee to edit
+    @State private var selectedAttendee: Attendee?  // Tracks the attendee to edit
     @State private var isEditing: Bool = false
 
     @State private var showErrorAlert: Bool = false
@@ -50,9 +50,15 @@ struct AttendeeTable: View {
                         .contextMenu {
                             Button {
                                 selectedAttendee = attendee
-                                isEditing = true // Trigger navigation
+                                isEditing = true  // Trigger navigation
                             } label: {
                                 Label("Edit", systemImage: "pencil")
+                            }
+
+                            Button {
+                                // Do nothing
+                            } label: {
+                                Label("Ban", systemImage: "hammer")
                             }
                         }
                 }
@@ -68,100 +74,19 @@ struct AttendeeTable: View {
                     EditAttendeeView(attendee: binding)
                 }
             }
-
-
-//            ZStack {
-//
-//
-//                VStack(alignment: .leading, spacing: 0) {
-//                    // Header
-//                    HStack {
-//                        Text("Badge Name")
-//                            .frame(width: 150, alignment: .leading)
-//                        Text("#")
-//                            .frame(width: 40, alignment: .leading)
-//                        Text("First Name")
-//                            .frame(width: 150, alignment: .leading)
-//                        Text("Last Name")
-//                            .frame(width: 150, alignment: .leading)
-//                    }
-//                    .font(.headline)
-//                    .padding(.horizontal)
-//                    //.background(Color(.systemGray5)) // Optional for header background
-//
-//                    // Table Rows
-//                    List {
-//                        ForEach(Array(zip(attendees.indices, attendees)), id: \.1.id) { index, attendee in
-//                            HStack {
-//                                Text(attendee.badgeName)
-//                                    .frame(width: 150, alignment: .leading)
-//                                Text(attendee.badgeNumber, format: .number)
-//                                    .frame(width: 40, alignment: .leading)
-//                                Text(attendee.firstName)
-//                                    .frame(width: 150, alignment: .leading)
-//                                Text(attendee.lastName)
-//                                    .frame(width: 150, alignment: .leading)
-//                            }
-//                            .padding(.vertical, 4)
-//                            .background(
-//                                index.isMultiple(of: 2) ? Color(.lightGray).opacity(0.2) : Color(.white)
-//                            )
-//                            .swipeActions(edge: .trailing) {
-//                                Button {
-//                                    selectedAttendee = attendee
-//                                    isEditing = true // Trigger navigation
-//                                } label: {
-//                                    Label("Edit", systemImage: "pencil")
-//                                }
-//                                .tint(.blue)
-//
-//                                Button(role: .destructive) {
-//                                    //deleteAttendee(attendee)
-//                                } label: {
-//                                    Label("Delete", systemImage: "trash")
-//                                }
-//                            }
-//                            .contextMenu {
-//                                Button {
-//                                    selectedAttendee = attendee
-//                                    isEditing = true // Trigger navigation
-//                                } label: {
-//                                    Label("Edit", systemImage: "pencil")
-//                                }
-//                            }
-//                        }
-//                    }
-//                    .listStyle(PlainListStyle()) // Optional for cleaner appearance
-//                    .padding(.horizontal, 0) // Align List with header
-//                }
-//                .navigationDestination(isPresented: $isEditing) {
-//                    if let detailAttendee = selectedAttendee {
-//                        let binding = Binding<Attendee>(
-//                            get: { detailAttendee },
-//                            set: { updatedAttendee in
-//                                updateAttendee(detailAttendee, with: updatedAttendee)
-//                            }
-//                        )
-//                        EditAttendeeView(attendee: binding)
-//                    }
-//                }
-//                .padding()
-//                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center) // Center the VStack
-//            }.padding()
         }
     }
 
 
     private func updateAttendee(_ original: Attendee, with updated: Attendee) {
-        original.update(from: updated) // Use the `update(from:)` method
+        original.update(from: updated)  // Use the `update(from:)` method
         original.lastModified = Date()
 
         context.insert(original)
 
         do {
             try context.save()
-        }
-        catch {
+        } catch {
             logger.warning("unable to save updated attendee: \(error.localizedDescription)")
         }
     }

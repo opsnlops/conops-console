@@ -61,10 +61,10 @@ struct RegisterNewAttendeeView: View {
                     }
                 }
             })
-#if os(iOS)
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
-#endif
+            #if os(iOS)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            #endif
         }
     }
 }

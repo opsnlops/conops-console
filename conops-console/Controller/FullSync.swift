@@ -41,8 +41,8 @@ extension TopContentView {
         }
 
     }
-//
-//            func performFullSync() async -> Result<String, ServerError> {
-//                return .success("performFullSync skipped")
-//            }
+    //
+    //            func performFullSync() async -> Result<String, ServerError> {
+    //                return .success("performFullSync skipped")
+    //            }
 }
