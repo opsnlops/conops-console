@@ -18,23 +18,154 @@ struct AttendeeTable: View {
     @Query(sort: \Attendee.badgeName, order: .forward)
     private var attendees: [Attendee]
 
-    @State private var showingForm = false
+
+    @State private var selectedAttendee: Attendee? // Tracks the attendee to edit
+    @State private var isEditing: Bool = false
+
     @State private var showErrorAlert: Bool = false
     @State private var errorMessage: String = ""
 
     let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "AttendeeTable")
 
+    /// This isn't using an actual table. Tables are goofy on iOS, even in 2025. If Apple finally
+    /// makes things like swipes and context menus work on entire rows, maybe I will re-vist that
+    /// some day.
+
     var body: some View {
+        NavigationStack {
 
-        Table(attendees) {
-            TableColumn("Badge Name", value: \.badgeName)
-            TableColumn("First Name", value: \.firstName)
-            TableColumn("Last Name", value: \.lastName)
+            Table(of: Attendee.self) {
+                TableColumn("Name", value: \.badgeName)
+                    .width(min: 120, ideal: 150)
+                TableColumn("#") { a in
+                    Text(a.badgeNumber, format: .number)
+                }
+                .width(60)
+                TableColumn("First Name", value: \.firstName)
+                    .width(min: 120, ideal: 250)
+                TableColumn("Last Name", value: \.lastName)
+            } rows: {
+                ForEach(attendees, id: \.id) { attendee in
+                    TableRow(attendee)
+                        .contextMenu {
+                            Button {
+                                selectedAttendee = attendee
+                                isEditing = true // Trigger navigation
+                            } label: {
+                                Label("Edit", systemImage: "pencil")
+                            }
+                        }
+                }
+            }
+            .navigationDestination(isPresented: $isEditing) {
+                if let detailAttendee = selectedAttendee {
+                    let binding = Binding<Attendee>(
+                        get: { detailAttendee },
+                        set: { updatedAttendee in
+                            updateAttendee(detailAttendee, with: updatedAttendee)
+                        }
+                    )
+                    EditAttendeeView(attendee: binding)
+                }
+            }
+
+
+//            ZStack {
+//
+//
+//                VStack(alignment: .leading, spacing: 0) {
+//                    // Header
+//                    HStack {
+//                        Text("Badge Name")
+//                            .frame(width: 150, alignment: .leading)
+//                        Text("#")
+//                            .frame(width: 40, alignment: .leading)
+//                        Text("First Name")
+//                            .frame(width: 150, alignment: .leading)
+//                        Text("Last Name")
+//                            .frame(width: 150, alignment: .leading)
+//                    }
+//                    .font(.headline)
+//                    .padding(.horizontal)
+//                    //.background(Color(.systemGray5)) // Optional for header background
+//
+//                    // Table Rows
+//                    List {
+//                        ForEach(Array(zip(attendees.indices, attendees)), id: \.1.id) { index, attendee in
+//                            HStack {
+//                                Text(attendee.badgeName)
+//                                    .frame(width: 150, alignment: .leading)
+//                                Text(attendee.badgeNumber, format: .number)
+//                                    .frame(width: 40, alignment: .leading)
+//                                Text(attendee.firstName)
+//                                    .frame(width: 150, alignment: .leading)
+//                                Text(attendee.lastName)
+//                                    .frame(width: 150, alignment: .leading)
+//                            }
+//                            .padding(.vertical, 4)
+//                            .background(
+//                                index.isMultiple(of: 2) ? Color(.lightGray).opacity(0.2) : Color(.white)
+//                            )
+//                            .swipeActions(edge: .trailing) {
+//                                Button {
+//                                    selectedAttendee = attendee
+//                                    isEditing = true // Trigger navigation
+//                                } label: {
+//                                    Label("Edit", systemImage: "pencil")
+//                                }
+//                                .tint(.blue)
+//
+//                                Button(role: .destructive) {
+//                                    //deleteAttendee(attendee)
+//                                } label: {
+//                                    Label("Delete", systemImage: "trash")
+//                                }
+//                            }
+//                            .contextMenu {
+//                                Button {
+//                                    selectedAttendee = attendee
+//                                    isEditing = true // Trigger navigation
+//                                } label: {
+//                                    Label("Edit", systemImage: "pencil")
+//                                }
+//                            }
+//                        }
+//                    }
+//                    .listStyle(PlainListStyle()) // Optional for cleaner appearance
+//                    .padding(.horizontal, 0) // Align List with header
+//                }
+//                .navigationDestination(isPresented: $isEditing) {
+//                    if let detailAttendee = selectedAttendee {
+//                        let binding = Binding<Attendee>(
+//                            get: { detailAttendee },
+//                            set: { updatedAttendee in
+//                                updateAttendee(detailAttendee, with: updatedAttendee)
+//                            }
+//                        )
+//                        EditAttendeeView(attendee: binding)
+//                    }
+//                }
+//                .padding()
+//                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center) // Center the VStack
+//            }.padding()
         }
+    }
 
+
+    private func updateAttendee(_ original: Attendee, with updated: Attendee) {
+        original.update(from: updated) // Use the `update(from:)` method
+        original.lastModified = Date()
+
+        context.insert(original)
+
+        do {
+            try context.save()
+        }
+        catch {
+            logger.warning("unable to save updated attendee: \(error.localizedDescription)")
+        }
     }
 }
-
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
     AttendeeTable()

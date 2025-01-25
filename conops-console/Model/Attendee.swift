@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Attendee {
+final class Attendee: Identifiable {
     @Attribute(.unique) var id: AttendeeIdentifier
     var convention: Convention?
     var lastModified: Date
@@ -93,6 +93,38 @@ final class Attendee {
         self.transactions = transactions
     }
 }
+
+// Allow for this attendee to be updated by another one
+extension Attendee {
+    func update(from updatedAttendee: Attendee) {
+        self.convention = updatedAttendee.convention
+        self.lastModified = updatedAttendee.lastModified
+        self.active = updatedAttendee.active
+        self.badgeNumber = updatedAttendee.badgeNumber
+        self.firstName = updatedAttendee.firstName
+        self.lastName = updatedAttendee.lastName
+        self.badgeName = updatedAttendee.badgeName
+        self.membershipLevel = updatedAttendee.membershipLevel
+        self.birthday = updatedAttendee.birthday
+        self.addressLine1 = updatedAttendee.addressLine1
+        self.addressLine2 = updatedAttendee.addressLine2
+        self.city = updatedAttendee.city
+        self.state = updatedAttendee.state
+        self.postalCode = updatedAttendee.postalCode
+        self.shirtSize = updatedAttendee.shirtSize
+        self.emailAddress = updatedAttendee.emailAddress
+        self.emergencyContact = updatedAttendee.emergencyContact
+        self.phoneNumber = updatedAttendee.phoneNumber
+        self.registrationDate = updatedAttendee.registrationDate
+        self.checkInTime = updatedAttendee.checkInTime
+        self.staff = updatedAttendee.staff
+        self.dealer = updatedAttendee.dealer
+        self.codeOfConductAccepted = updatedAttendee.codeOfConductAccepted
+        self.secretCode = updatedAttendee.secretCode
+        self.transactions = updatedAttendee.transactions
+    }
+}
+
 
 // MARK: - DTO conversions
 extension Attendee {

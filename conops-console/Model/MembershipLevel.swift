@@ -11,7 +11,7 @@ import Foundation
 struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: UUID
     let lastModified: Date
-    let membershipLongName: String
+    let longName: String
     let shortName: String
     let price: Float
     let showOnWeb: Bool
@@ -21,7 +21,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     init(
         id: UUID = UUID(),
         lastModified: Date = Date(),
-        membershipLongName: String = "Unknown Level",
+        longName: String = "Unknown Level",
         shortName: String = "???",
         price: Float = 0.0,
         showOnWeb: Bool = true,
@@ -30,7 +30,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     ) {
         self.id = id
         self.lastModified = lastModified
-        self.membershipLongName = membershipLongName
+        self.longName = longName
         self.shortName = shortName
         self.price = price
         self.showOnWeb = showOnWeb
@@ -41,7 +41,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     enum CodingKeys: String, CodingKey {
         case id
         case lastModified = "last_modified"
-        case membershipLongName = "long_name"
+        case longName = "long_name"
         case shortName = "short_name"
         case price
         case showOnWeb = "show_on_web"
@@ -50,7 +50,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     }
 
     static func < (lhs: MembershipLevel, rhs: MembershipLevel) -> Bool {
-        lhs.membershipLongName.localizedCaseInsensitiveCompare(rhs.membershipLongName)
+        lhs.longName.localizedCaseInsensitiveCompare(rhs.longName)
             == .orderedAscending
     }
 
@@ -58,7 +58,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
         MembershipLevel(
             id: UUID(),
             lastModified: Date(),
-            membershipLongName: "Mock Membership",
+            longName: "Mock Membership",
             shortName: "Mock",
             price: 49.99,
             showOnWeb: true,
@@ -75,7 +75,7 @@ extension MembershipLevel: CustomStringConvertible {
         MembershipLevel(
             id: \(id),
             lastModified: \(lastModified),
-            membershipLongName: "\(membershipLongName)",
+            membershipLongName: "\(longName)",
             shortName: "\(shortName)",
             price: \(price),
             showOnWeb: \(showOnWeb),

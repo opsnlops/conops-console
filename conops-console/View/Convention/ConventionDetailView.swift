@@ -21,30 +21,58 @@ struct ConventionDetailView: View {
     @State private var showErrorAlert: Bool = false
     @State private var errorMessage: String = ""
 
+    @State private var searchText: String = ""
+    @State private var isShowingSearchPopover: Bool = false
+
     private let logger = Logger(
         subsystem: "furry.enterprises.CreatureConsole", category: "ConventionDetailView")
 
     var body: some View {
 
         VStack {
+//            NavigationStack {
+//                Text("Searching for \(searchText)")
+//                    .navigationTitle("Searchable Example")
+//            }
+//            .searchable(text: $searchText)
             AttendeeTable()
         }
         .navigationTitle(convention.longName)
-        .toolbar(id: "ConventionViewToolbar") {
+        .toolbar(id: "attendeeEditorToolbar") {
+
             ToolbarItem(id: "registerAttendee", placement: .primaryAction) {
                 Button {
                     showingRegisterSheet = true
                 } label: {
-                    Image(systemName: "plus")
+                    Image(systemName: "person.fill.badge.plus")
                 }
-                .buttonStyle(.borderless)
+                .symbolRenderingMode(.multicolor)
             }
+
+            ToolbarItem(id: "searchAttendees", placement: .primaryAction) {
+                Button {
+                    isShowingSearchPopover.toggle()
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                }
+                .symbolRenderingMode(.hierarchical)
+                .popover(isPresented: $isShowingSearchPopover) {
+                    VStack {
+                        TextField("Search Attendees", text: $searchText)
+                            .padding()
+                            .frame(width: 320)
+                    }
+
+                }.textFieldStyle(.roundedBorder)
+            }
+
+
+
         }
         .sheet(isPresented: $showingRegisterSheet) {
             RegisterNewAttendeeView { newAttendee in
                 Task {
                     do {
-                        logger.info("saving new attendee")
                         newAttendee.convention = convention
                         logger.debug("Attendee saved: \(newAttendee)")
                         context.insert(newAttendee)
