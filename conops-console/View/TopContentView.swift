@@ -85,8 +85,6 @@ struct TopContentView: View {
             }
         }
         .task {
-
-
             let syncResult = await performFullSync()
             switch syncResult {
             case .success(let message):
