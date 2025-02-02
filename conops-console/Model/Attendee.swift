@@ -221,7 +221,7 @@ extension Attendee {
                     addressLine1: "123 Example St",
                     addressLine2: Optional<String>.none,
                     city: "ExampleCity",
-                    state: "EX",
+                    state: AmericanState.tennessee.rawValue,
                     postalCode: "12345",
                     shirtSize: Optional<String>.none,
                     emailAddress: "example\(i)@mockmail.com",

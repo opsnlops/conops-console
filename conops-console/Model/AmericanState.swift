@@ -7,7 +7,7 @@
 //
 
 // Source: https://gist.github.com/iamjason/8f8f4bc00c13de86bcad?permalink_comment_id=2898664
-enum AmericanState: String, Equatable, CaseIterable {
+enum AmericanState: String, Codable, Equatable, CaseIterable {
     case alabama = "AL"
     case alaska = "AK"
     case arizona = "AZ"

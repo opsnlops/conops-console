@@ -9,14 +9,11 @@
 import SwiftUI
 
 struct RegisterNewAttendeeView: View {
-
     // MARK: - Props
     var onAttendeeSave: (Attendee) -> Void
     @Environment(\.dismiss) private var dismiss
 
     // MARK: - State
-
-    // Set up the defaults for this form since we don't have an existing attendee to work off of
     @State private var attendee = Attendee(
         id: UUID(),
         convention: nil,
@@ -31,7 +28,7 @@ struct RegisterNewAttendeeView: View {
         addressLine1: "",
         addressLine2: nil,
         city: "",
-        state: "",
+        state: AmericanState.tennessee.rawValue,
         postalCode: "",
         shirtSize: nil,
         emailAddress: "",
@@ -48,24 +45,35 @@ struct RegisterNewAttendeeView: View {
 
     var body: some View {
         NavigationStack {
-            AttendeeForm(attendee: $attendee) {
-                // Save action
-                onAttendeeSave(attendee)
-                dismiss()
-            }
-            .navigationTitle("Register New Attendee")
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+            #if os(macOS)
+            // Wrap the ScrollView in a VStack so that the navigationTitle can be attached to the VStack
+            VStack {
+                ScrollView {
+                    AttendeeForm(attendee: $attendee) {
+                        onAttendeeSave(attendee)
                         dismiss()
                     }
                 }
-            })
-            #if os(iOS)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+            }
+            #else
+            AttendeeForm(attendee: $attendee) {
+                onAttendeeSave(attendee)
+                dismiss()
+            }
             #endif
         }
+        .navigationTitle("Register New Attendee")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+        }
+        #if os(iOS)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        #endif
     }
 }
 

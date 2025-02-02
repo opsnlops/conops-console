@@ -7,22 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "606DE922-8D54-4576-B918-6F8A75A01A56"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "conops-console/View/Attendee/RegisterNewAttendeeView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "53"
-            endingLineNumber = "53"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "2ABBA087-F372-4CCE-8393-D19E849DBFB1"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -30,8 +14,8 @@
             filePath = "conops-console/View/TopContentView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "54"
-            endingLineNumber = "54"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>

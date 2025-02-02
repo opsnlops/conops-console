@@ -33,9 +33,9 @@ struct ConventionDetailView: View {
             AttendeeTable()
         }
         .navigationTitle(convention.longName)
-        .toolbar(id: "attendeeEditorToolbar") {
+        .toolbar() {
 
-            ToolbarItem(id: "registerAttendee", placement: .primaryAction) {
+            ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingRegisterSheet = true
                 } label: {
@@ -44,7 +44,7 @@ struct ConventionDetailView: View {
                 .symbolRenderingMode(.multicolor)
             }
 
-            ToolbarItem(id: "searchAttendees", placement: .primaryAction) {
+            ToolbarItem(placement: .primaryAction) {
                 Button {
                     isShowingSearchPopover.toggle()
                 } label: {

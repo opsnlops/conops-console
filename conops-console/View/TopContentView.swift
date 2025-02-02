@@ -49,8 +49,13 @@ struct TopContentView: View {
             }
 
         } detail: {
-            Text(context.container.configurations.debugDescription)
-                .padding()
+            if let convention = selectedConvention {
+                    ConventionDetailView(convention: convention)
+                        .id(convention.id)
+            } else {
+                Text("Select a convention to see details 🥕")
+                    .padding()
+            }
         }
         .alert(isPresented: $showErrorAlert) {
             Alert(

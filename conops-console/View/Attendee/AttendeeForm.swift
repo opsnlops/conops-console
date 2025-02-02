@@ -54,8 +54,9 @@ struct AttendeeForm: View {
                     ))
                 TextField("City", text: $attendee.city)
                 Picker("State", selection: $attendee.state) {
-                    ForEach(AmericanState.allCases, id: \.self) { state in
-                        Text("\(state.displayName)")
+                    ForEach(AmericanState.allCases, id: \.rawValue) { state in
+                        Text(state.displayName)
+                            .tag(state.rawValue)
                     }
                 }
                 TextField("ZIP", text: $attendee.postalCode)
