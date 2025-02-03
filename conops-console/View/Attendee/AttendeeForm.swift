@@ -79,5 +79,8 @@ struct AttendeeForm: View {
                 }
             }
         }
+        #if os(macOS)
+        .padding()
+        #endif
     }
 }
