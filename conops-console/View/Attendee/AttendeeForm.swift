@@ -80,7 +80,7 @@ struct AttendeeForm: View {
             }
         }
         #if os(macOS)
-        .padding()
+            .padding()
         #endif
     }
 }

@@ -46,20 +46,20 @@ struct RegisterNewAttendeeView: View {
     var body: some View {
         NavigationStack {
             #if os(macOS)
-            // Wrap the ScrollView in a VStack so that the navigationTitle can be attached to the VStack
-            VStack {
-                ScrollView {
-                    AttendeeForm(attendee: $attendee) {
-                        onAttendeeSave(attendee)
-                        dismiss()
+                // Wrap the ScrollView in a VStack so that the navigationTitle can be attached to the VStack
+                VStack {
+                    ScrollView {
+                        AttendeeForm(attendee: $attendee) {
+                            onAttendeeSave(attendee)
+                            dismiss()
+                        }
                     }
                 }
-            }
             #else
-            AttendeeForm(attendee: $attendee) {
-                onAttendeeSave(attendee)
-                dismiss()
-            }
+                AttendeeForm(attendee: $attendee) {
+                    onAttendeeSave(attendee)
+                    dismiss()
+                }
             #endif
         }
         .navigationTitle("Register New Attendee")
@@ -71,8 +71,8 @@ struct RegisterNewAttendeeView: View {
             }
         }
         #if os(iOS)
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         #endif
     }
 }

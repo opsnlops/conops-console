@@ -12,12 +12,15 @@ import SwiftData
 import SwiftUI
 
 struct AttendeeTable: View {
+    // 🐰 Parameters for filtering:
+    let convention: Convention
+    let searchText: String
 
     @Environment(\.modelContext) var context
 
+    // Fetch all attendees sorted by badgeName.
     @Query(sort: \Attendee.badgeName, order: .forward)
     private var attendees: [Attendee]
-
 
     @State private var selectedAttendee: Attendee?  // Tracks the attendee to edit
     @State private var isEditing: Bool = false
@@ -27,36 +30,50 @@ struct AttendeeTable: View {
 
     let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "AttendeeTable")
 
-    /// This isn't using an actual table. Tables are goofy on iOS, even in 2025. If Apple finally
-    /// makes things like swipes and context menus work on entire rows, maybe I will re-vist that
-    /// some day.
+    // MARK: - In-Memory Filtering
+    /// Filters the fetched attendees to only those that belong to the given convention.
+    /// Also applies search filtering against firstName, lastName, or badgeName.
+    private var filteredAttendees: [Attendee] {
+        attendees.filter { attendee in
+            // Only include attendees that have a matching convention.
+            guard let attendeeConvention = attendee.convention, attendeeConvention == convention
+            else {
+                return false
+            }
+            // If there's no search text, we're happy with the attendee.
+            guard !searchText.isEmpty else { return true }
+            // Otherwise, check if any of the key fields contain the search text.
+            return attendee.firstName.localizedCaseInsensitiveContains(searchText)
+                || attendee.lastName.localizedCaseInsensitiveContains(searchText)
+                || attendee.badgeName.localizedCaseInsensitiveContains(searchText)
+        }
+    }
 
     var body: some View {
         NavigationStack {
-
             Table(of: Attendee.self) {
                 TableColumn("Name", value: \.badgeName)
                     .width(min: 120, ideal: 150)
-                TableColumn("#") { a in
-                    Text(a.badgeNumber, format: .number)
+                TableColumn("#") { attendee in
+                    Text(attendee.badgeNumber, format: .number)
                 }
                 .width(60)
                 TableColumn("First Name", value: \.firstName)
                     .width(min: 120, ideal: 250)
                 TableColumn("Last Name", value: \.lastName)
             } rows: {
-                ForEach(attendees, id: \.id) { attendee in
+                ForEach(filteredAttendees, id: \.id) { attendee in
                     TableRow(attendee)
                         .contextMenu {
                             Button {
                                 selectedAttendee = attendee
-                                isEditing = true  // Trigger navigation
+                                isEditing = true  // Trigger navigation to edit view
                             } label: {
                                 Label("Edit", systemImage: "pencil")
                             }
 
                             Button {
-                                // Do nothing
+                                // Ban action logic can go here 🐰🔨
                             } label: {
                                 Label("Ban", systemImage: "hammer")
                             }
@@ -77,7 +94,7 @@ struct AttendeeTable: View {
         }
     }
 
-
+    // MARK: - Update Attendee
     private func updateAttendee(_ original: Attendee, with updated: Attendee) {
         original.update(from: updated)  // Use the `update(from:)` method
         original.lastModified = Date()
@@ -93,5 +110,6 @@ struct AttendeeTable: View {
 }
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
-    AttendeeTable()
+    let dummyConvention = Convention.mock()
+    AttendeeTable(convention: dummyConvention, searchText: "")
 }

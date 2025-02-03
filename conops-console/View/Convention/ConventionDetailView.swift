@@ -28,13 +28,12 @@ struct ConventionDetailView: View {
         subsystem: "furry.enterprises.CreatureConsole", category: "ConventionDetailView")
 
     var body: some View {
-
         VStack {
-            AttendeeTable()
+            // Pass the current convention and searchText to the attendee table
+            AttendeeTable(convention: convention, searchText: searchText)
         }
         .navigationTitle(convention.longName)
-        .toolbar() {
-
+        .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingRegisterSheet = true
@@ -61,8 +60,8 @@ struct ConventionDetailView: View {
                             .padding()
                             .frame(width: 300)
                     }
-                }.textFieldStyle(.roundedBorder)
-
+                }
+                .textFieldStyle(.roundedBorder)
             }
         }
         .sheet(isPresented: $showingRegisterSheet) {
@@ -74,7 +73,7 @@ struct ConventionDetailView: View {
                         context.insert(newAttendee)
                         try context.save()
                     } catch {
-                        logger.error("Failed to save convention to SwiftData: \(error)")
+                        logger.error("Failed to save attendee to SwiftData: \(error)")
                         errorMessage = error.localizedDescription
                         showErrorAlert = true
                     }
@@ -85,7 +84,6 @@ struct ConventionDetailView: View {
             logger.debug("ConventionDetailView appeared for \(convention.longName)")
         }
     }
-
 }
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
