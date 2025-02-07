@@ -340,7 +340,7 @@
 				CODE_SIGN_ENTITLEMENTS = "conops-console/conops_console.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"conops-console/Preview Content\"";
 				DEVELOPMENT_TEAM = YQ8A74NDMJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -542,7 +542,7 @@
 				CODE_SIGN_ENTITLEMENTS = "conops-console/conops_console.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"conops-console/Preview Content\"";
 				DEVELOPMENT_TEAM = YQ8A74NDMJ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -585,7 +585,7 @@
 				CODE_SIGN_ENTITLEMENTS = "conops-console/conops_console.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"conops-console/Preview Content\"";
 				DEVELOPMENT_TEAM = YQ8A74NDMJ;
 				ENABLE_HARDENED_RUNTIME = YES;
