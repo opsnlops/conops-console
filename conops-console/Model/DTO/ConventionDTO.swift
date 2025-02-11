@@ -21,7 +21,7 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let registrationOpen: Bool
     let headerExtras: String?
     let footerExtras: String?
-    let contactEmailAddress: String?
+    let contactEmailAddress: String
     let slackWebHook: String?
     let postmarkServerToken: String?
     let twilioAccountSID: String?

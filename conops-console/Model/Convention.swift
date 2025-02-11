@@ -26,7 +26,7 @@ final class Convention {
     var registrationOpen: Bool
     var headerExtras: String?
     var footerExtras: String?
-    var contactEmailAddress: String?
+    var contactEmailAddress: String
     var slackWebHook: String?
     var postmarkServerToken: String?
     var twilioAccountSID: String?
@@ -66,7 +66,7 @@ final class Convention {
         registrationOpen: Bool,
         headerExtras: String? = nil,
         footerExtras: String? = nil,
-        contactEmailAddress: String? = nil,
+        contactEmailAddress: String,
         slackWebHook: String? = nil,
         postmarkServerToken: String? = nil,
         twilioAccountSID: String? = nil,

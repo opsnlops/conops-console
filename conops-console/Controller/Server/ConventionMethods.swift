@@ -29,21 +29,20 @@ extension ConopsServerClient {
         ) { $0 }  // No transformation needed here
     }
 
-    func updateConvention(_ convention: Convention) async -> Result<Convention, ServerError> {
+
+    func updateConvention(_ updateConvention: ConventionDTO) async -> Result<ConventionDTO, ServerError> {
+
         logger.info("Updating an existing convention on the server")
 
-        let conventionDTO = convention.toDTO()
-
         return await sendData(
-            "convention/\(convention.id)",
+            "convention/\(updateConvention.id)",
             method: .put,
-            body: conventionDTO,  // Use the DTO
+            body: updateConvention,  // Use the DTO
             dtoType: ConventionDTO.self,
-            returnType: Convention.self
-        ) { dto in
-            Convention.fromDTO(dto)
-        }
+            returnType: ConventionDTO.self
+        ) { $0 }
     }
+
 
     func deleteConvention(withId id: UUID) async -> Result<Void, ServerError> {
         logger.info("Deleting a convention with ID \(id) from the server")

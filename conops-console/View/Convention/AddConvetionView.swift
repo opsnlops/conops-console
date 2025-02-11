@@ -52,8 +52,7 @@ struct AddConventionView: View {
                                 registrationOpen: registrationOpen,
                                 headerExtras: nil,
                                 footerExtras: nil,
-                                contactEmailAddress: contactEmailAddress.isEmpty
-                                    ? nil : contactEmailAddress,
+                                contactEmailAddress: contactEmailAddress,
                                 slackWebHook: nil,
                                 postmarkServerToken: nil,
                                 twilioAccountSID: nil,

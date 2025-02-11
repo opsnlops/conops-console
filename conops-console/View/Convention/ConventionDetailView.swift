@@ -66,6 +66,13 @@ struct ConventionDetailView: View {
                 }
                 .textFieldStyle(.roundedBorder)
             }
+
+            ToolbarItem() {
+                NavigationLink(destination: ConventionEditView(convention: convention)) {
+                        Image(systemName: "slider.horizontal.3")
+                            .symbolRenderingMode(.hierarchical)
+                    }
+            }
         }
         .sheet(isPresented: $showingRegisterSheet) {
             RegisterNewAttendeeView { newAttendee in
