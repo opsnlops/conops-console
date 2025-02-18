@@ -21,33 +21,35 @@ extension ConopsServerClient {
     }
 
 
-    func createNewAttendeeDTO(_ dto: AttendeeDTO, conventionShortName: String) async -> Result<AttendeeDTO, ServerError> {
-            return await sendData(
-                "attendee/\(conventionShortName)",
-                method: .post,
-                body: dto,
-                dtoType: AttendeeDTO.self,
-                returnType: AttendeeDTO.self,
-                transform: { $0 }
-            )
-        }
+    func createNewAttendeeDTO(_ dto: AttendeeDTO, conventionShortName: String) async -> Result<
+        AttendeeDTO, ServerError
+    > {
+        return await sendData(
+            "attendee/\(conventionShortName)",
+            method: .post,
+            body: dto,
+            dtoType: AttendeeDTO.self,
+            returnType: AttendeeDTO.self,
+            transform: { $0 }
+        )
+    }
 
-//    func createNewAttendee(_ attendee: Attendee) async -> Result<AttendeeDTO, ServerError> {
-//
-//        guard let conventionShortName = attendee.convention?.shortName else {
-//            logger.warning("Cannot create attendee without a convention short name")
-//            fatalError("Convention short name is required to create an attendee")
-//        }
-//
-//        let dto = attendee.toDTO()  // Convert to DTO before sending
-//        return await sendData(
-//            "attendee/\(conventionShortName)",
-//            method: .post,
-//            body: dto,
-//            dtoType: AttendeeDTO.self,
-//            returnType: AttendeeDTO.self
-//        ) { $0 }  // No transformation needed here
-//    }
+    //    func createNewAttendee(_ attendee: Attendee) async -> Result<AttendeeDTO, ServerError> {
+    //
+    //        guard let conventionShortName = attendee.convention?.shortName else {
+    //            logger.warning("Cannot create attendee without a convention short name")
+    //            fatalError("Convention short name is required to create an attendee")
+    //        }
+    //
+    //        let dto = attendee.toDTO()  // Convert to DTO before sending
+    //        return await sendData(
+    //            "attendee/\(conventionShortName)",
+    //            method: .post,
+    //            body: dto,
+    //            dtoType: AttendeeDTO.self,
+    //            returnType: AttendeeDTO.self
+    //        ) { $0 }  // No transformation needed here
+    //    }
 
     func updateAttendee(_ attendee: Attendee) async -> Result<Attendee, ServerError> {
 

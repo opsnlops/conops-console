@@ -37,4 +37,3 @@ struct ShirtSizeEditView: View {
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
     ShirtSizeEditView(convention: .mock())
 }
-

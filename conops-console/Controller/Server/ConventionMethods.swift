@@ -30,12 +30,15 @@ extension ConopsServerClient {
     }
 
 
-    func updateConvention(_ updateConvention: ConventionDTO) async -> Result<ConventionDTO, ServerError> {
+    func updateConvention(_ updateConvention: ConventionDTO) async -> Result<
+        ConventionDTO, ServerError
+    > {
 
         logger.info("Updating an existing convention on the server")
 
+        let conventionIdLowerCase = updateConvention.id.uuidString.lowercased()
         return await sendData(
-            "convention/\(updateConvention.id)",
+            "convention/\(conventionIdLowerCase)",
             method: .put,
             body: updateConvention,  // Use the DTO
             dtoType: ConventionDTO.self,
@@ -47,8 +50,9 @@ extension ConopsServerClient {
     func deleteConvention(withId id: UUID) async -> Result<Void, ServerError> {
         logger.info("Deleting a convention with ID \(id) from the server")
 
+        let conventionIdLowerCase = id.uuidString.lowercased()
         return await sendData(
-            "convention/\(id)",
+            "convention/\(conventionIdLowerCase)",
             method: .delete,
             body: "",
             dtoType: EmptyDTO.self,  // Assuming EmptyDTO is defined for cases with no response

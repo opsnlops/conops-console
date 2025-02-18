@@ -67,11 +67,11 @@ struct ConventionDetailView: View {
                 .textFieldStyle(.roundedBorder)
             }
 
-            ToolbarItem() {
+            ToolbarItem {
                 NavigationLink(destination: ConventionEditView(convention: convention)) {
-                        Image(systemName: "slider.horizontal.3")
-                            .symbolRenderingMode(.hierarchical)
-                    }
+                    Image(systemName: "slider.horizontal.3")
+                        .symbolRenderingMode(.hierarchical)
+                }
             }
         }
         .sheet(isPresented: $showingRegisterSheet) {
@@ -91,7 +91,8 @@ struct ConventionDetailView: View {
 
                     // Perform the network call in a detached task (only sending Sendable data)
                     let result = await Task.detached(priority: .userInitiated) {
-                        await serverClient.createNewAttendeeDTO(dto, conventionShortName: conventionShortName)
+                        await serverClient.createNewAttendeeDTO(
+                            dto, conventionShortName: conventionShortName)
                     }.value
 
                     // Update our UI and SwiftData context on the main actor via our async helper.
@@ -114,7 +115,9 @@ struct ConventionDetailView: View {
     // MARK: - Helper Function for Updating the Context
     // Marked as async so it can be awaited when called from outside the main actor.
     @MainActor
-    private func updateContext(with result: Result<AttendeeDTO, ServerError>, newAttendee: Attendee) async {
+    private func updateContext(with result: Result<AttendeeDTO, ServerError>, newAttendee: Attendee)
+        async
+    {
         switch result {
         case .success:
             // Assign convention and update the local model.

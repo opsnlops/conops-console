@@ -13,7 +13,7 @@ import SwiftUI
 
 /// I tried using a LazyVGrid here, but macOS kept getting stuck in a loop when showing the grid. I don't really care since this isn't viewed often, so I switched to a VStack
 
-struct MembershipLevelEditView: View {
+struct ListMembershipLevelsView: View {
 
     @Environment(\.modelContext) var context
 
@@ -72,6 +72,13 @@ struct MembershipLevelEditView: View {
                 }
             }
         }
+        .alert(isPresented: $showErrorAlert) {
+            Alert(
+                title: Text("‼️"),
+                message: Text(errorMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
 
     }
 
@@ -80,33 +87,20 @@ struct MembershipLevelEditView: View {
     // Marked as async so it can be awaited when called from outside the main actor.
     @MainActor
     private func saveConvention() {
-        Task {
-            let client = ConopsServerClient()
 
-            // Turn this into a DTO to send over the wire
-            let conventionDto = convention.toDTO()
-
-            let saveResult = await client.updateConvention(conventionDto)
-            switch saveResult {
-            case .success(let conventionFromServer):
-                logger.debug("convention has id \(conventionFromServer.id)")
-                do {
-                    context.insert(convention)
-                    try context.save()
-                    showSuccessAlert = true
-                } catch {
-                    logger.error("Failed to save convention to SwiftData: \(error)")
-                    errorMessage = error.localizedDescription
-                    showErrorAlert = true
-                }
-            case .failure(let error):
-                logger.error("Failed to save convention to server: \(error)")
-                errorMessage = error.localizedDescription
-                showErrorAlert = true
-            }
+        do {
+            context.insert(convention)
+            try context.save()
+            showSuccessAlert = true
+        } catch {
+            logger.error("Failed to save convention to SwiftData: \(error)")
+            errorMessage = error.localizedDescription
+            showErrorAlert = true
         }
+
+    }
 }
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
-    MembershipLevelEditView(convention: .mock())
+    ListMembershipLevelsView(convention: .mock())
 }

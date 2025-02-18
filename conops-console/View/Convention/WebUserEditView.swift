@@ -37,4 +37,3 @@ struct WebUserEditView: View {
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
     WebUserEditView(convention: .mock())
 }
-

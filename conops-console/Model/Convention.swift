@@ -154,7 +154,7 @@ extension Convention {
 
     func toDTO() -> ConventionDTO {
         ConventionDTO(
-            id: self.id,
+            id: UUID(uuidString: self.id.uuidString.lowercased())!,
             lastModified: self.lastModified,
             active: self.active,
             longName: self.longName,
@@ -239,6 +239,152 @@ extension Convention {
     }
 }
 
+// MARK: - Encoding / Decoding
+extension Convention: Codable {
+    enum CodingKeys: String, CodingKey {
+        case id
+        case lastModified
+        case active
+        case longName
+        case shortName
+        case startDate
+        case endDate
+        case preRegStartDate
+        case preRegEndDate
+        case registrationOpen
+        case headerExtras
+        case footerExtras
+        case contactEmailAddress
+        case slackWebHook
+        case postmarkServerToken
+        case twilioAccountSID
+        case twilioAuthToken
+        case twilioOutgoingNumber
+        case compareTo
+        case minBadgeNumber
+        case dealersDenPresent
+        case dealersDenRegText
+        case paypalAPIUserName
+        case paypalAPIPassword
+        case paypalAPISignature
+        case membershipLevels
+        case shirtSizes
+        case mailTemplates
+        case attendees
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        // Convert the UUID to a lower-case string.
+        try container.encode(id.uuidString.lowercased(), forKey: .id)
+        try container.encode(lastModified, forKey: .lastModified)
+        try container.encode(active, forKey: .active)
+        try container.encode(longName, forKey: .longName)
+        try container.encode(shortName, forKey: .shortName)
+        try container.encode(startDate, forKey: .startDate)
+        try container.encode(endDate, forKey: .endDate)
+        try container.encode(preRegStartDate, forKey: .preRegStartDate)
+        try container.encode(preRegEndDate, forKey: .preRegEndDate)
+        try container.encode(registrationOpen, forKey: .registrationOpen)
+        try container.encode(headerExtras, forKey: .headerExtras)
+        try container.encode(footerExtras, forKey: .footerExtras)
+        try container.encode(contactEmailAddress, forKey: .contactEmailAddress)
+        try container.encode(slackWebHook, forKey: .slackWebHook)
+        try container.encode(postmarkServerToken, forKey: .postmarkServerToken)
+        try container.encode(twilioAccountSID, forKey: .twilioAccountSID)
+        try container.encode(twilioAuthToken, forKey: .twilioAuthToken)
+        try container.encode(twilioOutgoingNumber, forKey: .twilioOutgoingNumber)
+        try container.encode(compareTo, forKey: .compareTo)
+        try container.encode(minBadgeNumber, forKey: .minBadgeNumber)
+        try container.encode(dealersDenPresent, forKey: .dealersDenPresent)
+        try container.encode(dealersDenRegText, forKey: .dealersDenRegText)
+        try container.encode(paypalAPIUserName, forKey: .paypalAPIUserName)
+        try container.encode(paypalAPIPassword, forKey: .paypalAPIPassword)
+        try container.encode(paypalAPISignature, forKey: .paypalAPISignature)
+        try container.encode(membershipLevels, forKey: .membershipLevels)
+        try container.encode(shirtSizes, forKey: .shirtSizes)
+        try container.encode(mailTemplates, forKey: .mailTemplates)
+    }
+
+    public convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        // Decode the lower-case id string and convert it to a UUID.
+        let idString = try container.decode(String.self, forKey: .id)
+        guard let uuid = UUID(uuidString: idString) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .id,
+                in: container,
+                debugDescription: "Invalid UUID string")
+        }
+        let lastModified = try container.decode(Date.self, forKey: .lastModified)
+        let active = try container.decode(Bool.self, forKey: .active)
+        let longName = try container.decode(String.self, forKey: .longName)
+        let shortName = try container.decode(String.self, forKey: .shortName)
+        let startDate = try container.decode(Date.self, forKey: .startDate)
+        let endDate = try container.decode(Date.self, forKey: .endDate)
+        let preRegStartDate = try container.decode(Date.self, forKey: .preRegStartDate)
+        let preRegEndDate = try container.decode(Date.self, forKey: .preRegEndDate)
+        let registrationOpen = try container.decode(Bool.self, forKey: .registrationOpen)
+        let headerExtras = try container.decodeIfPresent(String.self, forKey: .headerExtras)
+        let footerExtras = try container.decodeIfPresent(String.self, forKey: .footerExtras)
+        let contactEmailAddress = try container.decode(String.self, forKey: .contactEmailAddress)
+        let slackWebHook = try container.decodeIfPresent(String.self, forKey: .slackWebHook)
+        let postmarkServerToken = try container.decodeIfPresent(
+            String.self, forKey: .postmarkServerToken)
+        let twilioAccountSID = try container.decodeIfPresent(String.self, forKey: .twilioAccountSID)
+        let twilioAuthToken = try container.decodeIfPresent(String.self, forKey: .twilioAuthToken)
+        let twilioOutgoingNumber = try container.decodeIfPresent(
+            String.self, forKey: .twilioOutgoingNumber)
+        let compareTo = try container.decodeIfPresent(UUID.self, forKey: .compareTo)
+        let minBadgeNumber = try container.decode(UInt32.self, forKey: .minBadgeNumber)
+        let dealersDenPresent = try container.decode(Bool.self, forKey: .dealersDenPresent)
+        let dealersDenRegText = try container.decodeIfPresent(
+            String.self, forKey: .dealersDenRegText)
+        let paypalAPIUserName = try container.decodeIfPresent(
+            String.self, forKey: .paypalAPIUserName)
+        let paypalAPIPassword = try container.decodeIfPresent(
+            String.self, forKey: .paypalAPIPassword)
+        let paypalAPISignature = try container.decodeIfPresent(
+            String.self, forKey: .paypalAPISignature)
+        let membershipLevels = try container.decode(
+            [MembershipLevel].self, forKey: .membershipLevels)
+        let shirtSizes = try container.decode([ShirtSize].self, forKey: .shirtSizes)
+        let mailTemplates = try container.decode([String: String].self, forKey: .mailTemplates)
+
+        self.init(
+            id: uuid,
+            lastModified: lastModified,
+            active: active,
+            longName: longName,
+            shortName: shortName,
+            startDate: startDate,
+            endDate: endDate,
+            preRegStartDate: preRegStartDate,
+            preRegEndDate: preRegEndDate,
+            registrationOpen: registrationOpen,
+            headerExtras: headerExtras,
+            footerExtras: footerExtras,
+            contactEmailAddress: contactEmailAddress,
+            slackWebHook: slackWebHook,
+            postmarkServerToken: postmarkServerToken,
+            twilioAccountSID: twilioAccountSID,
+            twilioAuthToken: twilioAuthToken,
+            twilioOutgoingNumber: twilioOutgoingNumber,
+            compareTo: compareTo,
+            minBadgeNumber: minBadgeNumber,
+            dealersDenPresent: dealersDenPresent,
+            dealersDenRegText: dealersDenRegText,
+            paypalAPIUserName: paypalAPIUserName,
+            paypalAPIPassword: paypalAPIPassword,
+            paypalAPISignature: paypalAPISignature,
+            membershipLevels: membershipLevels,
+            shirtSizes: shirtSizes,
+            mailTemplates: mailTemplates
+        )
+        self.attendees = attendees
+    }
+}
+
 
 // MARK: - Mock
 extension Convention {
@@ -269,7 +415,10 @@ extension Convention {
             paypalAPIUserName: nil,
             paypalAPIPassword: nil,
             paypalAPISignature: nil,
-            membershipLevels: [MembershipLevel.mock()],
+            membershipLevels: [
+                MembershipLevel.mock(), MembershipLevel.mock(), MembershipLevel.mock(),
+                MembershipLevel.mock(),
+            ],
             shirtSizes: [ShirtSize.mock()],
             mailTemplates: ["welcome": "Welcome to MockCon!"]
         )

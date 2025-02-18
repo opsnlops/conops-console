@@ -37,4 +37,3 @@ struct APIKeyEditView: View {
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
     APIKeyEditView(convention: .mock())
 }
-
