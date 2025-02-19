@@ -12,7 +12,7 @@ import SwiftData
 @Model
 final class Attendee: Identifiable {
     @Attribute(.unique) var id: AttendeeIdentifier
-    var convention: Convention?
+    var conventionId: ConventionIdentifier
     var lastModified: Date
     var active: Bool
     var badgeNumber: UInt32
@@ -40,7 +40,7 @@ final class Attendee: Identifiable {
 
     init(
         id: AttendeeIdentifier,
-        convention: Convention?,
+        conventionId: ConventionIdentifier,
         lastModified: Date,
         active: Bool,
         badgeNumber: UInt32,
@@ -67,6 +67,7 @@ final class Attendee: Identifiable {
         transactions: [Transaction]
     ) {
         self.id = id
+        self.conventionId = conventionId
         self.lastModified = lastModified
         self.active = active
         self.badgeNumber = badgeNumber
@@ -97,7 +98,7 @@ final class Attendee: Identifiable {
 // Allow for this attendee to be updated by another one
 extension Attendee {
     func update(from updatedAttendee: Attendee) {
-        self.convention = updatedAttendee.convention
+        self.conventionId = updatedAttendee.conventionId
         self.lastModified = updatedAttendee.lastModified
         self.active = updatedAttendee.active
         self.badgeNumber = updatedAttendee.badgeNumber
@@ -131,10 +132,7 @@ extension Attendee {
     static func fromDTO(_ dto: AttendeeDTO) -> Attendee {
         return Attendee(
             id: dto.id,
-
-            //TODO: Figure out how to get this out of the model
-            convention: nil,
-
+            conventionId: dto.conventionId,
             lastModified: dto.lastModified,
             active: dto.active,
             badgeNumber: dto.badgeNumber,
@@ -165,6 +163,7 @@ extension Attendee {
     func toDTO() -> AttendeeDTO {
         return AttendeeDTO(
             id: self.id,
+            conventionId: self.conventionId,
             lastModified: self.lastModified,
             active: self.active,
             badgeNumber: self.badgeNumber,
@@ -208,8 +207,8 @@ extension Attendee {
 
             container.mainContext.insert(
                 Attendee(
-                    id: UUID(),
-                    convention: nil,
+                    id: AttendeeIdentifier(),
+                    conventionId: ConventionIdentifier(),
                     lastModified: Date(),
                     active: true,
                     badgeNumber: UInt32(i),
@@ -247,8 +246,8 @@ extension Attendee {
 extension Attendee {
     static func mock() -> Attendee {
         return Attendee(
-            id: UUID(),
-            convention: .mock(),
+            id: AttendeeIdentifier(),
+            conventionId: ConventionIdentifier(),
             lastModified: Date(),
             active: true,
             badgeNumber: 1234,
@@ -283,7 +282,7 @@ extension Attendee: CustomStringConvertible {
         """
         Attendee(
             id: \(id),
-            convention: \(convention?.shortName ?? "nil"),
+            conventionId: \(conventionId),
             lastModified: \(lastModified),
             active: \(active),
             badgeNumber: \(badgeNumber),

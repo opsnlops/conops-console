@@ -10,6 +10,7 @@ import Foundation
 
 struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let id: AttendeeIdentifier
+    let conventionId: ConventionIdentifier
     let lastModified: Date
     let active: Bool
     let badgeNumber: UInt32
@@ -37,6 +38,7 @@ struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id
+        case conventionId = "convention_id"
         case lastModified = "last_modified"
         case active
         case badgeNumber = "badge_number"
@@ -69,14 +71,15 @@ struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     static func mock() -> AttendeeDTO {
         return AttendeeDTO(
-            id: UUID(),
+            id: AttendeeIdentifier(),
+            conventionId: ConventionIdentifier(),
             lastModified: Date(),
             active: true,
             badgeNumber: 1234,
             firstName: "Mock",
             lastName: "Attendee",
             badgeName: "Mocky",
-            membershipLevel: UUID(),
+            membershipLevel: MembershipLevelIdentifier(),
             birthday: Date(),
             addressLine1: "123 Mock St",
             addressLine2: "Apt 4B",

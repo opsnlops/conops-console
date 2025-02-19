@@ -12,11 +12,12 @@ struct RegisterNewAttendeeView: View {
     // MARK: - Props
     var onAttendeeSave: (Attendee) -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) var context
 
     // MARK: - State
     @State private var attendee = Attendee(
-        id: UUID(),
-        convention: nil,
+        id: AttendeeIdentifier(),
+        conventionId: ConventionIdentifier(),
         lastModified: Date(),
         active: true,
         badgeNumber: 0,

@@ -74,9 +74,14 @@ struct ConventionDetailView: View {
                 }
             }
         }
+        // MARK: - Sheet
         .sheet(isPresented: $showingRegisterSheet) {
             RegisterNewAttendeeView { newAttendee in
                 Task {
+
+                    // Update this attendee with the active convention ID
+                    newAttendee.conventionId = convention.id
+
                     // Extract the Sendable DTO on the main actor.
                     let dto: AttendeeDTO = await MainActor.run {
                         newAttendee.toDTO()
@@ -121,7 +126,7 @@ struct ConventionDetailView: View {
         switch result {
         case .success:
             // Assign convention and update the local model.
-            newAttendee.convention = convention
+            newAttendee.conventionId = convention.id
             context.insert(newAttendee)
             do {
                 try context.save()

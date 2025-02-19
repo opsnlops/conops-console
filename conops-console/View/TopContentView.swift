@@ -25,27 +25,39 @@ struct TopContentView: View {
     let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "TopContentView")
 
     var body: some View {
+
         NavigationSplitView {
-            List(selection: $selectedConvention) {
-                Section("Conventions") {
-                    ForEach(conventions) { convention in
-                        NavigationLink(value: convention) {
-                            Label(convention.shortName, systemImage: "person.2.fill")
-                                .symbolRenderingMode(.hierarchical)
+            VStack {
+                List(selection: $selectedConvention) {
+                    Section("Conventions") {
+                        ForEach(conventions) { convention in
+                            NavigationLink(value: convention) {
+                                Label(convention.shortName, systemImage: "person.2.fill")
+                                    .symbolRenderingMode(.hierarchical)
+                            }
+                        }
+                    }
+
+                    Section("Controls") {
+                        NavigationLink {
+                            SettingsView()
+                        } label: {
+                            Label("Settings", systemImage: "gear")
                         }
                     }
                 }
-
-                Section("Controls") {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Label("Settings", systemImage: "gear")
-                    }
+                .navigationDestination(for: Convention.self) { convention in
+                    createConventionDetailView(for: convention)
                 }
-            }
-            .navigationDestination(for: Convention.self) { convention in
-                createConventionDetailView(for: convention)
+
+                Spacer()
+
+                Button {
+                    showingForm = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .symbolRenderingMode(.multicolor)
             }
 
         } detail: {

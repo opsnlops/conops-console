@@ -48,7 +48,7 @@ final class Convention {
     var mailTemplates: [String: String]
 
     // One to many, hopefully every covention has lots of these!
-    @Relationship(deleteRule: .cascade, inverse: \Attendee.convention)
+    @Relationship(deleteRule: .cascade)
     var attendees = [Attendee]()
 
 

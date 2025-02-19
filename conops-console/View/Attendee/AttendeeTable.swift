@@ -36,7 +36,7 @@ struct AttendeeTable: View {
     private var filteredAttendees: [Attendee] {
         attendees.filter { attendee in
             // Only include attendees that have a matching convention.
-            guard let attendeeConvention = attendee.convention, attendeeConvention == convention
+            guard attendee.conventionId == convention.id
             else {
                 return false
             }
@@ -82,31 +82,12 @@ struct AttendeeTable: View {
             }
             .navigationDestination(isPresented: $isEditing) {
                 if let detailAttendee = selectedAttendee {
-                    let binding = Binding<Attendee>(
-                        get: { detailAttendee },
-                        set: { updatedAttendee in
-                            updateAttendee(detailAttendee, with: updatedAttendee)
-                        }
-                    )
-                    EditAttendeeView(attendee: binding)
+                    EditAttendeeView(attendee: detailAttendee, convention: convention)
                 }
             }
         }
     }
 
-    // MARK: - Update Attendee
-    private func updateAttendee(_ original: Attendee, with updated: Attendee) {
-        original.update(from: updated)  // Use the `update(from:)` method
-        original.lastModified = Date()
-
-        context.insert(original)
-
-        do {
-            try context.save()
-        } catch {
-            logger.warning("unable to save updated attendee: \(error.localizedDescription)")
-        }
-    }
 }
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
