@@ -24,7 +24,7 @@ struct RegisterNewAttendeeView: View {
         firstName: "",
         lastName: "",
         badgeName: "",
-        membershipLevel: UUID(),
+        membershipLevel: MembershipLevelIdentifier(),
         birthday: Calendar.current.date(byAdding: .year, value: -25, to: Date()) ?? Date(),
         addressLine1: "",
         addressLine2: nil,
