@@ -163,7 +163,6 @@ struct EditAttendeeView: View {
 
 #Preview {
     @Previewable @State var sampleAttendee = Attendee.mock()
-
     return NavigationStack {
         EditAttendeeView(attendee: sampleAttendee, convention: .mock())
     }

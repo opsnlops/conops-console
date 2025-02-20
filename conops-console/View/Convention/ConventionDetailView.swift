@@ -14,12 +14,14 @@ import SwiftUI
 struct ConventionDetailView: View {
 
     @Environment(\.modelContext) var context
+    @Environment(\.dismiss) var dismiss
 
     var convention: Convention
 
     @State private var showingRegisterSheet = false
-    @State private var showErrorAlert: Bool = false
-    @State private var errorMessage: String = ""
+
+    @State private var activeAlert: ActiveAlert?
+    @State private var alertMessage: String = ""
 
     @State private var searchText: String = ""
     @State private var isShowingSearchPopover: Bool = false
@@ -108,12 +110,25 @@ struct ConventionDetailView: View {
         .onAppear {
             logger.debug("ConventionDetailView appeared for \(convention.longName)")
         }
-        .alert(isPresented: $showErrorAlert) {
-            Alert(
-                title: Text("Error"),
-                message: Text(errorMessage),
-                dismissButton: .default(Text("OK"))
-            )
+        .alert(item: $activeAlert) { alert in
+            switch alert {
+            case .success:
+                return Alert(
+                    title: Text("Registration Successful"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(
+                        Text("Hooray 🎉"),
+                        action: {
+                            // Do nothing
+                        })
+                )
+            case .error:
+                return Alert(
+                    title: Text("Error"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
 
@@ -124,22 +139,38 @@ struct ConventionDetailView: View {
         async
     {
         switch result {
-        case .success:
+        case .success(let incomingAttendee):
+
             // Assign convention and update the local model.
             newAttendee.conventionId = convention.id
+
+            // Log the old and new ID (and modified)
+            let oldId = newAttendee.id
+            newAttendee.id = incomingAttendee.id
+            newAttendee.lastModified = incomingAttendee.lastModified
+
+            logger.debug(
+                "Generated fake id: \(oldId) -> now: \(newAttendee.id), lastModified: \(newAttendee.lastModified)"
+            )
+
             context.insert(newAttendee)
+
             do {
                 try context.save()
                 logger.debug("Successfully saved attendee")
+
+                alertMessage = "Registered \(newAttendee.badgeName)!"
+                activeAlert = .success
+
             } catch {
                 logger.error("Failed to save attendee locally: \(error)")
-                errorMessage = error.localizedDescription
-                showErrorAlert = true
+                alertMessage = error.localizedDescription
+                activeAlert = .error
             }
         case .failure(let error):
             logger.error("Server update failed: \(error)")
-            errorMessage = error.localizedDescription
-            showErrorAlert = true
+            alertMessage = error.localizedDescription
+            activeAlert = .error
         }
     }
 }
