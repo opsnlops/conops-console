@@ -19,7 +19,7 @@ struct CreateNewMembershipLevelView: View {
     // Create a blank membership level to feed into the form
 
     @State private var membershipLevel = MembershipLevel(
-        id: UUID(),
+        id: MembershipLevelIdentifier(),
         longName: "",
         shortName: "",
         price: 50.0,

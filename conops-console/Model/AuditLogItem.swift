@@ -9,10 +9,10 @@
 import Foundation
 
 struct AuditLogItem: Codable, Identifiable, Comparable, Hashable, Sendable {
-    let id: UUID
+    let id: Int
     let lastModified: Date
     let timestamp: Date
-    let conventionID: UUID
+    let conventionID: ConventionIdentifier
     let systemProduced: Bool
     let userName: String?
     let action: String
@@ -33,10 +33,10 @@ struct AuditLogItem: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     static func mock() -> AuditLogItem {
         AuditLogItem(
-            id: UUID(),
+            id: 0,
             lastModified: Date(),
             timestamp: Date(),
-            conventionID: UUID(),
+            conventionID: ConventionIdentifier(),
             systemProduced: true,
             userName: "Mock User",
             action: "Mock action performed"

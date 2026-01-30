@@ -20,14 +20,20 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let preRegEndDate: Date
     let registrationOpen: Bool
     let headerExtras: String?
+    let headerGraphic: String?
+    let styleSheet: String?
     let footerExtras: String?
-    let contactEmailAddress: String
+    let badgeClass: String?
+    let contactEmailAddress: String?
+    let replicationMode: String?
     let slackWebHook: String?
     let postmarkServerToken: String?
+    let messagingServiceEndpoint: String?
+    let messagingServiceApiKey: String?
     let twilioAccountSID: String?
     let twilioAuthToken: String?
     let twilioOutgoingNumber: String?
-    let compareTo: UUID?
+    let compareTo: ConventionIdentifier?
     let minBadgeNumber: UInt32
     let dealersDenPresent: Bool
     let dealersDenRegText: String?
@@ -50,10 +56,16 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
         case preRegEndDate = "pre_reg_end_date"
         case registrationOpen = "registration_open"
         case headerExtras = "header_extras"
+        case headerGraphic = "header_graphic"
+        case styleSheet = "style_sheet"
         case footerExtras = "footer_extras"
+        case badgeClass = "badge_class"
         case contactEmailAddress = "contact_email_address"
+        case replicationMode = "replication_mode"
         case slackWebHook = "slack_web_hook"
         case postmarkServerToken = "postmark_server_token"
+        case messagingServiceEndpoint = "messaging_service_endpoint"
+        case messagingServiceApiKey = "messaging_service_api_key"
         case twilioAccountSID = "twilio_account_sid"
         case twilioAuthToken = "twilio_auth_token"
         case twilioOutgoingNumber = "twilio_outgoing_number"
@@ -86,10 +98,16 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
             preRegEndDate: Date().addingTimeInterval(-60 * 60 * 24 * 5),
             registrationOpen: true,
             headerExtras: "Mock Header",
+            headerGraphic: "mock-header.png",
+            styleSheet: "mock-style.css",
             footerExtras: "Mock Footer",
+            badgeClass: "standard",
             contactEmailAddress: "mock@convention.com",
+            replicationMode: "primary",
             slackWebHook: "https://mock.slack.webhook",
             postmarkServerToken: "mock-postmark-token",
+            messagingServiceEndpoint: "https://mock.messaging.service",
+            messagingServiceApiKey: "mock-messaging-key",
             twilioAccountSID: "mock-sid",
             twilioAuthToken: "mock-auth-token",
             twilioOutgoingNumber: "+1234567890",

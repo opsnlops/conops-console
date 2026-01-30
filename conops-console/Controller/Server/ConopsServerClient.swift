@@ -17,7 +17,7 @@ enum UrlType {
 /// A client for our server!
 ///
 /// When making changes, take care to ensure that everything is thread safe. There should be no shared context between anything.
-class ConopsServerClient: ConopsServerProtocol {
+final class ConopsServerClient: ConopsServerProtocol {
 
     let logger = Logger(
         subsystem: "furry.enterprises.ConopsConsole", category: "ConopsServerClient")
@@ -37,17 +37,29 @@ class ConopsServerClient: ConopsServerProtocol {
         return URL(string: connectionString)!
     }
 
+    func makeURL(for endpoint: String, queryItems: [URLQueryItem] = []) -> URL {
+        var components = URLComponents(url: makeBaseURL(for: .http).appendingPathComponent(endpoint), resolvingAgainstBaseURL: false)
+        if !queryItems.isEmpty {
+            components?.queryItems = queryItems
+        }
+        return components?.url ?? makeBaseURL(for: .http).appendingPathComponent(endpoint)
+    }
+
     // Fetch data from the server
     func fetchData<DTO: Decodable, Object>(
         _ endpoint: String,
+        queryItems: [URLQueryItem] = [],
         dtoType: DTO.Type,
         returnType: Object.Type,
         transform: @escaping (DTO) -> Object
     ) async -> Result<Object, ServerError> {
-        let url = makeBaseURL(for: .http).appendingPathComponent(endpoint)
+        let url = makeURL(for: endpoint, queryItems: queryItems)
+
+
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        applyAuthHeader(to: &request)
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
@@ -69,7 +81,8 @@ class ConopsServerClient: ConopsServerProtocol {
         transform: @escaping (DTO) -> Object
     ) async -> Result<Object, ServerError> {
         do {
-            let url = makeBaseURL(for: .http).appendingPathComponent(endpoint)
+            let url = makeURL(for: endpoint)
+
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             let requestBody = try encoder.encode(body)
@@ -78,6 +91,7 @@ class ConopsServerClient: ConopsServerProtocol {
             request.httpMethod = method.rawValue
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = requestBody
+            applyAuthHeader(to: &request)
 
             // Use performRequest with the correct parameters
             return await performRequest(
@@ -150,7 +164,34 @@ class ConopsServerClient: ConopsServerProtocol {
             // Validate the server status
             guard serverStatus.status == "success" else {
                 let errorMessage = serverStatus.message ?? "Unknown server error"
+                logger.error("Server error response: \(errorMessage, privacy: .public)")
+                if let bodyString = String(data: data, encoding: .utf8) {
+                    logger.warning("Server error body: \(bodyString, privacy: .public)")
+                }
+
+                if serverStatus.detailed_status == "validation_error" {
+                    if let validationStatus = try? decoder.decode(
+                        ServerStatus<[ApiValidationError]>.self,
+                        from: data
+                    ),
+                        let validationErrors = validationStatus.data,
+                        validationErrors.isEmpty == false
+                    {
+                        let details = validationErrors
+                            .map { "\($0.field): \($0.message)" }
+                            .joined(separator: "\n")
+                        let message = (validationStatus.message ?? errorMessage)
+                            + "\n" + details
+                        return .failure(.serverError(message))
+                    }
+                }
+
                 return .failure(.serverError(errorMessage))
+            }
+
+            if serverStatus.data == nil, DTO.self == EmptyDTO.self {
+                let object = transform(EmptyDTO() as! DTO)
+                return .success(object)
             }
 
             // Ensure data exists
@@ -164,11 +205,17 @@ class ConopsServerClient: ConopsServerProtocol {
         } catch let decodingError as DecodingError {
             // Provide detailed decoding error messages
             let errorMessage = decodeErrorMessage(from: decodingError)
-            logger.error("Decoding error: \(errorMessage)")
+            logger.error("Decoding error: \(errorMessage, privacy: .public)")
+            if let bodyString = String(data: data, encoding: .utf8) {
+                logger.warning("Decoding error body: \(bodyString, privacy: .public)")
+            }
             return .failure(.serverError(errorMessage))
         } catch {
             // Catch-all for unexpected errors
-            logger.error("Unexpected decoding error: \(error.localizedDescription)")
+            logger.error("Unexpected decoding error: \(error.localizedDescription, privacy: .public)")
+            if let bodyString = String(data: data, encoding: .utf8) {
+                logger.warning("Unexpected error body: \(bodyString, privacy: .public)")
+            }
             return .failure(.serverError("Unexpected error"))
         }
     }
@@ -189,5 +236,38 @@ class ConopsServerClient: ConopsServerProtocol {
         @unknown default:
             return "Unknown decoding error"
         }
+    }
+
+    private func applyAuthHeader(to request: inout URLRequest) {
+        guard let token = AuthStore.shared.token else { return }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    }
+
+    func requestAuthToken(
+        conventionShortName: String,
+        username: String,
+        password: String
+    ) async -> Result<AuthTokenResponse, ServerError> {
+        let payload = AuthTokenRequest(
+            conventionShortName: conventionShortName,
+            username: username,
+            password: password
+        )
+
+        return await sendData(
+            "auth/token",
+            method: .post,
+            body: payload,
+            dtoType: AuthTokenResponse.self,
+            returnType: AuthTokenResponse.self
+        ) { $0 }
+    }
+
+    func getActiveConventionsPublic() async -> Result<[PublicConventionDTO], ServerError> {
+        return await fetchData(
+            "conventions/active",
+            dtoType: [PublicConventionDTO].self,
+            returnType: [PublicConventionDTO].self
+        ) { $0 }
     }
 }

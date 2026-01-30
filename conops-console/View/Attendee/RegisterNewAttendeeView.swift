@@ -10,6 +10,7 @@ import SwiftUI
 
 struct RegisterNewAttendeeView: View {
     // MARK: - Props
+    let convention: Convention
     var onAttendeeSave: (Attendee) -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) var context
@@ -35,14 +36,21 @@ struct RegisterNewAttendeeView: View {
         emailAddress: "",
         emergencyContact: nil,
         phoneNumber: nil,
+        referral: nil,
         registrationDate: Date(),
         checkInTime: nil,
         staff: false,
         dealer: false,
         codeOfConductAccepted: false,
         secretCode: nil,
+        attendeeType: .staff,
+        currentBalance: 0.0,
         transactions: []
     )
+
+    private var membershipLevels: [MembershipLevel] {
+        convention.membershipLevels.sorted()
+    }
 
     var body: some View {
         NavigationStack {
@@ -50,20 +58,26 @@ struct RegisterNewAttendeeView: View {
                 // Wrap the ScrollView in a VStack so that the navigationTitle can be attached to the VStack
                 VStack {
                     ScrollView {
-                        AttendeeForm(attendee: $attendee) {
+                        AttendeeForm(attendee: $attendee, membershipLevels: membershipLevels) {
                             onAttendeeSave(attendee)
                             dismiss()
                         }
                     }
                 }
             #else
-                AttendeeForm(attendee: $attendee) {
+                AttendeeForm(attendee: $attendee, membershipLevels: membershipLevels) {
                     onAttendeeSave(attendee)
                     dismiss()
                 }
             #endif
         }
         .navigationTitle("Register New Attendee")
+        .onAppear {
+            attendee.conventionId = convention.id
+            if attendee.membershipLevel == 0, let first = membershipLevels.first {
+                attendee.membershipLevel = first.id
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
@@ -79,5 +93,5 @@ struct RegisterNewAttendeeView: View {
 }
 
 #Preview {
-    RegisterNewAttendeeView(onAttendeeSave: { _ in })
+    RegisterNewAttendeeView(convention: Convention.mock()) { _ in }
 }

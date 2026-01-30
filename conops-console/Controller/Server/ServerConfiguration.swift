@@ -12,10 +12,16 @@ struct ServerConfiguration {
     static let hostnameKey = "serverHostname"
     static let portKey = "serverRestPort"
     static let useTLSKey = "useTLS"
+    static let includeInactiveKey = "includeInactiveConventions"
+    static let lastAuthConventionKey = "lastAuthConvention"
+    static let lastAuthUsernameKey = "lastAuthUsername"
 
     static var defaultHostname: String { "127.0.0.1" }
-    static var defaultPort: Int { 8000 }
+    static var defaultPort: Int { 8080 }
     static var defaultUseTLS: Bool { false }
+    static var defaultIncludeInactive: Bool { false }
+    static var defaultLastAuthConvention: String { "" }
+    static var defaultLastAuthUsername: String { "" }
 }
 
 extension UserDefaults {
@@ -37,5 +43,29 @@ extension UserDefaults {
                 ?? ServerConfiguration.defaultUseTLS
         }
         set { set(newValue, forKey: ServerConfiguration.useTLSKey) }
+    }
+
+    var includeInactiveConventions: Bool {
+        get {
+            object(forKey: ServerConfiguration.includeInactiveKey) as? Bool
+                ?? ServerConfiguration.defaultIncludeInactive
+        }
+        set { set(newValue, forKey: ServerConfiguration.includeInactiveKey) }
+    }
+
+    var lastAuthConvention: String {
+        get {
+            string(forKey: ServerConfiguration.lastAuthConventionKey)
+                ?? ServerConfiguration.defaultLastAuthConvention
+        }
+        set { set(newValue, forKey: ServerConfiguration.lastAuthConventionKey) }
+    }
+
+    var lastAuthUsername: String {
+        get {
+            string(forKey: ServerConfiguration.lastAuthUsernameKey)
+                ?? ServerConfiguration.defaultLastAuthUsername
+        }
+        set { set(newValue, forKey: ServerConfiguration.lastAuthUsernameKey) }
     }
 }

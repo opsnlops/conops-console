@@ -153,12 +153,18 @@ struct ConventionEditView: View {
 
             Section("Registration") {
                 Toggle("Registration Open", isOn: $convention.registrationOpen)
-                TextField("Contact Email Address", text: $convention.contactEmailAddress)
-                    .autocorrectionDisabled(true)
-                    #if os(iOS)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                    #endif
+                TextField(
+                    "Contact Email Address",
+                    text: Binding(
+                        get: { convention.contactEmailAddress ?? "" },
+                        set: { convention.contactEmailAddress = $0 }
+                    )
+                )
+                .autocorrectionDisabled(true)
+#if os(iOS)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+#endif
                 TextField("Min Badge Number", value: $convention.minBadgeNumber, format: .number)
             }
         }

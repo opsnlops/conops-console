@@ -11,6 +11,10 @@ import OSLog
 import SwiftData
 import SwiftUI
 
+#if os(iOS)
+    import UIKit
+#endif
+
 struct AttendeeTable: View {
     // 🐰 Parameters for filtering:
     let convention: Convention
@@ -24,6 +28,7 @@ struct AttendeeTable: View {
 
     @State private var selectedAttendee: Attendee?  // Tracks the attendee to edit
     @State private var isEditing: Bool = false
+    @State private var selectedAttendeeIds = Set<AttendeeIdentifier>()
 
     @State private var showErrorAlert: Bool = false
     @State private var errorMessage: String = ""
@@ -34,7 +39,7 @@ struct AttendeeTable: View {
     /// Filters the fetched attendees to only those that belong to the given convention.
     /// Also applies search filtering against firstName, lastName, or badgeName.
     private var filteredAttendees: [Attendee] {
-        attendees.filter { attendee in
+        let filtered = attendees.filter { attendee in
             // Only include attendees that have a matching convention.
             guard attendee.conventionId == convention.id
             else {
@@ -47,10 +52,14 @@ struct AttendeeTable: View {
                 || attendee.lastName.localizedCaseInsensitiveContains(searchText)
                 || attendee.badgeName.localizedCaseInsensitiveContains(searchText)
         }
+
+        return filtered.sorted { lhs, rhs in
+            lhs.badgeName.localizedCaseInsensitiveCompare(rhs.badgeName) == .orderedAscending
+        }
     }
 
     var body: some View {
-        NavigationStack {
+        #if os(macOS)
             Table(of: Attendee.self) {
                 TableColumn("Name", value: \.badgeName)
                     .width(min: 120, ideal: 150)
@@ -85,8 +94,75 @@ struct AttendeeTable: View {
                     EditAttendeeView(attendee: detailAttendee, convention: convention)
                 }
             }
-        }
+        #else
+            if isPad {
+                Table(of: Attendee.self, selection: $selectedAttendeeIds) {
+                    TableColumn("Name", value: \.badgeName)
+                        .width(min: 120, ideal: 150)
+                    TableColumn("#") { attendee in
+                        Text(attendee.badgeNumber, format: .number)
+                    }
+                    .width(60)
+                    TableColumn("First Name", value: \.firstName)
+                        .width(min: 120, ideal: 250)
+                    TableColumn("Last Name", value: \.lastName)
+                } rows: {
+                    ForEach(filteredAttendees, id: \.id) { attendee in
+                        TableRow(attendee)
+                            .contextMenu {
+                                Button {
+                                    selectedAttendee = attendee
+                                    isEditing = true  // Trigger navigation to edit view
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+
+                                Button {
+                                    // Ban action logic can go here 🐰🔨
+                                } label: {
+                                    Label("Ban", systemImage: "hammer")
+                                }
+                            }
+                    }
+                }
+                .navigationDestination(isPresented: $isEditing) {
+                    if let detailAttendee = selectedAttendee {
+                        EditAttendeeView(attendee: detailAttendee, convention: convention)
+                    }
+                }
+                .onChange(of: selectedAttendeeIds) { _, newValue in
+                    guard let attendeeId = newValue.first else { return }
+                    if let attendee = filteredAttendees.first(where: { $0.id == attendeeId }) {
+                        selectedAttendee = attendee
+                        isEditing = true
+                        selectedAttendeeIds = []
+                    }
+                }
+            } else {
+                List(filteredAttendees, id: \.id) { attendee in
+                    NavigationLink {
+                        EditAttendeeView(attendee: attendee, convention: convention)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(attendee.badgeName)
+                                .font(.headline)
+                            Text("\(attendee.firstName) \(attendee.lastName)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        #endif
     }
+
+    #if os(iOS)
+        private var isPad: Bool {
+            UIDevice.current.userInterfaceIdiom == .pad
+        }
+    #else
+        private var isPad: Bool { false }
+    #endif
 
 }
 

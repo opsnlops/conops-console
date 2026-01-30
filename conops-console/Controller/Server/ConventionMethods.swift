@@ -10,12 +10,32 @@ import Foundation
 
 extension ConopsServerClient {
 
-    func getAllConventions() async -> Result<[ConventionDTO], ServerError> {
-        await fetchData(
-            "conventions",
+    func getAllConventions(
+        since: Date?,
+        includeInactive: Bool
+    ) async -> Result<[ConventionDTO], ServerError> {
+        var queryItems: [URLQueryItem] = []
+        if let since {
+            queryItems.append(URLQueryItem(name: "since", value: ISO8601DateFormatter().string(from: since)))
+        }
+        if includeInactive {
+            queryItems.append(URLQueryItem(name: "include_inactive", value: "true"))
+        }
+
+        return await fetchData(
+            "secure-conventions",
+            queryItems: queryItems,
             dtoType: [ConventionDTO].self,
             returnType: [ConventionDTO].self
-        ) { $0 }  // No transformation needed here
+        ) { $0 }
+    }
+
+    func getConvention(id: ConventionIdentifier) async -> Result<ConventionDTO, ServerError> {
+        return await fetchData(
+            "convention/\(id)",
+            dtoType: ConventionDTO.self,
+            returnType: ConventionDTO.self
+        ) { $0 }
     }
 
     func createNewConvention(_ convention: Convention) async -> Result<ConventionDTO, ServerError> {
@@ -36,9 +56,8 @@ extension ConopsServerClient {
 
         logger.info("Updating an existing convention on the server")
 
-        let conventionIdLowerCase = updateConvention.id.uuidString.lowercased()
         return await sendData(
-            "convention/\(conventionIdLowerCase)",
+            "convention/\(updateConvention.id)",
             method: .put,
             body: updateConvention,  // Use the DTO
             dtoType: ConventionDTO.self,
@@ -47,12 +66,11 @@ extension ConopsServerClient {
     }
 
 
-    func deleteConvention(withId id: UUID) async -> Result<Void, ServerError> {
+    func deleteConvention(withId id: ConventionIdentifier) async -> Result<Void, ServerError> {
         logger.info("Deleting a convention with ID \(id) from the server")
 
-        let conventionIdLowerCase = id.uuidString.lowercased()
         return await sendData(
-            "convention/\(conventionIdLowerCase)",
+            "convention/\(id)",
             method: .delete,
             body: "",
             dtoType: EmptyDTO.self,  // Assuming EmptyDTO is defined for cases with no response

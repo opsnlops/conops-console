@@ -30,12 +30,15 @@ final class Attendee: Identifiable {
     var emailAddress: String
     var emergencyContact: String?
     var phoneNumber: String?
+    var referral: String?
     var registrationDate: Date
     var checkInTime: Date?
     var staff: Bool
     var dealer: Bool
     var codeOfConductAccepted: Bool
     var secretCode: String?
+    var attendeeType: AttendeeType
+    var currentBalance: Float
     var transactions: [Transaction]
 
     init(
@@ -58,12 +61,15 @@ final class Attendee: Identifiable {
         emailAddress: String,
         emergencyContact: String?,
         phoneNumber: String?,
+        referral: String?,
         registrationDate: Date,
         checkInTime: Date?,
         staff: Bool,
         dealer: Bool,
         codeOfConductAccepted: Bool,
         secretCode: String?,
+        attendeeType: AttendeeType,
+        currentBalance: Float,
         transactions: [Transaction]
     ) {
         self.id = id
@@ -85,12 +91,15 @@ final class Attendee: Identifiable {
         self.emailAddress = emailAddress
         self.emergencyContact = emergencyContact
         self.phoneNumber = phoneNumber
+        self.referral = referral
         self.registrationDate = registrationDate
         self.checkInTime = checkInTime
         self.staff = staff
         self.dealer = dealer
         self.codeOfConductAccepted = codeOfConductAccepted
         self.secretCode = secretCode
+        self.attendeeType = attendeeType
+        self.currentBalance = currentBalance
         self.transactions = transactions
     }
 }
@@ -116,12 +125,15 @@ extension Attendee {
         self.emailAddress = updatedAttendee.emailAddress
         self.emergencyContact = updatedAttendee.emergencyContact
         self.phoneNumber = updatedAttendee.phoneNumber
+        self.referral = updatedAttendee.referral
         self.registrationDate = updatedAttendee.registrationDate
         self.checkInTime = updatedAttendee.checkInTime
         self.staff = updatedAttendee.staff
         self.dealer = updatedAttendee.dealer
         self.codeOfConductAccepted = updatedAttendee.codeOfConductAccepted
         self.secretCode = updatedAttendee.secretCode
+        self.attendeeType = updatedAttendee.attendeeType
+        self.currentBalance = updatedAttendee.currentBalance
         self.transactions = updatedAttendee.transactions
     }
 }
@@ -130,6 +142,17 @@ extension Attendee {
 // MARK: - DTO conversions
 extension Attendee {
     static func fromDTO(_ dto: AttendeeDTO) -> Attendee {
+        let resolvedAttendeeType: AttendeeType
+        switch (dto.staff, dto.dealer) {
+        case (true, true):
+            resolvedAttendeeType = .staffDealer
+        case (true, false):
+            resolvedAttendeeType = .staff
+        case (false, true):
+            resolvedAttendeeType = .dealer
+        case (false, false):
+            resolvedAttendeeType = dto.attendeeType
+        }
         return Attendee(
             id: dto.id,
             conventionId: dto.conventionId,
@@ -150,17 +173,31 @@ extension Attendee {
             emailAddress: dto.emailAddress,
             emergencyContact: dto.emergencyContact,
             phoneNumber: dto.phoneNumber,
+            referral: dto.referral,
             registrationDate: dto.registrationDate,
             checkInTime: dto.checkInTime,
             staff: dto.staff,
             dealer: dto.dealer,
             codeOfConductAccepted: dto.codeOfConductAccepted,
             secretCode: dto.secretCode,
+            attendeeType: resolvedAttendeeType,
+            currentBalance: dto.currentBalance,
             transactions: dto.transactions
         )
     }
 
     func toDTO() -> AttendeeDTO {
+        let resolvedAttendeeType: AttendeeType
+        switch (self.staff, self.dealer) {
+        case (true, true):
+            resolvedAttendeeType = .staffDealer
+        case (true, false):
+            resolvedAttendeeType = .staff
+        case (false, true):
+            resolvedAttendeeType = .dealer
+        case (false, false):
+            resolvedAttendeeType = self.attendeeType
+        }
         return AttendeeDTO(
             id: self.id,
             conventionId: self.conventionId,
@@ -181,12 +218,15 @@ extension Attendee {
             emailAddress: self.emailAddress,
             emergencyContact: self.emergencyContact,
             phoneNumber: self.phoneNumber,
+            referral: self.referral,
             registrationDate: self.registrationDate,
             checkInTime: self.checkInTime,
             staff: self.staff,
             dealer: self.dealer,
+            attendeeType: resolvedAttendeeType,
             codeOfConductAccepted: self.codeOfConductAccepted,
             secretCode: self.secretCode,
+            currentBalance: self.currentBalance,
             transactions: self.transactions
         )
     }
@@ -215,7 +255,7 @@ extension Attendee {
                     firstName: "SampleFirstName\(i)",
                     lastName: "SampleLastName\(i)",
                     badgeName: "BadgeName\(i)",
-                    membershipLevel: UUID(),
+                    membershipLevel: MembershipLevelIdentifier(),
                     birthday: Date().addingTimeInterval(-60 * 60 * 24 * 365 * (18 + number)),  // Mock age 18+
                     addressLine1: "123 Example St",
                     addressLine2: Optional<String>.none,
@@ -226,12 +266,15 @@ extension Attendee {
                     emailAddress: "example\(i)@mockmail.com",
                     emergencyContact: Optional<String>.none,
                     phoneNumber: Optional<String>.none,
+                    referral: Optional<String>.none,
                     registrationDate: Date().addingTimeInterval(-60 * 60 * 24 * (10 + number)),  // Mock registered 10+ days ago
                     checkInTime: Optional<Date>.none,
                     staff: i % 2 == 0,  // Alternate staff status
                     dealer: i % 3 == 0,  // Alternate dealer status
                     codeOfConductAccepted: true,
                     secretCode: Optional<String>.none,
+                    attendeeType: i % 3 == 0 ? .dealer : .staff,
+                    currentBalance: 0.0,
                     transactions: []
                 )
             )
@@ -254,7 +297,7 @@ extension Attendee {
             firstName: "Mock",
             lastName: "Attendee",
             badgeName: "Mocky McFunnyEars",
-            membershipLevel: UUID(),
+            membershipLevel: MembershipLevelIdentifier(),
             birthday: Date().addingTimeInterval(-60 * 60 * 24 * 365 * 25),  // 25 years ago
             addressLine1: "123 Mock St",
             addressLine2: "Apt 4B",
@@ -265,12 +308,15 @@ extension Attendee {
             emailAddress: "mock@example.com",
             emergencyContact: "Jane Doe",
             phoneNumber: "123-456-7890",
+            referral: "MockReferral",
             registrationDate: Date().addingTimeInterval(-60 * 60 * 24 * 7),  // Registered 7 days ago
             checkInTime: Date().addingTimeInterval(-60 * 60 * 2),  // Checked in 2 hours ago
             staff: false,
             dealer: true,
             codeOfConductAccepted: true,
             secretCode: "MockSecret",
+            attendeeType: .dealer,
+            currentBalance: 0.0,
             transactions: [Transaction.mock()]
         )
     }
@@ -300,12 +346,14 @@ extension Attendee: CustomStringConvertible {
             emailAddress: "\(emailAddress)",
             emergencyContact: "\(emergencyContact ?? "nil")",
             phoneNumber: "\(phoneNumber ?? "nil")",
+            referral: "\(referral ?? "nil")",
             registrationDate: \(registrationDate),
             checkInTime: \(checkInTime.map {"\($0)"} ?? "nil"),
             staff: \(staff),
             dealer: \(dealer),
             codeOfConductAccepted: \(codeOfConductAccepted),
             secretCode: "\(secretCode ?? "nil")",
+            currentBalance: \(currentBalance),
             transactions: \(transactions.count) total
         )
         """

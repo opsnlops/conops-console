@@ -25,14 +25,20 @@ final class Convention {
     var preRegEndDate: Date
     var registrationOpen: Bool
     var headerExtras: String?
+    var headerGraphic: String?
+    var styleSheet: String?
     var footerExtras: String?
-    var contactEmailAddress: String
+    var badgeClass: String?
+    var contactEmailAddress: String?
+    var replicationMode: String?
     var slackWebHook: String?
     var postmarkServerToken: String?
+    var messagingServiceEndpoint: String?
+    var messagingServiceApiKey: String?
     var twilioAccountSID: String?
     var twilioAuthToken: String?
     var twilioOutgoingNumber: String?
-    var compareTo: UUID?
+    var compareTo: ConventionIdentifier?
     var minBadgeNumber: UInt32
     var dealersDenPresent: Bool
     var dealersDenRegText: String?
@@ -65,14 +71,20 @@ final class Convention {
         preRegEndDate: Date,
         registrationOpen: Bool,
         headerExtras: String? = nil,
+        headerGraphic: String? = nil,
+        styleSheet: String? = nil,
         footerExtras: String? = nil,
-        contactEmailAddress: String,
+        badgeClass: String? = nil,
+        contactEmailAddress: String? = nil,
+        replicationMode: String? = nil,
         slackWebHook: String? = nil,
         postmarkServerToken: String? = nil,
+        messagingServiceEndpoint: String? = nil,
+        messagingServiceApiKey: String? = nil,
         twilioAccountSID: String? = nil,
         twilioAuthToken: String? = nil,
         twilioOutgoingNumber: String? = nil,
-        compareTo: UUID? = nil,
+        compareTo: ConventionIdentifier? = nil,
         minBadgeNumber: UInt32,
         dealersDenPresent: Bool,
         dealersDenRegText: String? = nil,
@@ -94,10 +106,16 @@ final class Convention {
         self.preRegEndDate = preRegEndDate
         self.registrationOpen = registrationOpen
         self.headerExtras = headerExtras
+        self.headerGraphic = headerGraphic
+        self.styleSheet = styleSheet
         self.footerExtras = footerExtras
+        self.badgeClass = badgeClass
         self.contactEmailAddress = contactEmailAddress
+        self.replicationMode = replicationMode
         self.slackWebHook = slackWebHook
         self.postmarkServerToken = postmarkServerToken
+        self.messagingServiceEndpoint = messagingServiceEndpoint
+        self.messagingServiceApiKey = messagingServiceApiKey
         self.twilioAccountSID = twilioAccountSID
         self.twilioAuthToken = twilioAuthToken
         self.twilioOutgoingNumber = twilioOutgoingNumber
@@ -131,10 +149,16 @@ extension Convention {
             preRegEndDate: dto.preRegEndDate,
             registrationOpen: dto.registrationOpen,
             headerExtras: dto.headerExtras,
+            headerGraphic: dto.headerGraphic,
+            styleSheet: dto.styleSheet,
             footerExtras: dto.footerExtras,
+            badgeClass: dto.badgeClass,
             contactEmailAddress: dto.contactEmailAddress,
+            replicationMode: dto.replicationMode,
             slackWebHook: dto.slackWebHook,
             postmarkServerToken: dto.postmarkServerToken,
+            messagingServiceEndpoint: dto.messagingServiceEndpoint,
+            messagingServiceApiKey: dto.messagingServiceApiKey,
             twilioAccountSID: dto.twilioAccountSID,
             twilioAuthToken: dto.twilioAuthToken,
             twilioOutgoingNumber: dto.twilioOutgoingNumber,
@@ -154,7 +178,7 @@ extension Convention {
 
     func toDTO() -> ConventionDTO {
         ConventionDTO(
-            id: UUID(uuidString: self.id.uuidString.lowercased())!,
+            id: self.id,
             lastModified: self.lastModified,
             active: self.active,
             longName: self.longName,
@@ -165,10 +189,16 @@ extension Convention {
             preRegEndDate: self.preRegEndDate,
             registrationOpen: self.registrationOpen,
             headerExtras: self.headerExtras,
+            headerGraphic: self.headerGraphic,
+            styleSheet: self.styleSheet,
             footerExtras: self.footerExtras,
+            badgeClass: self.badgeClass,
             contactEmailAddress: self.contactEmailAddress,
+            replicationMode: self.replicationMode,
             slackWebHook: self.slackWebHook,
             postmarkServerToken: self.postmarkServerToken,
+            messagingServiceEndpoint: self.messagingServiceEndpoint,
+            messagingServiceApiKey: self.messagingServiceApiKey,
             twilioAccountSID: self.twilioAccountSID,
             twilioAuthToken: self.twilioAuthToken,
             twilioOutgoingNumber: self.twilioOutgoingNumber,
@@ -183,6 +213,45 @@ extension Convention {
             shirtSizes: self.shirtSizes,
             mailTemplates: self.mailTemplates
         )
+    }
+}
+
+// MARK: - Update helper
+extension Convention {
+    func update(from updated: Convention) {
+        self.lastModified = updated.lastModified
+        self.active = updated.active
+        self.longName = updated.longName
+        self.shortName = updated.shortName
+        self.startDate = updated.startDate
+        self.endDate = updated.endDate
+        self.preRegStartDate = updated.preRegStartDate
+        self.preRegEndDate = updated.preRegEndDate
+        self.registrationOpen = updated.registrationOpen
+        self.headerExtras = updated.headerExtras
+        self.headerGraphic = updated.headerGraphic
+        self.styleSheet = updated.styleSheet
+        self.footerExtras = updated.footerExtras
+        self.badgeClass = updated.badgeClass
+        self.contactEmailAddress = updated.contactEmailAddress
+        self.replicationMode = updated.replicationMode
+        self.slackWebHook = updated.slackWebHook
+        self.postmarkServerToken = updated.postmarkServerToken
+        self.messagingServiceEndpoint = updated.messagingServiceEndpoint
+        self.messagingServiceApiKey = updated.messagingServiceApiKey
+        self.twilioAccountSID = updated.twilioAccountSID
+        self.twilioAuthToken = updated.twilioAuthToken
+        self.twilioOutgoingNumber = updated.twilioOutgoingNumber
+        self.compareTo = updated.compareTo
+        self.minBadgeNumber = updated.minBadgeNumber
+        self.dealersDenPresent = updated.dealersDenPresent
+        self.dealersDenRegText = updated.dealersDenRegText
+        self.paypalAPIUserName = updated.paypalAPIUserName
+        self.paypalAPIPassword = updated.paypalAPIPassword
+        self.paypalAPISignature = updated.paypalAPISignature
+        self.membershipLevels = updated.membershipLevels
+        self.shirtSizes = updated.shirtSizes
+        self.mailTemplates = updated.mailTemplates
     }
 }
 
@@ -203,7 +272,7 @@ extension Convention {
 
             container.mainContext.insert(
                 Convention(
-                    id: UUID(),
+                    id: ConventionIdentifier(),
                     lastModified: Date(),
                     active: true,
                     longName: "Sample Convention \(i)",
@@ -214,14 +283,20 @@ extension Convention {
                     preRegEndDate: Date().addingTimeInterval(60 * 60 * 24 * (30 * number)),
                     registrationOpen: true,
                     headerExtras: Optional<String>.none,
+                    headerGraphic: Optional<String>.none,
+                    styleSheet: Optional<String>.none,
                     footerExtras: Optional<String>.none,
+                    badgeClass: Optional<String>.none,
                     contactEmailAddress: "bunny\(i)@example.com",
+                    replicationMode: Optional<String>.none,
                     slackWebHook: Optional<String>.none,
                     postmarkServerToken: Optional<String>.none,
+                    messagingServiceEndpoint: Optional<String>.none,
+                    messagingServiceApiKey: Optional<String>.none,
                     twilioAccountSID: Optional<String>.none,
                     twilioAuthToken: Optional<String>.none,
                     twilioOutgoingNumber: Optional<String>.none,
-                    compareTo: Optional<UUID>.none,
+                    compareTo: Optional<ConventionIdentifier>.none,
                     minBadgeNumber: UInt32(i),
                     dealersDenPresent: false,
                     dealersDenRegText: Optional<String>.none,
@@ -253,10 +328,16 @@ extension Convention: Codable {
         case preRegEndDate
         case registrationOpen
         case headerExtras
+        case headerGraphic
+        case styleSheet
         case footerExtras
+        case badgeClass
         case contactEmailAddress
+        case replicationMode
         case slackWebHook
         case postmarkServerToken
+        case messagingServiceEndpoint
+        case messagingServiceApiKey
         case twilioAccountSID
         case twilioAuthToken
         case twilioOutgoingNumber
@@ -275,8 +356,7 @@ extension Convention: Codable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        // Convert the UUID to a lower-case string.
-        try container.encode(id.uuidString.lowercased(), forKey: .id)
+        try container.encode(id, forKey: .id)
         try container.encode(lastModified, forKey: .lastModified)
         try container.encode(active, forKey: .active)
         try container.encode(longName, forKey: .longName)
@@ -287,10 +367,16 @@ extension Convention: Codable {
         try container.encode(preRegEndDate, forKey: .preRegEndDate)
         try container.encode(registrationOpen, forKey: .registrationOpen)
         try container.encode(headerExtras, forKey: .headerExtras)
+        try container.encode(headerGraphic, forKey: .headerGraphic)
+        try container.encode(styleSheet, forKey: .styleSheet)
         try container.encode(footerExtras, forKey: .footerExtras)
+        try container.encode(badgeClass, forKey: .badgeClass)
         try container.encode(contactEmailAddress, forKey: .contactEmailAddress)
+        try container.encode(replicationMode, forKey: .replicationMode)
         try container.encode(slackWebHook, forKey: .slackWebHook)
         try container.encode(postmarkServerToken, forKey: .postmarkServerToken)
+        try container.encode(messagingServiceEndpoint, forKey: .messagingServiceEndpoint)
+        try container.encode(messagingServiceApiKey, forKey: .messagingServiceApiKey)
         try container.encode(twilioAccountSID, forKey: .twilioAccountSID)
         try container.encode(twilioAuthToken, forKey: .twilioAuthToken)
         try container.encode(twilioOutgoingNumber, forKey: .twilioOutgoingNumber)
@@ -308,14 +394,7 @@ extension Convention: Codable {
 
     public convenience init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        // Decode the lower-case id string and convert it to a UUID.
-        let idString = try container.decode(String.self, forKey: .id)
-        guard let uuid = UUID(uuidString: idString) else {
-            throw DecodingError.dataCorruptedError(
-                forKey: .id,
-                in: container,
-                debugDescription: "Invalid UUID string")
-        }
+        let id = try container.decode(ConventionIdentifier.self, forKey: .id)
         let lastModified = try container.decode(Date.self, forKey: .lastModified)
         let active = try container.decode(Bool.self, forKey: .active)
         let longName = try container.decode(String.self, forKey: .longName)
@@ -326,16 +405,24 @@ extension Convention: Codable {
         let preRegEndDate = try container.decode(Date.self, forKey: .preRegEndDate)
         let registrationOpen = try container.decode(Bool.self, forKey: .registrationOpen)
         let headerExtras = try container.decodeIfPresent(String.self, forKey: .headerExtras)
+        let headerGraphic = try container.decodeIfPresent(String.self, forKey: .headerGraphic)
+        let styleSheet = try container.decodeIfPresent(String.self, forKey: .styleSheet)
         let footerExtras = try container.decodeIfPresent(String.self, forKey: .footerExtras)
-        let contactEmailAddress = try container.decode(String.self, forKey: .contactEmailAddress)
+        let badgeClass = try container.decodeIfPresent(String.self, forKey: .badgeClass)
+        let contactEmailAddress = try container.decodeIfPresent(String.self, forKey: .contactEmailAddress)
+        let replicationMode = try container.decodeIfPresent(String.self, forKey: .replicationMode)
         let slackWebHook = try container.decodeIfPresent(String.self, forKey: .slackWebHook)
         let postmarkServerToken = try container.decodeIfPresent(
             String.self, forKey: .postmarkServerToken)
+        let messagingServiceEndpoint = try container.decodeIfPresent(
+            String.self, forKey: .messagingServiceEndpoint)
+        let messagingServiceApiKey = try container.decodeIfPresent(
+            String.self, forKey: .messagingServiceApiKey)
         let twilioAccountSID = try container.decodeIfPresent(String.self, forKey: .twilioAccountSID)
         let twilioAuthToken = try container.decodeIfPresent(String.self, forKey: .twilioAuthToken)
         let twilioOutgoingNumber = try container.decodeIfPresent(
             String.self, forKey: .twilioOutgoingNumber)
-        let compareTo = try container.decodeIfPresent(UUID.self, forKey: .compareTo)
+        let compareTo = try container.decodeIfPresent(ConventionIdentifier.self, forKey: .compareTo)
         let minBadgeNumber = try container.decode(UInt32.self, forKey: .minBadgeNumber)
         let dealersDenPresent = try container.decode(Bool.self, forKey: .dealersDenPresent)
         let dealersDenRegText = try container.decodeIfPresent(
@@ -352,7 +439,7 @@ extension Convention: Codable {
         let mailTemplates = try container.decode([String: String].self, forKey: .mailTemplates)
 
         self.init(
-            id: uuid,
+            id: id,
             lastModified: lastModified,
             active: active,
             longName: longName,
@@ -363,10 +450,16 @@ extension Convention: Codable {
             preRegEndDate: preRegEndDate,
             registrationOpen: registrationOpen,
             headerExtras: headerExtras,
+            headerGraphic: headerGraphic,
+            styleSheet: styleSheet,
             footerExtras: footerExtras,
+            badgeClass: badgeClass,
             contactEmailAddress: contactEmailAddress,
+            replicationMode: replicationMode,
             slackWebHook: slackWebHook,
             postmarkServerToken: postmarkServerToken,
+            messagingServiceEndpoint: messagingServiceEndpoint,
+            messagingServiceApiKey: messagingServiceApiKey,
             twilioAccountSID: twilioAccountSID,
             twilioAuthToken: twilioAuthToken,
             twilioOutgoingNumber: twilioOutgoingNumber,
@@ -390,7 +483,7 @@ extension Convention: Codable {
 extension Convention {
     static func mock() -> Convention {
         return Convention(
-            id: UUID(),
+            id: ConventionIdentifier(),
             lastModified: Date(),
             active: true,
             longName: "Mock Convention",
@@ -401,10 +494,16 @@ extension Convention {
             preRegEndDate: Date().addingTimeInterval(-60 * 60 * 24 * 10),  // 10 days ago
             registrationOpen: true,
             headerExtras: "Welcome to MockCon!",
+            headerGraphic: "mock-header.png",
+            styleSheet: "mock-style.css",
             footerExtras: "Thanks for joining us!",
+            badgeClass: "standard",
             contactEmailAddress: "contact@mockcon.com",
+            replicationMode: "primary",
             slackWebHook: nil,
             postmarkServerToken: nil,
+            messagingServiceEndpoint: nil,
+            messagingServiceApiKey: nil,
             twilioAccountSID: nil,
             twilioAuthToken: nil,
             twilioOutgoingNumber: nil,

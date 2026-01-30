@@ -40,7 +40,7 @@ struct AddConventionView: View {
                         Button("Save") {
                             // Create a new DTO with user-entered data
                             let newDTO = ConventionDTO(
-                                id: UUID(),
+                                id: ConventionIdentifier(),
                                 lastModified: Date(),
                                 active: active,
                                 longName: longName,
@@ -51,10 +51,16 @@ struct AddConventionView: View {
                                 preRegEndDate: preRegEndDate,
                                 registrationOpen: registrationOpen,
                                 headerExtras: nil,
+                                headerGraphic: nil,
+                                styleSheet: nil,
                                 footerExtras: nil,
+                                badgeClass: nil,
                                 contactEmailAddress: contactEmailAddress,
+                                replicationMode: nil,
                                 slackWebHook: nil,
                                 postmarkServerToken: nil,
+                                messagingServiceEndpoint: nil,
+                                messagingServiceApiKey: nil,
                                 twilioAccountSID: nil,
                                 twilioAuthToken: nil,
                                 twilioOutgoingNumber: nil,

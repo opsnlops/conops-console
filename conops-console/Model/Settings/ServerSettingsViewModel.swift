@@ -18,16 +18,21 @@ class ServerSettingsViewModel: ObservableObject {
     @Published var useTLS: Bool {
         didSet { UserDefaults.standard.useTLS = useTLS }
     }
+    @Published var includeInactiveConventions: Bool {
+        didSet { UserDefaults.standard.includeInactiveConventions = includeInactiveConventions }
+    }
 
     init() {
         self.hostname = UserDefaults.standard.serverHostname
         self.port = UserDefaults.standard.serverPort
         self.useTLS = UserDefaults.standard.useTLS
+        self.includeInactiveConventions = UserDefaults.standard.includeInactiveConventions
     }
 
     func resetToDefaults() {
         hostname = ServerConfiguration.defaultHostname
         port = ServerConfiguration.defaultPort
         useTLS = ServerConfiguration.defaultUseTLS
+        includeInactiveConventions = ServerConfiguration.defaultIncludeInactive
     }
 }

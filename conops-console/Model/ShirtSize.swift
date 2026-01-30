@@ -9,11 +9,13 @@
 import Foundation
 
 struct ShirtSize: Codable, Identifiable, Comparable, Hashable, Sendable {
-    let id: UUID
+    let id: Int
     let lastModified: Date
     let size: String
     let displayOrder: UInt32
     let initialInventory: UInt32
+    let numberRequested: UInt32
+    let numberAvailable: UInt32
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -21,6 +23,8 @@ struct ShirtSize: Codable, Identifiable, Comparable, Hashable, Sendable {
         case size
         case displayOrder = "display_order"
         case initialInventory = "initial_inventory"
+        case numberRequested = "number_requested"
+        case numberAvailable = "number_available"
     }
 
     static func < (lhs: ShirtSize, rhs: ShirtSize) -> Bool {
@@ -29,11 +33,13 @@ struct ShirtSize: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     static func mock() -> ShirtSize {
         ShirtSize(
-            id: UUID(),
+            id: 0,
             lastModified: Date(),
             size: "Medium",
             displayOrder: 1,
-            initialInventory: 100
+            initialInventory: 100,
+            numberRequested: 0,
+            numberAvailable: 100
         )
     }
 }

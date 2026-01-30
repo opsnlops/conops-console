@@ -11,6 +11,10 @@ import OSLog
 import SwiftData
 import SwiftUI
 
+#if os(iOS)
+    import UIKit
+#endif
+
 struct ConventionDetailView: View {
 
     @Environment(\.modelContext) var context
@@ -32,12 +36,18 @@ struct ConventionDetailView: View {
     )
 
     var body: some View {
-        VStack {
-            // Pass the current convention and searchText to the attendee table
-            AttendeeTable(convention: convention, searchText: searchText)
-        }
-        .navigationTitle(convention.longName)
-        .toolbar {
+        NavigationStack {
+            VStack {
+                #if os(iOS)
+                    if isPad == false {
+                        searchInlineField
+                    }
+                #endif
+                // Pass the current convention and searchText to the attendee table
+                AttendeeTable(convention: convention, searchText: searchText)
+            }
+            .navigationTitle(convention.longName)
+            .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingRegisterSheet = true
@@ -47,27 +57,46 @@ struct ConventionDetailView: View {
                 .symbolRenderingMode(.multicolor)
             }
 
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    isShowingSearchPopover.toggle()
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                }
-                .symbolRenderingMode(.hierarchical)
-                .symbolEffect(
-                    .wiggle.byLayer,
-                    options: .repeat(.periodic(delay: 2.0)),
-                    isActive: !searchText.isEmpty
-                )
-                .popover(isPresented: $isShowingSearchPopover) {
-                    VStack {
-                        TextField("Search Attendees", text: $searchText)
-                            .padding()
-                            .frame(width: 300)
+            #if os(iOS)
+                if isPad {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            isShowingSearchPopover.toggle()
+                        } label: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        .symbolRenderingMode(.hierarchical)
+                        .symbolEffect(
+                            .wiggle.byLayer,
+                            options: .repeat(.periodic(delay: 2.0)),
+                            isActive: !searchText.isEmpty
+                        )
+                        .foregroundStyle(!searchText.isEmpty ? Color.accentColor : Color.primary)
+                        .popover(isPresented: $isShowingSearchPopover) {
+                            searchPopoverContent
+                        }
+                        .textFieldStyle(.roundedBorder)
                     }
                 }
-                .textFieldStyle(.roundedBorder)
-            }
+            #else
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isShowingSearchPopover.toggle()
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .symbolRenderingMode(.hierarchical)
+                    .symbolEffect(
+                        .wiggle.byLayer,
+                        options: .repeat(.periodic(delay: 2.0)),
+                        isActive: !searchText.isEmpty
+                    )
+                    .popover(isPresented: $isShowingSearchPopover) {
+                        searchPopoverContent
+                    }
+                    .textFieldStyle(.roundedBorder)
+                }
+            #endif
 
             ToolbarItem {
                 NavigationLink(destination: ConventionEditView(convention: convention)) {
@@ -75,10 +104,11 @@ struct ConventionDetailView: View {
                         .symbolRenderingMode(.hierarchical)
                 }
             }
+            }
         }
         // MARK: - Sheet
         .sheet(isPresented: $showingRegisterSheet) {
-            RegisterNewAttendeeView { newAttendee in
+            RegisterNewAttendeeView(convention: convention) { newAttendee in
                 Task {
 
                     // Update this attendee with the active convention ID
@@ -144,14 +174,8 @@ struct ConventionDetailView: View {
             // Assign convention and update the local model.
             newAttendee.conventionId = convention.id
 
-            // Log the old and new ID (and modified)
-            let oldId = newAttendee.id
-            newAttendee.id = incomingAttendee.id
-            newAttendee.lastModified = incomingAttendee.lastModified
-
-            logger.debug(
-                "Generated fake id: \(oldId) -> now: \(newAttendee.id), lastModified: \(newAttendee.lastModified)"
-            )
+            let updatedAttendee = Attendee.fromDTO(incomingAttendee)
+            newAttendee.update(from: updatedAttendee)
 
             context.insert(newAttendee)
 
@@ -173,6 +197,41 @@ struct ConventionDetailView: View {
             activeAlert = .error
         }
     }
+
+    private var searchPopoverContent: some View {
+        VStack(spacing: 12) {
+            TextField("Search Attendees", text: $searchText)
+                .textFieldStyle(.roundedBorder)
+                .padding(.horizontal)
+        }
+        .padding(.vertical, 12)
+        .frame(width: isPad ? 300 : 260)
+    }
+
+    private var searchInlineField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search Attendees", text: $searchText)
+                .textFieldStyle(.plain)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(uiColor: .secondarySystemBackground))
+        )
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
+
+    #if os(iOS)
+        private var isPad: Bool {
+            UIDevice.current.userInterfaceIdiom == .pad
+        }
+    #else
+        private var isPad: Bool { true }
+    #endif
 }
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {

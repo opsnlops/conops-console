@@ -9,9 +9,11 @@
 import Foundation
 
 struct Transaction: Codable, Identifiable, Comparable, Hashable {
-    let id: UUID
+    let id: Int
     let amount: Float
     let transactionTime: Date
+    let typeCode: Int
+    let typeDescription: String
     let paymentReference: String?
     let paymentStatus: String?
     let paymentDetails: String?
@@ -22,6 +24,8 @@ struct Transaction: Codable, Identifiable, Comparable, Hashable {
         case id
         case amount
         case transactionTime = "transaction_time"
+        case typeCode = "type_code"
+        case typeDescription = "type_description"
         case paymentReference = "payment_reference"
         case paymentStatus = "payment_status"
         case paymentDetails = "payment_details"
@@ -35,9 +39,11 @@ struct Transaction: Codable, Identifiable, Comparable, Hashable {
 
     static func mock() -> Transaction {
         Transaction(
-            id: UUID(),
+            id: 0,
             amount: 123.45,
             transactionTime: Date(),
+            typeCode: 1,
+            typeDescription: "Mock Type",
             paymentReference: "MockPaymentRef",
             paymentStatus: "Completed",
             paymentDetails: "Mock payment details",

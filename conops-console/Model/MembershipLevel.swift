@@ -9,7 +9,7 @@
 import Foundation
 
 struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
-    var id: UUID
+    var id: MembershipLevelIdentifier
     var lastModified: Date
     var longName: String
     var shortName: String
@@ -19,7 +19,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
     var shirtIncluded: Bool
 
     init(
-        id: UUID = UUID(),
+        id: MembershipLevelIdentifier = MembershipLevelIdentifier(),
         lastModified: Date = Date(),
         longName: String = "Unknown Level",
         shortName: String = "???",
@@ -56,7 +56,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
 
     static func mock() -> MembershipLevel {
         MembershipLevel(
-            id: UUID(),
+            id: MembershipLevelIdentifier(),
             lastModified: Date(),
             longName: "Mock Membership",
             shortName: "Mock",
@@ -72,8 +72,7 @@ struct MembershipLevel: Codable, Identifiable, Comparable, Hashable, Sendable {
 extension MembershipLevel {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        // Encode the UUID as a lower-case string
-        try container.encode(id.uuidString.lowercased(), forKey: .id)
+        try container.encode(id, forKey: .id)
         try container.encode(lastModified, forKey: .lastModified)
         try container.encode(longName, forKey: .longName)
         try container.encode(shortName, forKey: .shortName)
@@ -85,16 +84,7 @@ extension MembershipLevel {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        // Decode the UUID from the lower-case string
-        let idString = try container.decode(String.self, forKey: .id)
-        guard let uuid = UUID(uuidString: idString) else {
-            throw DecodingError.dataCorruptedError(
-                forKey: .id,
-                in: container,
-                debugDescription: "Invalid UUID string"
-            )
-        }
-        id = uuid
+        id = try container.decode(MembershipLevelIdentifier.self, forKey: .id)
         lastModified = try container.decode(Date.self, forKey: .lastModified)
         longName = try container.decode(String.self, forKey: .longName)
         shortName = try container.decode(String.self, forKey: .shortName)

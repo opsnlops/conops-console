@@ -12,6 +12,8 @@ import SwiftUI
 @main
 struct ConopsConsoleApp: App {
 
+    @StateObject private var appState = AppState()
+
 
     init() {
         initializeDefaults()
@@ -22,6 +24,9 @@ struct ConopsConsoleApp: App {
             ServerConfiguration.hostnameKey: ServerConfiguration.defaultHostname,
             ServerConfiguration.portKey: ServerConfiguration.defaultPort,
             ServerConfiguration.useTLSKey: ServerConfiguration.defaultUseTLS,
+            ServerConfiguration.includeInactiveKey: ServerConfiguration.defaultIncludeInactive,
+            ServerConfiguration.lastAuthConventionKey: ServerConfiguration.defaultLastAuthConvention,
+            ServerConfiguration.lastAuthUsernameKey: ServerConfiguration.defaultLastAuthUsername,
         ])
     }
 
@@ -29,8 +34,14 @@ struct ConopsConsoleApp: App {
     var body: some Scene {
         WindowGroup {
             TopContentView()
+                .environmentObject(appState)
         }
-        .modelContainer(for: [Attendee.self, Convention.self])
+        .modelContainer(for: [Attendee.self, Convention.self, SyncState.self])
+        #if os(macOS) || os(iOS)
+            .commands {
+                ConventionCommands(appState: appState)
+            }
+        #endif
 
         #if os(macOS)
             Settings {
