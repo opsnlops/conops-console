@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 1/22/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -120,15 +120,18 @@ extension TopContentView {
                 .filter { includeInactive || $0.active }
             let preferredShortName = UserDefaults.standard.lastAuthConvention.trimmingCharacters(
                 in: .whitespacesAndNewlines)
-            let primaryConvention = storedConventions.first(where: {
-                !$0.shortName.isEmpty
-                    && $0.shortName.caseInsensitiveCompare(preferredShortName) == .orderedSame
-            }) ?? storedConventions.first
+            let primaryConvention =
+                storedConventions.first(where: {
+                    !$0.shortName.isEmpty
+                        && $0.shortName.caseInsensitiveCompare(preferredShortName) == .orderedSame
+                }) ?? storedConventions.first
 
             if let primaryConvention {
                 conventionsToSync = [primaryConvention.toDTO()]
                 if let compareToId = primaryConvention.compareTo,
-                    let compareToConvention = storedConventions.first(where: { $0.id == compareToId })
+                    let compareToConvention = storedConventions.first(where: {
+                        $0.id == compareToId
+                    })
                 {
                     conventionsToSync.append(compareToConvention.toDTO())
                 }

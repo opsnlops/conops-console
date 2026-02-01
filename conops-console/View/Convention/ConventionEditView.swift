@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 2/10/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -74,6 +74,7 @@ struct ConventionEditView: View {
                     logger.debug("Saving convention")
                     saveConvention()
                 }
+                .buttonStyle(.borderedProminent)
             }
         }
         .alert(item: $activeAlert) { alert in
@@ -161,10 +162,10 @@ struct ConventionEditView: View {
                     )
                 )
                 .autocorrectionDisabled(true)
-#if os(iOS)
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-#endif
+                #if os(iOS)
+                    .keyboardType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                #endif
                 TextField("Min Badge Number", value: $convention.minBadgeNumber, format: .number)
             }
         }

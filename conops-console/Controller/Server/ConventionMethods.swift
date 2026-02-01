@@ -3,7 +3,7 @@
 //  conops-console
 //
 //  Created by April White on 1/4/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -16,7 +16,8 @@ extension ConopsServerClient {
     ) async -> Result<[ConventionDTO], ServerError> {
         var queryItems: [URLQueryItem] = []
         if let since {
-            queryItems.append(URLQueryItem(name: "since", value: ISO8601DateFormatter().string(from: since)))
+            queryItems.append(
+                URLQueryItem(name: "since", value: ISO8601DateFormatter().string(from: since)))
         }
         if includeInactive {
             queryItems.append(URLQueryItem(name: "include_inactive", value: "true"))

@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 1/21/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -20,9 +20,9 @@ private struct DateOnly: Codable {
         let dateString = try container.decode(String.self)
         let parts = dateString.split(separator: "-")
         guard parts.count == 3,
-              let year = Int(parts[0]),
-              let month = Int(parts[1]),
-              let day = Int(parts[2])
+            let year = Int(parts[0]),
+            let month = Int(parts[1]),
+            let day = Int(parts[2])
         else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date")
         }
@@ -49,13 +49,15 @@ private struct DateOnly: Codable {
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents(in: TimeZone.current, from: value)
         guard let year = components.year,
-              let month = components.month,
-              let day = components.day
+            let month = components.month,
+            let day = components.day
         else {
-            throw EncodingError.invalidValue(value, EncodingError.Context(
-                codingPath: container.codingPath,
-                debugDescription: "Invalid date"
-            ))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: container.codingPath,
+                    debugDescription: "Invalid date"
+                ))
         }
         let dateString = String(format: "%04d-%02d-%02d", year, month, day)
         try container.encode(dateString)
@@ -90,6 +92,7 @@ struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let attendeeType: AttendeeType
     let codeOfConductAccepted: Bool
     let secretCode: String?
+    let minor: Bool
     let currentBalance: Float
     let transactions: [Transaction]
 
@@ -121,6 +124,7 @@ struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
         case attendeeType = "attendee_type"
         case codeOfConductAccepted = "code_of_conduct_accepted"
         case secretCode = "secret_code"
+        case minor = "minor"
         case currentBalance = "current_balance"
         case transactions
     }
@@ -158,6 +162,7 @@ struct AttendeeDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
             attendeeType: .staff,
             codeOfConductAccepted: true,
             secretCode: "MockSecret",
+            minor: false,
             currentBalance: 0.0,
             transactions: [Transaction.mock()]
         )
@@ -196,6 +201,7 @@ extension AttendeeDTO {
         try container.encode(attendeeType, forKey: .attendeeType)
         try container.encode(codeOfConductAccepted, forKey: .codeOfConductAccepted)
         try container.encode(secretCode, forKey: .secretCode)
+        try container.encode(minor, forKey: .minor)
         try container.encode(currentBalance, forKey: .currentBalance)
         try container.encode(transactions, forKey: .transactions)
     }
@@ -211,7 +217,8 @@ extension AttendeeDTO {
         self.firstName = try container.decode(String.self, forKey: .firstName)
         self.lastName = try container.decode(String.self, forKey: .lastName)
         self.badgeName = try container.decode(String.self, forKey: .badgeName)
-        self.membershipLevel = try container.decode(MembershipLevelIdentifier.self, forKey: .membershipLevel)
+        self.membershipLevel = try container.decode(
+            MembershipLevelIdentifier.self, forKey: .membershipLevel)
         self.birthday = try container.decode(DateOnly.self, forKey: .birthday).value
         self.addressLine1 = try container.decode(String.self, forKey: .addressLine1)
         self.addressLine2 = try container.decodeIfPresent(String.self, forKey: .addressLine2)
@@ -228,10 +235,13 @@ extension AttendeeDTO {
         self.checkInTime = try container.decodeIfPresent(Date.self, forKey: .checkInTime)
         self.staff = try container.decode(Bool.self, forKey: .staff)
         self.dealer = try container.decode(Bool.self, forKey: .dealer)
-        self.attendeeType = try container.decodeIfPresent(AttendeeType.self, forKey: .attendeeType) ?? .staff
+        self.attendeeType =
+            try container.decodeIfPresent(AttendeeType.self, forKey: .attendeeType) ?? .staff
         self.codeOfConductAccepted = try container.decode(Bool.self, forKey: .codeOfConductAccepted)
         self.secretCode = try container.decodeIfPresent(String.self, forKey: .secretCode)
-        self.currentBalance = try container.decodeIfPresent(Float.self, forKey: .currentBalance) ?? 0.0
+        self.minor = try container.decodeIfPresent(Bool.self, forKey: .minor) ?? false
+        self.currentBalance =
+            try container.decodeIfPresent(Float.self, forKey: .currentBalance) ?? 0.0
         self.transactions = try container.decode([Transaction].self, forKey: .transactions)
     }
 }

@@ -3,7 +3,7 @@
 //  conops-console
 //
 //  Created by April White on 1/4/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -409,7 +409,8 @@ extension Convention: Codable {
         let styleSheet = try container.decodeIfPresent(String.self, forKey: .styleSheet)
         let footerExtras = try container.decodeIfPresent(String.self, forKey: .footerExtras)
         let badgeClass = try container.decodeIfPresent(String.self, forKey: .badgeClass)
-        let contactEmailAddress = try container.decodeIfPresent(String.self, forKey: .contactEmailAddress)
+        let contactEmailAddress = try container.decodeIfPresent(
+            String.self, forKey: .contactEmailAddress)
         let replicationMode = try container.decodeIfPresent(String.self, forKey: .replicationMode)
         let slackWebHook = try container.decodeIfPresent(String.self, forKey: .slackWebHook)
         let postmarkServerToken = try container.decodeIfPresent(

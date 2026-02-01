@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 1/24/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -11,10 +11,16 @@ import OSLog
 import SwiftData
 import SwiftUI
 
+#if os(iOS)
+    import UIKit
+#endif
+
 struct EditAttendeeView: View {
 
     @Environment(\.modelContext) var context
     @Environment(\.dismiss) var dismiss
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.verticalSizeClass) var verticalSizeClass
 
     // MARK: - Props
     @State var attendee: Attendee
@@ -37,6 +43,13 @@ struct EditAttendeeView: View {
     @State private var showActionAlert = false
     @State private var actionMessage = ""
 
+    private var isPad: Bool {
+        #if os(iOS)
+            return UIDevice.current.userInterfaceIdiom == .pad
+        #else
+            return false
+        #endif
+    }
 
     let logger = Logger(
         subsystem: "furry.enterprises.CreatureConsole", category: "EditAttendeeView")
@@ -137,21 +150,222 @@ struct EditAttendeeView: View {
                 .padding()
             }
         #else
-            AttendeeForm(
-                attendee: $attendee,
-                membershipLevels: convention.membershipLevels,
-                showTransactions: true,
-                transactions: attendee.transactions,
-                pendingTransactions: pendingTransactions,
-                currentBalance: attendee.currentBalance,
-                onAddTransaction: {
-                    showTransactionSheet = true
+            if isPad {
+                twoColumnContent
+            } else {
+                AttendeeForm(
+                    attendee: $attendee,
+                    membershipLevels: convention.membershipLevels,
+                    showTransactions: true,
+                    transactions: attendee.transactions,
+                    pendingTransactions: pendingTransactions,
+                    currentBalance: attendee.currentBalance,
+                    onAddTransaction: {
+                        showTransactionSheet = true
+                    }
+                ) {
+                    showSaveSheet = true
                 }
-            ) {
-                showSaveSheet = true
             }
         #endif
     }
+
+    #if os(iOS)
+        @ViewBuilder
+        private var twoColumnContent: some View {
+            HStack(alignment: .top, spacing: 0) {
+                // Left column
+                Form {
+                    Section(header: Text("Basic Info")) {
+                        TextField("Badge Name", text: $attendee.badgeName)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                        TextField(
+                            "Badge Number",
+                            value: $attendee.badgeNumber,
+                            formatter: NumberFormatter()
+                        )
+                        .keyboardType(.numberPad)
+                        TextField("First Name", text: $attendee.firstName)
+                        TextField("Last Name", text: $attendee.lastName)
+                        DatePicker(
+                            "Birthday", selection: $attendee.birthday, displayedComponents: .date)
+                    }
+
+                    Section("Registration") {
+                        if convention.membershipLevels.isEmpty {
+                            Text("No membership levels available")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Picker("Membership Level", selection: $attendee.membershipLevel) {
+                                ForEach(convention.membershipLevels, id: \.id) { level in
+                                    Text(level.longName)
+                                        .tag(level.id)
+                                }
+                            }
+                        }
+                    }
+
+                    Section("Communications") {
+                        TextField("Email", text: $attendee.emailAddress)
+                            .autocorrectionDisabled(true)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+
+                        TextField(
+                            "Emergency Contact",
+                            text: Binding(
+                                get: { attendee.emergencyContact ?? "" },
+                                set: { attendee.emergencyContact = $0.isEmpty ? nil : $0 }
+                            ))
+                    }
+
+                    Section("Meta") {
+                        Toggle("Active", isOn: $attendee.active)
+                        Toggle("Staff", isOn: $attendee.staff)
+                        Toggle("Dealer", isOn: $attendee.dealer)
+                    }
+                }
+                .formStyle(.grouped)
+
+                // Right column
+                Form {
+                    Section("Address") {
+                        TextField("Street Address", text: $attendee.addressLine1)
+                        TextField(
+                            "More Street Address",
+                            text: Binding(
+                                get: { attendee.addressLine2 ?? "" },
+                                set: { attendee.addressLine2 = $0.isEmpty ? nil : $0 }
+                            ))
+                        TextField("City", text: $attendee.city)
+                        Picker("State", selection: $attendee.state) {
+                            ForEach(AmericanState.allCases, id: \.rawValue) { state in
+                                Text(state.displayName)
+                                    .tag(state.rawValue)
+                            }
+                        }
+                        TextField("ZIP", text: $attendee.postalCode)
+                            .keyboardType(.numbersAndPunctuation)
+                    }
+
+                    Section(header: transactionsHeader, footer: Text(transactionsFooterText)) {
+                        if pendingTransactions.isEmpty == false {
+                            ForEach(pendingTransactions) { pending in
+                                pendingTransactionRow(pending)
+                            }
+                        }
+                        if attendee.transactions.isEmpty {
+                            Text("No transactions yet")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(sortedTransactions) { transaction in
+                                transactionRow(transaction)
+                            }
+                        }
+                    }
+                }
+                .formStyle(.grouped)
+            }
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        showSaveSheet = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+        }
+
+        private var sortedTransactions: [Transaction] {
+            attendee.transactions.sorted(by: >)
+        }
+
+        private var transactionsFooterText: String {
+            let formatted = NumberFormatter.localizedString(
+                from: NSNumber(value: attendee.currentBalance),
+                number: .currency)
+            if pendingTransactions.isEmpty {
+                return "Total Balance: \(formatted)"
+            }
+
+            let pendingTotal = pendingTransactions.reduce(0) { $0 + $1.amount }
+            let pendingFormatted = NumberFormatter.localizedString(
+                from: NSNumber(value: pendingTotal),
+                number: .currency)
+            return "Total Balance: \(formatted) • Pending: \(pendingFormatted)"
+        }
+
+        private var transactionsHeader: some View {
+            HStack {
+                Text("Transactions")
+                Spacer()
+                Button("Add") {
+                    showTransactionSheet = true
+                }
+            }
+        }
+
+        private func transactionRow(_ transaction: Transaction) -> some View {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(transaction.typeDescription)
+                        .font(.headline)
+                    Spacer()
+                    Text(transaction.amount, format: .currency(code: currencyCode))
+                        .font(.headline)
+                }
+                Text(transaction.transactionTime.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if let userName = transaction.userName, userName.isEmpty == false {
+                    Text("User: \(userName)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if let notes = transaction.notes, notes.isEmpty == false {
+                    Text(notes)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+
+        private func pendingTransactionRow(_ transaction: PendingTransaction) -> some View {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(transaction.type.description)
+                        .font(.headline)
+                    Spacer()
+                    Text(transaction.amount, format: .currency(code: currencyCode))
+                        .font(.headline)
+                }
+                HStack(spacing: 8) {
+                    Text("Pending")
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.orange.opacity(0.18))
+                        .clipShape(Capsule())
+                    Text("Will be saved with attendee updates")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if transaction.notes.isEmpty == false {
+                    Text(transaction.notes)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+            .listRowBackground(Color.orange.opacity(0.08))
+        }
+
+        private var currencyCode: String {
+            Locale.current.currency?.identifier ?? "USD"
+        }
+    #endif
 
 
     func saveAttendee(reason: String, notifyAttendee: Bool) {
@@ -252,13 +466,13 @@ struct EditAttendeeView: View {
                         showSaveSheet = false
                         saveAttendee(reason: trimmedReason, notifyAttendee: notifyAttendee)
                     }
+                    .buttonStyle(.borderedProminent)
                     .disabled(saveReason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }
-        .presentationBackground(.thinMaterial)
         #if os(iOS)
-            .presentationDetents([.medium])
+            .presentationDetents([.large])
         #endif
     }
 
@@ -268,8 +482,14 @@ struct EditAttendeeView: View {
                 Section(header: Text("Transaction")) {
                     TextField("Amount", text: $transactionAmount)
                         #if os(iOS)
-                            .keyboardType(.decimalPad)
+                            .keyboardType(.numbersAndPunctuation)
                         #endif
+                        .onChange(of: transactionAmount) { _, newValue in
+                            let filtered = newValue.filter { "0123456789.-".contains($0) }
+                            if filtered != newValue {
+                                transactionAmount = filtered
+                            }
+                        }
 
                     Picker("Type", selection: $transactionType) {
                         ForEach(TransactionTypeOption.allCases) { option in
@@ -313,14 +533,17 @@ struct EditAttendeeView: View {
                         transactionReason = ""
                         transactionType = .other
                     }
-                    .disabled(parsedTransactionAmount() == nil || transactionReason.trimmingCharacters(
-                        in: .whitespacesAndNewlines).isEmpty)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(
+                        parsedTransactionAmount() == nil
+                            || transactionReason.trimmingCharacters(
+                                in: .whitespacesAndNewlines
+                            ).isEmpty)
                 }
             }
         }
-        .presentationBackground(.thinMaterial)
         #if os(iOS)
-            .presentationDetents([.medium])
+            .presentationDetents([.large])
         #endif
     }
 
@@ -348,11 +571,11 @@ struct EditAttendeeView: View {
                         showPrintSheet = false
                         printBadge(printerName: selectedPrinter)
                     }
+                    .buttonStyle(.borderedProminent)
                     .disabled(selectedPrinter.isEmpty)
                 }
             }
         }
-        .presentationBackground(.thinMaterial)
         #if os(iOS)
             .presentationDetents([.medium])
         #endif

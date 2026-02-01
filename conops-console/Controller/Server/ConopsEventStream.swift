@@ -3,7 +3,8 @@ import OSLog
 
 @MainActor
 final class ConopsEventStream {
-    private let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "EventStream")
+    private let logger = Logger(
+        subsystem: "furry.enterprises.CreatureConsole", category: "EventStream")
     private var task: Task<Void, Never>?
     private let reconnectDelay: UInt64 = 3_000_000_000
     private var currentEventName: String?
@@ -36,14 +37,17 @@ final class ConopsEventStream {
                         break
                     }
 
-                    let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type") ?? "<missing>"
+                    let contentType =
+                        httpResponse.value(forHTTPHeaderField: "Content-Type") ?? "<missing>"
                     self.logger.info(
-                        "SSE response status \(httpResponse.statusCode), content-type \(contentType, privacy: .public)")
+                        "SSE response status \(httpResponse.statusCode), content-type \(contentType, privacy: .public)"
+                    )
 
                     guard (200...299).contains(httpResponse.statusCode) else {
                         let errorBody = await self.readErrorBody(from: bytes)
                         self.logger.error(
-                            "SSE connection failed (status \(httpResponse.statusCode)): \(errorBody, privacy: .public)")
+                            "SSE connection failed (status \(httpResponse.statusCode)): \(errorBody, privacy: .public)"
+                        )
                         await self.sleepBeforeReconnect()
                         continue
                     }
@@ -59,7 +63,8 @@ final class ConopsEventStream {
                     self.logger.info("SSE stream ended")
                 } catch {
                     guard !Task.isCancelled else { return }
-                    self.logger.error("SSE disconnected: \(error.localizedDescription, privacy: .public)")
+                    self.logger.error(
+                        "SSE disconnected: \(error.localizedDescription, privacy: .public)")
                     await self.sleepBeforeReconnect()
                 }
             }
@@ -81,11 +86,13 @@ final class ConopsEventStream {
             return
         }
         if line.hasPrefix("event:") {
-            currentEventName = line.replacingOccurrences(of: "event:", with: "").trimmingCharacters(in: .whitespaces)
+            currentEventName = line.replacingOccurrences(of: "event:", with: "").trimmingCharacters(
+                in: .whitespaces)
             return
         }
         guard line.hasPrefix("data:") else { return }
-        let payload = line.replacingOccurrences(of: "data:", with: "").trimmingCharacters(in: .whitespaces)
+        let payload = line.replacingOccurrences(of: "data:", with: "").trimmingCharacters(
+            in: .whitespaces)
         if currentEventName == "ping" {
             logger.info("SSE ping received")
             return

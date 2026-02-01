@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 2/2/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -18,7 +18,8 @@ extension ConopsServerClient {
 
         var queryItems: [URLQueryItem] = []
         if let since {
-            queryItems.append(URLQueryItem(name: "since", value: ISO8601DateFormatter().string(from: since)))
+            queryItems.append(
+                URLQueryItem(name: "since", value: ISO8601DateFormatter().string(from: since)))
         }
 
         return await fetchData(

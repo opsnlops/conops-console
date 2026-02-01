@@ -3,7 +3,7 @@
 //  conops-console
 //
 //  Created by April White on 1/4/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -38,6 +38,7 @@ final class Attendee: Identifiable {
     var codeOfConductAccepted: Bool
     var secretCode: String?
     var attendeeType: AttendeeType
+    var minor: Bool
     var currentBalance: Float
     var transactions: [Transaction]
 
@@ -69,6 +70,7 @@ final class Attendee: Identifiable {
         codeOfConductAccepted: Bool,
         secretCode: String?,
         attendeeType: AttendeeType,
+        minor: Bool,
         currentBalance: Float,
         transactions: [Transaction]
     ) {
@@ -99,9 +101,28 @@ final class Attendee: Identifiable {
         self.codeOfConductAccepted = codeOfConductAccepted
         self.secretCode = secretCode
         self.attendeeType = attendeeType
+        self.minor = minor
         self.currentBalance = currentBalance
         self.transactions = transactions
     }
+}
+
+// MARK: - Computed Properties for Sorting
+extension Attendee {
+    /// Int representation for table sorting (1 = minor, 0 = not minor)
+    var minorSortKey: Int { minor ? 1 : 0 }
+
+    /// Int representation for table sorting (1 = staff, 0 = not staff)
+    var staffSortKey: Int { staff ? 1 : 0 }
+
+    /// Int representation for table sorting (1 = dealer, 0 = not dealer)
+    var dealerSortKey: Int { dealer ? 1 : 0 }
+
+    /// Non-optional string for table sorting
+    var shirtSizeSortKey: String { shirtSize ?? "" }
+
+    /// Combined first and last name for display
+    var idName: String { "\(firstName) \(lastName)" }
 }
 
 // Allow for this attendee to be updated by another one
@@ -133,6 +154,7 @@ extension Attendee {
         self.codeOfConductAccepted = updatedAttendee.codeOfConductAccepted
         self.secretCode = updatedAttendee.secretCode
         self.attendeeType = updatedAttendee.attendeeType
+        self.minor = updatedAttendee.minor
         self.currentBalance = updatedAttendee.currentBalance
         self.transactions = updatedAttendee.transactions
     }
@@ -181,6 +203,7 @@ extension Attendee {
             codeOfConductAccepted: dto.codeOfConductAccepted,
             secretCode: dto.secretCode,
             attendeeType: resolvedAttendeeType,
+            minor: dto.minor,
             currentBalance: dto.currentBalance,
             transactions: dto.transactions
         )
@@ -226,6 +249,7 @@ extension Attendee {
             attendeeType: resolvedAttendeeType,
             codeOfConductAccepted: self.codeOfConductAccepted,
             secretCode: self.secretCode,
+            minor: self.minor,
             currentBalance: self.currentBalance,
             transactions: self.transactions
         )
@@ -274,6 +298,7 @@ extension Attendee {
                     codeOfConductAccepted: true,
                     secretCode: Optional<String>.none,
                     attendeeType: i % 3 == 0 ? .dealer : .staff,
+                    minor: i % 5 == 0,
                     currentBalance: 0.0,
                     transactions: []
                 )
@@ -316,6 +341,7 @@ extension Attendee {
             codeOfConductAccepted: true,
             secretCode: "MockSecret",
             attendeeType: .dealer,
+            minor: false,
             currentBalance: 0.0,
             transactions: [Transaction.mock()]
         )

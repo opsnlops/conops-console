@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 1/22/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 // Source: https://gist.github.com/iamjason/8f8f4bc00c13de86bcad?permalink_comment_id=2898664

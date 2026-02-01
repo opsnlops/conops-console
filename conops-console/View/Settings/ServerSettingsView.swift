@@ -3,7 +3,7 @@
 //  conops-console
 //
 //  Created by April White on 1/4/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import OSLog
@@ -20,7 +20,8 @@ struct ServerSettingsView: View {
     @State private var showResetSuccessAlert = false
     @State private var resetSuccessMessage = ""
 
-    private let logger = Logger(subsystem: "furry.enterprises.ConopsConsole", category: "ServerSettings")
+    private let logger = Logger(
+        subsystem: "furry.enterprises.ConopsConsole", category: "ServerSettings")
 
     var body: some View {
         Form {

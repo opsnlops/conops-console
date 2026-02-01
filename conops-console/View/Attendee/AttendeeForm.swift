@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 1/24/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -34,7 +34,7 @@ struct AttendeeForm: View {
                     formatter: NumberFormatter()
                 )
                 #if os(iOS)
-                .keyboardType(.numberPad)
+                    .keyboardType(.numberPad)
                 #endif
                 TextField("First Name", text: $attendee.firstName)
                 TextField("Last Name", text: $attendee.lastName)
@@ -123,6 +123,7 @@ struct AttendeeForm: View {
                 Button("Save") {
                     onSave?()
                 }
+                .buttonStyle(.borderedProminent)
             }
         }
         #if os(macOS)

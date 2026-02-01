@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 1/21/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -36,13 +36,17 @@ struct AttendeeTable: View {
 
     #if os(macOS)
         @State private var sortDescriptor = AttendeeSortDescriptor(key: .badgeName, ascending: true)
+    #else
+        @State private var sortOrder: [KeyPathComparator<Attendee>] = [
+            KeyPathComparator(\.badgeName, order: .forward)
+        ]
     #endif
 
     let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "AttendeeTable")
 
     // MARK: - In-Memory Filtering
     /// Filters the fetched attendees to only those that belong to the given convention.
-    /// Also applies search filtering against firstName, lastName, or badgeName.
+    /// Also applies search filtering against firstName, lastName, badgeName, or badgeNumber.
     private var filteredAttendees: [Attendee] {
         let filtered = attendees.filter { attendee in
             // Only include attendees that have a matching convention.
@@ -56,14 +60,14 @@ struct AttendeeTable: View {
             return attendee.firstName.localizedCaseInsensitiveContains(searchText)
                 || attendee.lastName.localizedCaseInsensitiveContains(searchText)
                 || attendee.badgeName.localizedCaseInsensitiveContains(searchText)
+                || String(attendee.badgeNumber).contains(searchText)
+                || (attendee.shirtSize?.localizedCaseInsensitiveContains(searchText) ?? false)
         }
 
         #if os(macOS)
             return filtered.sorted { sortDescriptor.compare($0, $1) }
         #else
-            return filtered.sorted { lhs, rhs in
-                lhs.badgeName.localizedCaseInsensitiveCompare(rhs.badgeName) == .orderedAscending
-            }
+            return filtered.sorted(using: sortOrder)
         #endif
     }
 
@@ -71,6 +75,7 @@ struct AttendeeTable: View {
         #if os(macOS)
             AttendeeTableMac(
                 attendees: filteredAttendees,
+                convention: convention,
                 onDoubleClick: { attendee in
                     selectedAttendee = attendee
                     isEditing = true
@@ -95,56 +100,35 @@ struct AttendeeTable: View {
             }
         #else
             if isPad {
-                Table(of: Attendee.self, selection: $selectedAttendeeIds) {
-                    TableColumn("Name", value: \.badgeName)
-                        .width(min: 120, ideal: 150)
-                    TableColumn("#") { attendee in
-                        Text(attendee.badgeNumber, format: .number)
-                    }
-                    .width(60)
-                    TableColumn("First Name", value: \.firstName)
-                        .width(min: 120, ideal: 250)
-                    TableColumn("Last Name", value: \.lastName)
-                } rows: {
-                    ForEach(filteredAttendees, id: \.id) { attendee in
-                        TableRow(attendee)
-                            .contextMenu {
-                                Button {
-                                    selectedAttendee = attendee
-                                    isEditing = true  // Trigger navigation to edit view
-                                } label: {
-                                    Label("Edit", systemImage: "pencil")
-                                }
-
-                                Button {
-                                    // Ban action logic can go here 🐰🔨
-                                } label: {
-                                    Label("Ban", systemImage: "hammer")
-                                }
-                            }
-                    }
-                }
-                .navigationDestination(isPresented: $isEditing) {
-                    if let detailAttendee = selectedAttendee {
-                        EditAttendeeView(attendee: detailAttendee, convention: convention)
-                    }
-                }
-                .onChange(of: selectedAttendeeIds) { _, newValue in
-                    guard let attendeeId = newValue.first else { return }
-                    if let attendee = filteredAttendees.first(where: { $0.id == attendeeId }) {
-                        selectedAttendee = attendee
-                        isEditing = true
-                        selectedAttendeeIds = []
-                    }
-                }
+                AttendeeTableiPad(
+                    attendees: filteredAttendees,
+                    convention: convention,
+                    selectedAttendee: $selectedAttendee,
+                    isEditing: $isEditing,
+                    sortOrder: $sortOrder
+                )
             } else {
                 List(filteredAttendees, id: \.id) { attendee in
                     NavigationLink {
                         EditAttendeeView(attendee: attendee, convention: convention)
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(attendee.badgeName)
-                                .font(.headline)
+                            HStack {
+                                Text(attendee.badgeName)
+                                    .font(.headline)
+                                Text("#\(attendee.badgeNumber)")
+                                    .font(.headline)
+                                    .foregroundStyle(.secondary)
+                                if attendee.minor {
+                                    MinorBadge()
+                                }
+                                if attendee.staff {
+                                    StaffBadge()
+                                }
+                                if attendee.dealer {
+                                    DealerBadge()
+                                }
+                            }
                             Text("\(attendee.firstName) \(attendee.lastName)")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)

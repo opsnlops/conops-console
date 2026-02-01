@@ -56,7 +56,7 @@ struct KeychainStore {
         ]
 
         let attributes: [String: Any] = [
-            kSecValueData as String: data,
+            kSecValueData as String: data
         ]
 
         let status = SecItemCopyMatching(query as CFDictionary, nil)

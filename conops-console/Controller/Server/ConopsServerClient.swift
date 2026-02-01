@@ -3,7 +3,7 @@
 //  conops-console
 //
 //  Created by April White on 1/4/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import Foundation
@@ -38,7 +38,9 @@ final class ConopsServerClient: ConopsServerProtocol {
     }
 
     func makeURL(for endpoint: String, queryItems: [URLQueryItem] = []) -> URL {
-        var components = URLComponents(url: makeBaseURL(for: .http).appendingPathComponent(endpoint), resolvingAgainstBaseURL: false)
+        var components = URLComponents(
+            url: makeBaseURL(for: .http).appendingPathComponent(endpoint),
+            resolvingAgainstBaseURL: false)
         if !queryItems.isEmpty {
             components?.queryItems = queryItems
         }
@@ -177,10 +179,12 @@ final class ConopsServerClient: ConopsServerProtocol {
                         let validationErrors = validationStatus.data,
                         validationErrors.isEmpty == false
                     {
-                        let details = validationErrors
+                        let details =
+                            validationErrors
                             .map { "\($0.field): \($0.message)" }
                             .joined(separator: "\n")
-                        let message = (validationStatus.message ?? errorMessage)
+                        let message =
+                            (validationStatus.message ?? errorMessage)
                             + "\n" + details
                         return .failure(.serverError(message))
                     }
@@ -212,7 +216,8 @@ final class ConopsServerClient: ConopsServerProtocol {
             return .failure(.serverError(errorMessage))
         } catch {
             // Catch-all for unexpected errors
-            logger.error("Unexpected decoding error: \(error.localizedDescription, privacy: .public)")
+            logger.error(
+                "Unexpected decoding error: \(error.localizedDescription, privacy: .public)")
             if let bodyString = String(data: data, encoding: .utf8) {
                 logger.warning("Unexpected error body: \(bodyString, privacy: .public)")
             }

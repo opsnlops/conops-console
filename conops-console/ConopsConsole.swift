@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 import SwiftData
 import SwiftUI
 
@@ -13,19 +14,55 @@ import SwiftUI
 struct ConopsConsoleApp: App {
 
     @StateObject private var appState = AppState()
+    let modelContainer: ModelContainer
 
+    private static let logger = Logger(
+        subsystem: "furry.enterprises.CreatureConsole",
+        category: "ConopsConsoleApp"
+    )
 
     init() {
-        initializeDefaults()
+        Self.initializeDefaults()
+
+        // Create model container with schema migration handling
+        do {
+            let schema = Schema([Attendee.self, Convention.self, SyncState.self])
+            let config = ModelConfiguration(schema: schema)
+            modelContainer = try ModelContainer(for: schema, configurations: [config])
+        } catch {
+            // If the schema is incompatible, delete and recreate
+            Self.logger.error("Failed to create model container: \(error). Attempting recovery...")
+
+            do {
+                let schema = Schema([Attendee.self, Convention.self, SyncState.self])
+                let config = ModelConfiguration(schema: schema)
+
+                // Try to delete the existing store
+                let storeURL = config.url
+                try? FileManager.default.removeItem(at: storeURL)
+                // Also remove the -wal and -shm files
+                try? FileManager.default.removeItem(
+                    at: storeURL.appendingPathExtension("wal"))
+                try? FileManager.default.removeItem(
+                    at: storeURL.appendingPathExtension("shm"))
+                Self.logger.info("Deleted existing store at \(storeURL.path)")
+
+                modelContainer = try ModelContainer(for: schema, configurations: [config])
+                Self.logger.info("Successfully recreated model container")
+            } catch {
+                fatalError("Could not create ModelContainer: \(error)")
+            }
+        }
     }
 
-    private func initializeDefaults() {
+    private static func initializeDefaults() {
         UserDefaults.standard.register(defaults: [
             ServerConfiguration.hostnameKey: ServerConfiguration.defaultHostname,
             ServerConfiguration.portKey: ServerConfiguration.defaultPort,
             ServerConfiguration.useTLSKey: ServerConfiguration.defaultUseTLS,
             ServerConfiguration.includeInactiveKey: ServerConfiguration.defaultIncludeInactive,
-            ServerConfiguration.lastAuthConventionKey: ServerConfiguration.defaultLastAuthConvention,
+            ServerConfiguration.lastAuthConventionKey: ServerConfiguration
+                .defaultLastAuthConvention,
             ServerConfiguration.lastAuthUsernameKey: ServerConfiguration.defaultLastAuthUsername,
         ])
     }
@@ -36,7 +73,7 @@ struct ConopsConsoleApp: App {
             TopContentView()
                 .environmentObject(appState)
         }
-        .modelContainer(for: [Attendee.self, Convention.self, SyncState.self])
+        .modelContainer(modelContainer)
         #if os(macOS) || os(iOS)
             .commands {
                 ConventionCommands(appState: appState)

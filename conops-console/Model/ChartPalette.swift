@@ -4,7 +4,9 @@ struct ChartPalette {
     private static let goldenRatio: Double = 0.61803398875
     private static let baseHue: Double = Double.random(in: 0...1)
 
-    static func seriesColors(count: Int, saturation: Double = 0.62, brightness: Double = 0.9) -> [Color] {
+    static func seriesColors(count: Int, saturation: Double = 0.62, brightness: Double = 0.9)
+        -> [Color]
+    {
         guard count > 0 else { return [] }
         var colors: [Color] = []
         colors.reserveCapacity(count)

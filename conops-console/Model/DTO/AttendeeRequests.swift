@@ -12,9 +12,9 @@ private struct DateOnly: Codable {
         let dateString = try container.decode(String.self)
         let parts = dateString.split(separator: "-")
         guard parts.count == 3,
-              let year = Int(parts[0]),
-              let month = Int(parts[1]),
-              let day = Int(parts[2])
+            let year = Int(parts[0]),
+            let month = Int(parts[1]),
+            let day = Int(parts[2])
         else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date")
         }
@@ -41,13 +41,15 @@ private struct DateOnly: Codable {
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents(in: TimeZone.current, from: value)
         guard let year = components.year,
-              let month = components.month,
-              let day = components.day
+            let month = components.month,
+            let day = components.day
         else {
-            throw EncodingError.invalidValue(value, EncodingError.Context(
-                codingPath: container.codingPath,
-                debugDescription: "Invalid date"
-            ))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: container.codingPath,
+                    debugDescription: "Invalid date"
+                ))
         }
         let dateString = String(format: "%04d-%02d-%02d", year, month, day)
         try container.encode(dateString)

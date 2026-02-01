@@ -44,18 +44,22 @@ struct DashboardView: View {
         self.compareConventionId = compareConventionId ?? -1
         let selectedConventionId = conventionId
         let selectedCompareId = self.compareConventionId
-        _conventions = Query(filter: #Predicate<Convention> { convention in
-            convention.id == selectedConventionId
-        })
-        _attendees = Query(filter: #Predicate<Attendee> { attendee in
-            attendee.conventionId == selectedConventionId && attendee.active == true
-        })
-        _compareAttendees = Query(filter: #Predicate<Attendee> { attendee in
-            attendee.conventionId == selectedCompareId && attendee.active == true
-        })
-        _compareConventions = Query(filter: #Predicate<Convention> { convention in
-            convention.id == selectedCompareId
-        })
+        _conventions = Query(
+            filter: #Predicate<Convention> { convention in
+                convention.id == selectedConventionId
+            })
+        _attendees = Query(
+            filter: #Predicate<Attendee> { attendee in
+                attendee.conventionId == selectedConventionId && attendee.active == true
+            })
+        _compareAttendees = Query(
+            filter: #Predicate<Attendee> { attendee in
+                attendee.conventionId == selectedCompareId && attendee.active == true
+            })
+        _compareConventions = Query(
+            filter: #Predicate<Convention> { convention in
+                convention.id == selectedCompareId
+            })
     }
 
     private var registrationsCount: Int {
@@ -112,20 +116,26 @@ struct DashboardView: View {
 
     private var compareAttendanceSeries: [AttendancePoint] {
         guard let compareConvention = compareConventions.first else { return [] }
-        return attendanceSeries(for: compareConvention, attendees: compareAttendees, limitToToday: false)
+        return attendanceSeries(
+            for: compareConvention, attendees: compareAttendees, limitToToday: false)
     }
 
     private var attendanceChartData: [AttendanceSeriesPoint] {
         guard let convention = currentConvention else { return [] }
         var points: [AttendanceSeriesPoint] = []
         if let compareConventionShortName {
-            points.append(contentsOf: compareAttendanceSeries.map {
-                AttendanceSeriesPoint(dayOffset: $0.dayOffset, count: $0.count, series: compareConventionShortName)
-            })
+            points.append(
+                contentsOf: compareAttendanceSeries.map {
+                    AttendanceSeriesPoint(
+                        dayOffset: $0.dayOffset, count: $0.count, series: compareConventionShortName
+                    )
+                })
         }
-        points.append(contentsOf: attendanceSeries.map {
-            AttendanceSeriesPoint(dayOffset: $0.dayOffset, count: $0.count, series: convention.shortName)
-        })
+        points.append(
+            contentsOf: attendanceSeries.map {
+                AttendanceSeriesPoint(
+                    dayOffset: $0.dayOffset, count: $0.count, series: convention.shortName)
+            })
         return points
     }
 
@@ -153,16 +163,20 @@ struct DashboardView: View {
     ) -> [AttendancePoint] {
         let calendar = Calendar.current
         let startDate = calendar.startOfDay(for: convention.preRegStartDate)
-        let endDate = limitToToday
+        let endDate =
+            limitToToday
             ? min(calendar.startOfDay(for: convention.endDate), calendar.startOfDay(for: Date()))
             : calendar.startOfDay(for: convention.endDate)
 
         guard startDate <= endDate else { return [] }
 
-        let dailyCounts = Dictionary(grouping: attendees, by: { attendee in
-            let day = calendar.startOfDay(for: attendee.registrationDate)
-            return calendar.dateComponents([.day], from: startDate, to: day).day ?? 0
-        })
+        let dailyCounts = Dictionary(
+            grouping: attendees,
+            by: { attendee in
+                let day = calendar.startOfDay(for: attendee.registrationDate)
+                return calendar.dateComponents([.day], from: startDate, to: day).day ?? 0
+            }
+        )
         .mapValues { $0.count }
 
         var points: [AttendancePoint] = []
@@ -187,9 +201,6 @@ struct DashboardView: View {
         if let convention = currentConvention {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text(convention.longName)
-                        .font(.title)
-
                     statCards
 
                     attendanceSection
@@ -198,6 +209,7 @@ struct DashboardView: View {
                 }
                 .padding(24)
             }
+            .navigationTitle(convention.longName)
         } else {
             ContentUnavailableView(
                 "Convention data unavailable",
@@ -238,7 +250,9 @@ struct DashboardView: View {
                 .opacity(opacity(for: point.series))
                 .zIndex(zIndex(for: point.series))
             }
-            .chartForegroundStyleScale(range: ChartPalette.seriesColors(count: attendanceSeriesNames.count))
+            .chartForegroundStyleScale(
+                range: ChartPalette.seriesColors(count: attendanceSeriesNames.count)
+            )
             .chartYAxis {
                 AxisMarks(position: .leading)
             }
@@ -266,7 +280,9 @@ struct DashboardView: View {
                                 .foregroundStyle(.primary)
                         }
                     }
-                    .chartForegroundStyleScale(range: ChartPalette.seriesColors(count: levelCounts.count))
+                    .chartForegroundStyleScale(
+                        range: ChartPalette.seriesColors(count: levelCounts.count)
+                    )
                     .chartYAxis {
                         AxisMarks(position: .leading)
                     }
@@ -309,7 +325,9 @@ struct DashboardView: View {
                             .foregroundStyle(.primary)
                     }
                 }
-                .chartForegroundStyleScale(range: ChartPalette.seriesColors(count: shirtSizeCounts.count))
+                .chartForegroundStyleScale(
+                    range: ChartPalette.seriesColors(count: shirtSizeCounts.count)
+                )
                 .chartYAxis {
                     AxisMarks(position: .leading)
                 }

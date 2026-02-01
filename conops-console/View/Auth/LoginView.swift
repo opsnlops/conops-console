@@ -57,6 +57,7 @@ struct LoginView: View {
                             Button("Sign In") {
                                 Task { await submit() }
                             }
+                            .buttonStyle(.borderedProminent)
                             .disabled(!canSubmit)
                         }
                     }
@@ -94,6 +95,7 @@ struct LoginView: View {
                     Button("Sign In") {
                         Task { await submit() }
                     }
+                    .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
                     .disabled(isSubmitting || !canSubmit)
                 }

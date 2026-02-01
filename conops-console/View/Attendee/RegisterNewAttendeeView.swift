@@ -3,7 +3,7 @@
 //  Conops Console
 //
 //  Created by April White on 1/22/25.
-//  Copyright © 2025 April's Creature Workshop. All rights reserved.
+//  Copyright © 2026 April's Creature Workshop. All rights reserved.
 //
 
 import SwiftUI
@@ -44,6 +44,7 @@ struct RegisterNewAttendeeView: View {
         codeOfConductAccepted: false,
         secretCode: nil,
         attendeeType: .staff,
+        minor: false,
         currentBalance: 0.0,
         transactions: []
     )

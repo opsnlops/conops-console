@@ -152,7 +152,7 @@ struct TopContentView: View {
                     .padding(.vertical, 8)
                 #endif
             }
-            .navigationTitle("Conops")
+            .navigationTitle(selectedConvention.map { "\($0.shortName) Conops" } ?? "Conops")
 
         } detail: {
             switch selectedRoute {
