@@ -28,7 +28,6 @@ struct ConventionDetailView: View {
     @State private var alertMessage: String = ""
 
     @State private var searchText: String = ""
-    @State private var isShowingSearchPopover: Bool = false
 
     private let logger = Logger(
         subsystem: "furry.enterprises.CreatureConsole",
@@ -38,73 +37,48 @@ struct ConventionDetailView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                #if os(iOS)
-                    if isPad == false {
-                        searchInlineField
-                    }
-                #endif
                 // Pass the current convention and searchText to the attendee table
                 AttendeeTable(convention: convention, searchText: searchText)
             }
             .navigationTitle(convention.longName)
-            .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingRegisterSheet = true
-                } label: {
-                    Image(systemName: "person.fill.badge.plus")
-                }
-                .symbolRenderingMode(.multicolor)
-            }
-
             #if os(iOS)
-                if isPad {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            isShowingSearchPopover.toggle()
-                        } label: {
-                            Image(systemName: "magnifyingglass")
+                .toolbarRole(.browser)
+                .toolbar(.visible, for: .bottomBar)
+                .toolbar {
+                    if isPad == false {
+                        ToolbarItem(placement: .bottomBar) {
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                                TextField("Search Attendees", text: $searchText)
+                            }
+                            .frame(maxWidth: .infinity)
                         }
-                        .symbolRenderingMode(.hierarchical)
-                        .symbolEffect(
-                            .wiggle.byLayer,
-                            options: .repeat(.periodic(delay: 2.0)),
-                            isActive: !searchText.isEmpty
-                        )
-                        .foregroundStyle(!searchText.isEmpty ? Color.accentColor : Color.primary)
-                        .popover(isPresented: $isShowingSearchPopover) {
-                            searchPopoverContent
-                        }
-                        .textFieldStyle(.roundedBorder)
                     }
-                }
-            #else
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        isShowingSearchPopover.toggle()
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                    }
-                    .symbolRenderingMode(.hierarchical)
-                    .symbolEffect(
-                        .wiggle.byLayer,
-                        options: .repeat(.periodic(delay: 2.0)),
-                        isActive: !searchText.isEmpty
-                    )
-                    .popover(isPresented: $isShowingSearchPopover) {
-                        searchPopoverContent
-                    }
-                    .textFieldStyle(.roundedBorder)
                 }
             #endif
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showingRegisterSheet = true
+                    } label: {
+                        Image(systemName: "person.fill.badge.plus")
+                    }
+                    .symbolRenderingMode(.multicolor)
+                }
 
-            ToolbarItem {
-                NavigationLink(destination: ConventionEditView(convention: convention)) {
-                    Image(systemName: "slider.horizontal.3")
-                        .symbolRenderingMode(.hierarchical)
+                ToolbarItem {
+                    NavigationLink(destination: ConventionEditView(convention: convention)) {
+                        Image(systemName: "slider.horizontal.3")
+                            .symbolRenderingMode(.hierarchical)
+                    }
                 }
             }
-            }
+            #if os(iOS)
+                .modifier(SearchableIfPad(searchText: $searchText, isPad: isPad))
+            #else
+                .searchable(text: $searchText, prompt: "Search Attendees")
+            #endif
         }
         // MARK: - Sheet
         .sheet(isPresented: $showingRegisterSheet) {
@@ -198,33 +172,6 @@ struct ConventionDetailView: View {
         }
     }
 
-    private var searchPopoverContent: some View {
-        VStack(spacing: 12) {
-            TextField("Search Attendees", text: $searchText)
-                .textFieldStyle(.roundedBorder)
-                .padding(.horizontal)
-        }
-        .padding(.vertical, 12)
-        .frame(width: isPad ? 300 : 260)
-    }
-
-    private var searchInlineField: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-            TextField("Search Attendees", text: $searchText)
-                .textFieldStyle(.plain)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(uiColor: .secondarySystemBackground))
-        )
-        .padding(.horizontal)
-        .padding(.top, 8)
-    }
-
     #if os(iOS)
         private var isPad: Bool {
             UIDevice.current.userInterfaceIdiom == .pad
@@ -233,6 +180,21 @@ struct ConventionDetailView: View {
         private var isPad: Bool { true }
     #endif
 }
+
+#if os(iOS)
+    private struct SearchableIfPad: ViewModifier {
+        @Binding var searchText: String
+        let isPad: Bool
+
+        func body(content: Content) -> some View {
+            if isPad {
+                content.searchable(text: $searchText, prompt: "Search Attendees")
+            } else {
+                content
+            }
+        }
+    }
+#endif
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
     ConventionDetailView(convention: .mock())

@@ -14,26 +14,114 @@ struct LoginView: View {
     @State private var errorMessage: String?
 
     private let logger = Logger(subsystem: "furry.enterprises.ConopsConsole", category: "LoginView")
+    private let canCancel: Bool
     private let onAuthenticated: () -> Void
+    private let onCancel: (() -> Void)?
 
-    init(onAuthenticated: @escaping () -> Void) {
+    init(
+        canCancel: Bool = false,
+        onAuthenticated: @escaping () -> Void,
+        onCancel: (() -> Void)? = nil
+    ) {
         let defaults = UserDefaults.standard
         _conventionShortName = State(initialValue: defaults.lastAuthConvention)
         _username = State(initialValue: defaults.lastAuthUsername)
+        self.canCancel = canCancel
         self.onAuthenticated = onAuthenticated
+        self.onCancel = onCancel
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Sign in")
-                .font(.title2)
+        #if os(iOS)
+            NavigationStack {
+                Form {
+                    conventionSection
+                    credentialsSection
+                    errorSection
+                }
+                .navigationTitle("Sign In")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        if canCancel {
+                            Button("Cancel") {
+                                onCancel?()
+                                dismiss()
+                            }
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        if isSubmitting {
+                            ProgressView()
+                        } else {
+                            Button("Sign In") {
+                                Task { await submit() }
+                            }
+                            .disabled(!canSubmit)
+                        }
+                    }
+                }
+                .interactiveDismissDisabled(!canCancel)
+            }
+            .task {
+                await loadConventions()
+            }
+        #else
+            VStack(spacing: 0) {
+                Form {
+                    conventionSection
+                    credentialsSection
+                    errorSection
+                }
+                .formStyle(.grouped)
 
-            if conventions.isEmpty {
+                Divider()
+
+                HStack {
+                    if canCancel {
+                        Button("Cancel") {
+                            onCancel?()
+                            dismiss()
+                        }
+                        .keyboardShortcut(.cancelAction)
+                    }
+                    Spacer()
+                    if isSubmitting {
+                        ProgressView()
+                            .controlSize(.small)
+                            .padding(.trailing, 8)
+                    }
+                    Button("Sign In") {
+                        Task { await submit() }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(isSubmitting || !canSubmit)
+                }
+                .padding()
+            }
+            .frame(width: 400, height: 320)
+            .task {
+                await loadConventions()
+            }
+        #endif
+    }
+
+    @ViewBuilder
+    private var conventionSection: some View {
+        Section {
+            if isLoadingConventions {
+                HStack {
+                    Text("Loading conventions...")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    ProgressView()
+                }
+            } else if conventions.isEmpty {
                 TextField("Convention short name", text: $conventionShortName)
-                    .textFieldStyle(.roundedBorder)
                     .autocorrectionDisabled()
                     #if os(iOS)
                         .textInputAutocapitalization(.never)
+                        .textContentType(.organizationName)
                     #endif
             } else {
                 Picker("Convention", selection: $conventionShortName) {
@@ -42,50 +130,40 @@ struct LoginView: View {
                             .tag(convention.shortName)
                     }
                 }
-                #if os(macOS)
-                    .pickerStyle(.menu)
-                #endif
             }
+        } header: {
+            Text("Convention")
+        } footer: {
+            if let conventionLoadError {
+                Text(conventionLoadError)
+            }
+        }
+    }
 
+    @ViewBuilder
+    private var credentialsSection: some View {
+        Section("Credentials") {
             TextField("Username", text: $username)
-                .textFieldStyle(.roundedBorder)
                 .autocorrectionDisabled()
                 #if os(iOS)
                     .textInputAutocapitalization(.never)
+                    .textContentType(.username)
                 #endif
 
             SecureField("Password", text: $password)
-                .textFieldStyle(.roundedBorder)
-                .autocorrectionDisabled()
                 #if os(iOS)
-                    .textInputAutocapitalization(.never)
+                    .textContentType(.password)
                 #endif
+        }
+    }
 
-            if let conventionLoadError {
-                Text(conventionLoadError)
-                    .foregroundStyle(.secondary)
-            }
-
-            if let errorMessage {
-                Text(errorMessage)
+    @ViewBuilder
+    private var errorSection: some View {
+        if let errorMessage {
+            Section {
+                Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
             }
-
-            HStack {
-                Spacer()
-                Button("Sign in") {
-                    Task { await submit() }
-                }
-                .disabled(isSubmitting || !canSubmit)
-            }
-        }
-        .padding(24)
-        .frame(minWidth: 320)
-        #if os(iOS)
-            .interactiveDismissDisabled(true)
-        #endif
-        .task {
-            await loadConventions()
         }
     }
 
@@ -150,4 +228,8 @@ struct LoginView: View {
 
 #Preview {
     LoginView(onAuthenticated: {})
+}
+
+#Preview("With Cancel") {
+    LoginView(canCancel: true, onAuthenticated: {}, onCancel: {})
 }

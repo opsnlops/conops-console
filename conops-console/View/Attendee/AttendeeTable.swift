@@ -28,10 +28,15 @@ struct AttendeeTable: View {
 
     @State private var selectedAttendee: Attendee?  // Tracks the attendee to edit
     @State private var isEditing: Bool = false
+    @State private var selectedAttendeeId: AttendeeIdentifier?
     @State private var selectedAttendeeIds = Set<AttendeeIdentifier>()
 
     @State private var showErrorAlert: Bool = false
     @State private var errorMessage: String = ""
+
+    #if os(macOS)
+        @State private var sortDescriptor = AttendeeSortDescriptor(key: .badgeName, ascending: true)
+    #endif
 
     let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "AttendeeTable")
 
@@ -53,42 +58,36 @@ struct AttendeeTable: View {
                 || attendee.badgeName.localizedCaseInsensitiveContains(searchText)
         }
 
-        return filtered.sorted { lhs, rhs in
-            lhs.badgeName.localizedCaseInsensitiveCompare(rhs.badgeName) == .orderedAscending
-        }
+        #if os(macOS)
+            return filtered.sorted { sortDescriptor.compare($0, $1) }
+        #else
+            return filtered.sorted { lhs, rhs in
+                lhs.badgeName.localizedCaseInsensitiveCompare(rhs.badgeName) == .orderedAscending
+            }
+        #endif
     }
 
     var body: some View {
         #if os(macOS)
-            Table(of: Attendee.self) {
-                TableColumn("Name", value: \.badgeName)
-                    .width(min: 120, ideal: 150)
-                TableColumn("#") { attendee in
-                    Text(attendee.badgeNumber, format: .number)
-                }
-                .width(60)
-                TableColumn("First Name", value: \.firstName)
-                    .width(min: 120, ideal: 250)
-                TableColumn("Last Name", value: \.lastName)
-            } rows: {
-                ForEach(filteredAttendees, id: \.id) { attendee in
-                    TableRow(attendee)
-                        .contextMenu {
-                            Button {
-                                selectedAttendee = attendee
-                                isEditing = true  // Trigger navigation to edit view
-                            } label: {
-                                Label("Edit", systemImage: "pencil")
-                            }
-
-                            Button {
-                                // Ban action logic can go here 🐰🔨
-                            } label: {
-                                Label("Ban", systemImage: "hammer")
-                            }
-                        }
-                }
-            }
+            AttendeeTableMac(
+                attendees: filteredAttendees,
+                onDoubleClick: { attendee in
+                    selectedAttendee = attendee
+                    isEditing = true
+                },
+                onContextMenu: { attendee in
+                    let menu = NSMenu()
+                    let editItem = NSMenuItem(
+                        title: "Edit",
+                        action: #selector(NSApplication.shared.sendAction(_:to:from:)),
+                        keyEquivalent: ""
+                    )
+                    menu.addItem(editItem)
+                    return menu
+                },
+                selectedAttendeeId: $selectedAttendeeId,
+                sortDescriptor: $sortDescriptor
+            )
             .navigationDestination(isPresented: $isEditing) {
                 if let detailAttendee = selectedAttendee {
                     EditAttendeeView(attendee: detailAttendee, convention: convention)
