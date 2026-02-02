@@ -42,6 +42,7 @@ final class Convention {
     var minBadgeNumber: UInt32
     var dealersDenPresent: Bool
     var dealersDenRegText: String?
+    var timeZone: String
     var paypalAPIUserName: String?
     var paypalAPIPassword: String?
     var paypalAPISignature: String?
@@ -88,6 +89,7 @@ final class Convention {
         minBadgeNumber: UInt32,
         dealersDenPresent: Bool,
         dealersDenRegText: String? = nil,
+        timeZone: String = "America/Chicago",
         paypalAPIUserName: String? = nil,
         paypalAPIPassword: String? = nil,
         paypalAPISignature: String? = nil,
@@ -123,6 +125,7 @@ final class Convention {
         self.minBadgeNumber = minBadgeNumber
         self.dealersDenPresent = dealersDenPresent
         self.dealersDenRegText = dealersDenRegText
+        self.timeZone = timeZone
         self.paypalAPIUserName = paypalAPIUserName
         self.paypalAPIPassword = paypalAPIPassword
         self.paypalAPISignature = paypalAPISignature
@@ -137,14 +140,18 @@ final class Convention {
 extension Convention {
 
     static func fromDTO(_ dto: ConventionDTO) -> Convention {
+        // Parse date-only strings (YYYY-MM-DD) to Date, defaulting to current date if invalid
+        let startDate = ConventionDTO.parseDateOnly(dto.startDate) ?? Date()
+        let endDate = ConventionDTO.parseDateOnly(dto.endDate) ?? Date()
+
         return Convention(
             id: dto.id,
             lastModified: dto.lastModified,
             active: dto.active,
             longName: dto.longName,
             shortName: dto.shortName,
-            startDate: dto.startDate,
-            endDate: dto.endDate,
+            startDate: startDate,
+            endDate: endDate,
             preRegStartDate: dto.preRegStartDate,
             preRegEndDate: dto.preRegEndDate,
             registrationOpen: dto.registrationOpen,
@@ -166,6 +173,7 @@ extension Convention {
             minBadgeNumber: dto.minBadgeNumber,
             dealersDenPresent: dto.dealersDenPresent,
             dealersDenRegText: dto.dealersDenRegText,
+            timeZone: dto.timeZone,
             paypalAPIUserName: dto.paypalAPIUserName,
             paypalAPIPassword: dto.paypalAPIPassword,
             paypalAPISignature: dto.paypalAPISignature,
@@ -183,8 +191,8 @@ extension Convention {
             active: self.active,
             longName: self.longName,
             shortName: self.shortName,
-            startDate: self.startDate,
-            endDate: self.endDate,
+            startDate: ConventionDTO.formatDateOnly(self.startDate),
+            endDate: ConventionDTO.formatDateOnly(self.endDate),
             preRegStartDate: self.preRegStartDate,
             preRegEndDate: self.preRegEndDate,
             registrationOpen: self.registrationOpen,
@@ -206,6 +214,7 @@ extension Convention {
             minBadgeNumber: self.minBadgeNumber,
             dealersDenPresent: self.dealersDenPresent,
             dealersDenRegText: self.dealersDenRegText,
+            timeZone: self.timeZone,
             paypalAPIUserName: self.paypalAPIUserName,
             paypalAPIPassword: self.paypalAPIPassword,
             paypalAPISignature: self.paypalAPISignature,
@@ -246,6 +255,7 @@ extension Convention {
         self.minBadgeNumber = updated.minBadgeNumber
         self.dealersDenPresent = updated.dealersDenPresent
         self.dealersDenRegText = updated.dealersDenRegText
+        self.timeZone = updated.timeZone
         self.paypalAPIUserName = updated.paypalAPIUserName
         self.paypalAPIPassword = updated.paypalAPIPassword
         self.paypalAPISignature = updated.paypalAPISignature
@@ -345,6 +355,7 @@ extension Convention: Codable {
         case minBadgeNumber
         case dealersDenPresent
         case dealersDenRegText
+        case timeZone
         case paypalAPIUserName
         case paypalAPIPassword
         case paypalAPISignature
@@ -384,6 +395,7 @@ extension Convention: Codable {
         try container.encode(minBadgeNumber, forKey: .minBadgeNumber)
         try container.encode(dealersDenPresent, forKey: .dealersDenPresent)
         try container.encode(dealersDenRegText, forKey: .dealersDenRegText)
+        try container.encode(timeZone, forKey: .timeZone)
         try container.encode(paypalAPIUserName, forKey: .paypalAPIUserName)
         try container.encode(paypalAPIPassword, forKey: .paypalAPIPassword)
         try container.encode(paypalAPISignature, forKey: .paypalAPISignature)
@@ -428,6 +440,8 @@ extension Convention: Codable {
         let dealersDenPresent = try container.decode(Bool.self, forKey: .dealersDenPresent)
         let dealersDenRegText = try container.decodeIfPresent(
             String.self, forKey: .dealersDenRegText)
+        let timeZone =
+            try container.decodeIfPresent(String.self, forKey: .timeZone) ?? "America/Chicago"
         let paypalAPIUserName = try container.decodeIfPresent(
             String.self, forKey: .paypalAPIUserName)
         let paypalAPIPassword = try container.decodeIfPresent(
@@ -468,6 +482,7 @@ extension Convention: Codable {
             minBadgeNumber: minBadgeNumber,
             dealersDenPresent: dealersDenPresent,
             dealersDenRegText: dealersDenRegText,
+            timeZone: timeZone,
             paypalAPIUserName: paypalAPIUserName,
             paypalAPIPassword: paypalAPIPassword,
             paypalAPISignature: paypalAPISignature,
@@ -512,6 +527,7 @@ extension Convention {
             minBadgeNumber: 1000,
             dealersDenPresent: false,
             dealersDenRegText: nil,
+            timeZone: "America/Chicago",
             paypalAPIUserName: nil,
             paypalAPIPassword: nil,
             paypalAPISignature: nil,

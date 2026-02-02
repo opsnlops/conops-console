@@ -59,14 +59,22 @@ struct RegisterNewAttendeeView: View {
                 // Wrap the ScrollView in a VStack so that the navigationTitle can be attached to the VStack
                 VStack {
                     ScrollView {
-                        AttendeeForm(attendee: $attendee, membershipLevels: membershipLevels) {
+                        AttendeeForm(
+                            attendee: $attendee,
+                            convention: convention,
+                            membershipLevels: membershipLevels
+                        ) {
                             onAttendeeSave(attendee)
                             dismiss()
                         }
                     }
                 }
             #else
-                AttendeeForm(attendee: $attendee, membershipLevels: membershipLevels) {
+                AttendeeForm(
+                    attendee: $attendee,
+                    convention: convention,
+                    membershipLevels: membershipLevels
+                ) {
                     onAttendeeSave(attendee)
                     dismiss()
                 }

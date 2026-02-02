@@ -21,12 +21,16 @@ class ServerSettingsViewModel: ObservableObject {
     @Published var includeInactiveConventions: Bool {
         didSet { UserDefaults.standard.includeInactiveConventions = includeInactiveConventions }
     }
+    @Published var showInactiveAttendees: Bool {
+        didSet { UserDefaults.standard.showInactiveAttendees = showInactiveAttendees }
+    }
 
     init() {
         self.hostname = UserDefaults.standard.serverHostname
         self.port = UserDefaults.standard.serverPort
         self.useTLS = UserDefaults.standard.useTLS
         self.includeInactiveConventions = UserDefaults.standard.includeInactiveConventions
+        self.showInactiveAttendees = UserDefaults.standard.showInactiveAttendees
     }
 
     func resetToDefaults() {
@@ -34,5 +38,6 @@ class ServerSettingsViewModel: ObservableObject {
         port = ServerConfiguration.defaultPort
         useTLS = ServerConfiguration.defaultUseTLS
         includeInactiveConventions = ServerConfiguration.defaultIncludeInactive
+        showInactiveAttendees = ServerConfiguration.defaultShowInactiveAttendees
     }
 }

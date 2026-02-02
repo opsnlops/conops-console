@@ -21,6 +21,7 @@ struct EditAttendeeView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
+    @EnvironmentObject var appState: AppState
 
     // MARK: - Props
     @State var attendee: Attendee
@@ -136,6 +137,7 @@ struct EditAttendeeView: View {
             ScrollView {
                 AttendeeForm(
                     attendee: $attendee,
+                    convention: convention,
                     membershipLevels: convention.membershipLevels,
                     showTransactions: true,
                     transactions: attendee.transactions,
@@ -155,6 +157,7 @@ struct EditAttendeeView: View {
             } else {
                 AttendeeForm(
                     attendee: $attendee,
+                    convention: convention,
                     membershipLevels: convention.membershipLevels,
                     showTransactions: true,
                     transactions: attendee.transactions,
@@ -224,6 +227,20 @@ struct EditAttendeeView: View {
                         Toggle("Active", isOn: $attendee.active)
                         Toggle("Staff", isOn: $attendee.staff)
                         Toggle("Dealer", isOn: $attendee.dealer)
+                    }
+
+                    Section("Dates") {
+                        LabeledContent("Registered") {
+                            Text(attendee.registrationDate.formatted(using: convention).dateTime)
+                        }
+                        LabeledContent("Checked In") {
+                            if let checkIn = attendee.checkInTime {
+                                Text(checkIn.formatted(using: convention).dateTime)
+                            } else {
+                                Text("Not yet")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                 }
                 .formStyle(.grouped)
@@ -315,7 +332,7 @@ struct EditAttendeeView: View {
                     Text(transaction.amount, format: .currency(code: currencyCode))
                         .font(.headline)
                 }
-                Text(transaction.transactionTime.formatted(date: .abbreviated, time: .shortened))
+                Text(transaction.transactionTime.formatted(using: convention).dateTime)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 if let userName = transaction.userName, userName.isEmpty == false {
@@ -625,12 +642,24 @@ struct EditAttendeeView: View {
     }
 
     private func loadRemotePrinters() async {
+        // Check cache first
+        if let cached = appState.remotePrinters(for: convention.shortName) {
+            await MainActor.run {
+                remotePrinters = cached
+                if selectedPrinter.isEmpty, let first = cached.first {
+                    selectedPrinter = first
+                }
+            }
+            return
+        }
+
         let client = ConopsServerClient()
         let result = await client.getRemotePrinters(conventionShortName: convention.shortName)
         switch result {
         case .success(let printers):
             await MainActor.run {
                 remotePrinters = printers
+                appState.cacheRemotePrinters(printers, for: convention.shortName)
                 if selectedPrinter.isEmpty, let first = printers.first {
                     selectedPrinter = first
                 }
@@ -728,4 +757,5 @@ struct EditAttendeeView: View {
     return NavigationStack {
         EditAttendeeView(attendee: sampleAttendee, convention: .mock())
     }
+    .environmentObject(AppState())
 }

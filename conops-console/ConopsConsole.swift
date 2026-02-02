@@ -14,6 +14,8 @@ import SwiftUI
 struct ConopsConsoleApp: App {
 
     @StateObject private var appState = AppState()
+    @StateObject private var authManager = BiometricAuthManager()
+    @Environment(\.scenePhase) private var scenePhase
     let modelContainer: ModelContainer
 
     private static let logger = Logger(
@@ -61,6 +63,8 @@ struct ConopsConsoleApp: App {
             ServerConfiguration.portKey: ServerConfiguration.defaultPort,
             ServerConfiguration.useTLSKey: ServerConfiguration.defaultUseTLS,
             ServerConfiguration.includeInactiveKey: ServerConfiguration.defaultIncludeInactive,
+            ServerConfiguration.showInactiveAttendeesKey: ServerConfiguration
+                .defaultShowInactiveAttendees,
             ServerConfiguration.lastAuthConventionKey: ServerConfiguration
                 .defaultLastAuthConvention,
             ServerConfiguration.lastAuthUsernameKey: ServerConfiguration.defaultLastAuthUsername,
@@ -70,10 +74,19 @@ struct ConopsConsoleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            TopContentView()
-                .environmentObject(appState)
+            ZStack {
+                TopContentView()
+                    .environmentObject(appState)
+
+                if authManager.requiresBiometrics && !authManager.isUnlocked {
+                    LockScreenView(authManager: authManager)
+                }
+            }
         }
         .modelContainer(modelContainer)
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            handleScenePhaseChange(from: oldPhase, to: newPhase)
+        }
         #if os(macOS) || os(iOS)
             .commands {
                 ConventionCommands(appState: appState)
@@ -85,5 +98,22 @@ struct ConopsConsoleApp: App {
                 SettingsView()
             }
         #endif
+    }
+
+    private func handleScenePhaseChange(from oldPhase: ScenePhase, to newPhase: ScenePhase) {
+        switch newPhase {
+        case .background:
+            // Lock when going to background
+            authManager.lock()
+        case .active:
+            // Prompt for auth when becoming active if locked
+            if authManager.requiresBiometrics && !authManager.isUnlocked {
+                authManager.authenticate()
+            }
+        case .inactive:
+            break
+        @unknown default:
+            break
+        }
     }
 }

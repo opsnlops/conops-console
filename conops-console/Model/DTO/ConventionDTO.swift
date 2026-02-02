@@ -14,8 +14,8 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let active: Bool
     let longName: String
     let shortName: String
-    let startDate: Date
-    let endDate: Date
+    let startDate: String      // YYYY-MM-DD format (date-only, no timezone issues)
+    let endDate: String        // YYYY-MM-DD format (date-only, no timezone issues)
     let preRegStartDate: Date
     let preRegEndDate: Date
     let registrationOpen: Bool
@@ -37,6 +37,7 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let minBadgeNumber: UInt32
     let dealersDenPresent: Bool
     let dealersDenRegText: String?
+    let timeZone: String
     let paypalAPIUserName: String?
     let paypalAPIPassword: String?
     let paypalAPISignature: String?
@@ -73,6 +74,7 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
         case minBadgeNumber = "min_badge_number"
         case dealersDenPresent = "dealers_den_present"
         case dealersDenRegText = "dealers_den_reg_text"
+        case timeZone = "time_zone"
         case paypalAPIUserName = "paypal_api_user_name"
         case paypalAPIPassword = "paypal_api_password"
         case paypalAPISignature = "paypal_api_signature"
@@ -85,6 +87,22 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
         lhs.shortName.localizedCaseInsensitiveCompare(rhs.shortName) == .orderedAscending
     }
 
+    // Helper to format Date as YYYY-MM-DD string
+    private static let dateOnlyFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter
+    }()
+
+    static func formatDateOnly(_ date: Date) -> String {
+        dateOnlyFormatter.string(from: date)
+    }
+
+    static func parseDateOnly(_ string: String) -> Date? {
+        dateOnlyFormatter.date(from: string)
+    }
+
     static func mock() -> ConventionDTO {
         ConventionDTO(
             id: ConventionIdentifier(),
@@ -92,8 +110,8 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
             active: true,
             longName: "Mock Convention",
             shortName: "MockCon",
-            startDate: Date(),
-            endDate: Date().addingTimeInterval(60 * 60 * 24 * 3),
+            startDate: formatDateOnly(Date()),
+            endDate: formatDateOnly(Date().addingTimeInterval(60 * 60 * 24 * 3)),
             preRegStartDate: Date().addingTimeInterval(-60 * 60 * 24 * 30),
             preRegEndDate: Date().addingTimeInterval(-60 * 60 * 24 * 5),
             registrationOpen: true,
@@ -115,6 +133,7 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
             minBadgeNumber: 100,
             dealersDenPresent: false,
             dealersDenRegText: nil,
+            timeZone: "America/Chicago",
             paypalAPIUserName: nil,
             paypalAPIPassword: nil,
             paypalAPISignature: nil,

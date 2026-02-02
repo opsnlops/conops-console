@@ -56,7 +56,9 @@ struct KeychainStore {
         ]
 
         let attributes: [String: Any] = [
-            kSecValueData as String: data
+            kSecValueData as String: data,
+            // Only accessible when device is unlocked, and only on this device
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ]
 
         let status = SecItemCopyMatching(query as CFDictionary, nil)
@@ -65,6 +67,7 @@ struct KeychainStore {
         } else {
             var addQuery = query
             addQuery[kSecValueData as String] = data
+            addQuery[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
             SecItemAdd(addQuery as CFDictionary, nil)
         }
     }

@@ -41,6 +41,10 @@ struct ServerSettingsView: View {
                 Toggle("Include Inactive Conventions", isOn: $viewModel.includeInactiveConventions)
             }
 
+            Section(header: Text("Display Options")) {
+                Toggle("Show Inactive Attendees", isOn: $viewModel.showInactiveAttendees)
+            }
+
             Section(header: Text("Local Data")) {
                 Button(role: .destructive) {
                     showResetConfirmation = true

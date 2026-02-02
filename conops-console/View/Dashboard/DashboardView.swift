@@ -33,15 +33,21 @@ struct DashboardView: View {
 
     let conventionId: ConventionIdentifier
     private let compareConventionId: ConventionIdentifier
+    var onNavigateToAttendees: (() -> Void)?
 
     @Query private var conventions: [Convention]
     @Query private var attendees: [Attendee]
     @Query private var compareAttendees: [Attendee]
     @Query private var compareConventions: [Convention]
 
-    init(conventionId: ConventionIdentifier, compareConventionId: ConventionIdentifier?) {
+    init(
+        conventionId: ConventionIdentifier,
+        compareConventionId: ConventionIdentifier?,
+        onNavigateToAttendees: (() -> Void)? = nil
+    ) {
         self.conventionId = conventionId
         self.compareConventionId = compareConventionId ?? -1
+        self.onNavigateToAttendees = onNavigateToAttendees
         let selectedConventionId = conventionId
         let selectedCompareId = self.compareConventionId
         _conventions = Query(
@@ -107,6 +113,10 @@ struct DashboardView: View {
 
     private var shirtSizePalette: [Color] {
         ChartPalette.seriesColors(count: shirtSizeCounts.count)
+    }
+
+    private var maxShirtRemaining: Int {
+        shirtSizeCounts.map(\.remaining).max() ?? 0
     }
 
     private var attendanceSeries: [AttendancePoint] {
@@ -221,7 +231,8 @@ struct DashboardView: View {
 
     private var statCards: some View {
         HStack(spacing: 16) {
-            StatCard(title: "Registrations", value: registrationsCount)
+            StatCard(
+                title: "Registrations", value: registrationsCount, action: onNavigateToAttendees)
             StatCard(title: "Checked-In", value: checkedInCount)
         }
     }
@@ -302,6 +313,7 @@ struct DashboardView: View {
                         .foregroundStyle(by: .value("Size", item.name))
                     }
                     .chartForegroundStyleScale(range: shirtSizePalette)
+                    .padding(.trailing, 40)
                     .frame(minHeight: 220)
 
                     shirtSizeLegend
@@ -328,10 +340,12 @@ struct DashboardView: View {
                 .chartForegroundStyleScale(
                     range: ChartPalette.seriesColors(count: shirtSizeCounts.count)
                 )
+                .chartXScale(domain: 0...max(maxShirtRemaining, 1))
                 .chartYAxis {
                     AxisMarks(position: .leading)
                 }
-                .frame(minHeight: 220)
+                .padding(.trailing, 40)
+                .frame(minHeight: max(CGFloat(shirtSizeCounts.count) * 44, 220))
             }
         }
     }
@@ -369,6 +383,7 @@ struct DashboardView: View {
 private struct StatCard: View {
     let title: String
     let value: Int
+    var action: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -385,6 +400,13 @@ private struct StatCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(statCardBackground)
         )
+        .contentShape(RoundedRectangle(cornerRadius: 12))
+        .onTapGesture {
+            action?()
+        }
+        #if os(iOS)
+            .hoverEffect(action != nil ? .highlight : .automatic)
+        #endif
     }
 
     private var statCardBackground: Color {

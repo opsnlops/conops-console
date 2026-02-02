@@ -48,10 +48,15 @@ struct AttendeeTable: View {
     /// Filters the fetched attendees to only those that belong to the given convention.
     /// Also applies search filtering against firstName, lastName, badgeName, or badgeNumber.
     private var filteredAttendees: [Attendee] {
+        let showInactive = UserDefaults.standard.showInactiveAttendees
         let filtered = attendees.filter { attendee in
             // Only include attendees that have a matching convention.
             guard attendee.conventionId == convention.id
             else {
+                return false
+            }
+            // Filter out inactive attendees unless the setting is enabled.
+            if !showInactive && !attendee.active {
                 return false
             }
             // If there's no search text, we're happy with the attendee.

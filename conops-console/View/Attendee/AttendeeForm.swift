@@ -11,6 +11,7 @@ import SwiftUI
 
 struct AttendeeForm: View {
     @Binding var attendee: Attendee
+    var convention: Convention?
     var membershipLevels: [MembershipLevel] = []
     var showTransactions: Bool = false
     var transactions: [Transaction] = []
@@ -99,6 +100,22 @@ struct AttendeeForm: View {
                 Toggle("Dealer", isOn: $attendee.dealer)
             }
 
+            if let convention = convention {
+                Section("Dates") {
+                    LabeledContent("Registered") {
+                        Text(attendee.registrationDate.formatted(using: convention).dateTime)
+                    }
+                    LabeledContent("Checked In") {
+                        if let checkIn = attendee.checkInTime {
+                            Text(checkIn.formatted(using: convention).dateTime)
+                        } else {
+                            Text("Not yet")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+
             if showTransactions {
                 Section(header: transactionsHeader, footer: Text(transactionsFooterText)) {
                     if pendingTransactions.isEmpty == false {
@@ -171,7 +188,7 @@ struct AttendeeForm: View {
                 Text(transaction.amount, format: .currency(code: currencyCode))
                     .font(.headline)
             }
-            Text(transaction.transactionTime.formatted(date: .abbreviated, time: .shortened))
+            Text(formattedTransactionTime(transaction.transactionTime))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if let userName = transaction.userName, userName.isEmpty == false {
@@ -220,5 +237,13 @@ struct AttendeeForm: View {
 
     private var currencyCode: String {
         Locale.current.currency?.identifier ?? "USD"
+    }
+
+    private func formattedTransactionTime(_ date: Date) -> String {
+        if let convention = convention {
+            return date.formatted(using: convention).dateTime
+        } else {
+            return date.formatted(date: .abbreviated, time: .shortened)
+        }
     }
 }

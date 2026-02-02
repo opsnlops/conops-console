@@ -38,13 +38,18 @@ final class ConopsServerClient: ConopsServerProtocol {
     }
 
     func makeURL(for endpoint: String, queryItems: [URLQueryItem] = []) -> URL {
-        var components = URLComponents(
-            url: makeBaseURL(for: .http).appendingPathComponent(endpoint),
-            resolvingAgainstBaseURL: false)
+        // Use string concatenation instead of appendingPathComponent to avoid
+        // unexpected behavior with path components
+        let baseString = makeBaseURL(for: .http).absoluteString
+        let separator = baseString.hasSuffix("/") ? "" : "/"
+        let cleanEndpoint = endpoint.hasPrefix("/") ? String(endpoint.dropFirst()) : endpoint
+        let fullURLString = baseString + separator + cleanEndpoint
+
+        var components = URLComponents(string: fullURLString)
         if !queryItems.isEmpty {
             components?.queryItems = queryItems
         }
-        return components?.url ?? makeBaseURL(for: .http).appendingPathComponent(endpoint)
+        return components?.url ?? URL(string: fullURLString)!
     }
 
     // Fetch data from the server
@@ -126,9 +131,43 @@ final class ConopsServerClient: ConopsServerProtocol {
         dtoType: DTO.Type,
         transform: (DTO) -> Object
     ) -> Result<Object, ServerError> {
-        guard response is HTTPURLResponse else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             logger.error("Response is not of type HTTPURLResponse")
             return .failure(.serverError("Invalid response"))
+        }
+
+        let statusCode = httpResponse.statusCode
+        let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type") ?? ""
+        logger.debug("HTTP status code: \(statusCode), Content-Type: \(contentType)")
+
+        // Check for non-success status codes before trying to parse JSON
+        if statusCode < 200 || statusCode >= 300 {
+            let bodyString = String(data: data, encoding: .utf8) ?? "(empty or binary)"
+            logger.error(
+                "HTTP error \(statusCode): \(bodyString.prefix(500), privacy: .public)")
+
+            // Try to parse as API error response if it's JSON
+            if contentType.contains("application/json"),
+               let serverStatus = try? JSONDecoder().decode(
+                ServerStatus<EmptyDTO>.self, from: data)
+            {
+                let message = serverStatus.message ?? "HTTP \(statusCode)"
+                return .failure(.apiError(statusCode, message))
+            }
+
+            // Handle HTML error pages (WAF, proxy errors, etc.)
+            if contentType.contains("text/html") {
+                let friendlyMessage = extractHtmlErrorMessage(from: bodyString, statusCode: statusCode)
+                return .failure(.apiError(statusCode, friendlyMessage))
+            }
+
+            return .failure(.apiError(statusCode, "HTTP \(statusCode): \(bodyString.prefix(200))"))
+        }
+
+        // Verify we're getting JSON before trying to parse
+        if !contentType.contains("application/json") && !data.isEmpty {
+            let bodyPreview = String(data: data, encoding: .utf8)?.prefix(200) ?? "(binary)"
+            logger.warning("Unexpected Content-Type '\(contentType)': \(bodyPreview)")
         }
 
         let decoder = JSONDecoder()
@@ -146,9 +185,15 @@ final class ConopsServerClient: ConopsServerProtocol {
                 .withInternetDateTime, .withFractionalSeconds,
             ]
 
-            // Try fractional first, fallback to standard ISO8601
+            // Date-only formatter for YYYY-MM-DD format (used by birthday, convention start/end dates)
+            let dateOnlyFormatter = DateFormatter()
+            dateOnlyFormatter.dateFormat = "yyyy-MM-dd"
+            dateOnlyFormatter.timeZone = TimeZone(identifier: "UTC")
+
+            // Try fractional first, then standard ISO8601, then date-only
             if let date = iso8601FractionalFormatter.date(from: dateString)
                 ?? iso8601StandardFormatter.date(from: dateString)
+                ?? dateOnlyFormatter.date(from: dateString)
             {
                 return date
             }
@@ -240,6 +285,32 @@ final class ConopsServerClient: ConopsServerProtocol {
             return "Data corrupted: \(context.debugDescription) - \(context.codingPath)"
         @unknown default:
             return "Unknown decoding error"
+        }
+    }
+
+    // Extract a user-friendly message from HTML error pages
+    private func extractHtmlErrorMessage(from html: String, statusCode: Int) -> String {
+        // Try to extract <title> content
+        if let titleRange = html.range(of: "<title>"),
+           let titleEndRange = html.range(of: "</title>", range: titleRange.upperBound..<html.endIndex) {
+            let title = String(html[titleRange.upperBound..<titleEndRange.lowerBound])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !title.isEmpty && title.count < 100 {
+                return "\(title) (HTTP \(statusCode))"
+            }
+        }
+
+        // Fallback to generic messages based on status code
+        switch statusCode {
+        case 401: return "Authentication required"
+        case 403: return "Access denied by server security"
+        case 404: return "Resource not found"
+        case 429: return "Too many requests - please wait"
+        case 500: return "Server error"
+        case 502: return "Bad gateway - server may be down"
+        case 503: return "Service unavailable"
+        case 504: return "Gateway timeout"
+        default: return "Server returned error page (HTTP \(statusCode))"
         }
     }
 

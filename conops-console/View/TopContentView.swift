@@ -160,7 +160,8 @@ struct TopContentView: View {
                 if let convention = selectedConvention {
                     DashboardView(
                         conventionId: convention.id,
-                        compareConventionId: convention.compareTo
+                        compareConventionId: convention.compareTo,
+                        onNavigateToAttendees: { selectedRoute = .attendees }
                     )
                     .id("dashboard-\(convention.id)")
                 } else {

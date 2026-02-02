@@ -9,17 +9,19 @@
 import Foundation
 
 struct ServerConfiguration {
-    static let hostnameKey = "serverHostname"
-    static let portKey = "serverRestPort"
-    static let useTLSKey = "useTLS"
-    static let includeInactiveKey = "includeInactiveConventions"
-    static let lastAuthConventionKey = "lastAuthConvention"
-    static let lastAuthUsernameKey = "lastAuthUsername"
+    static let hostnameKey = "conops.server.hostname"
+    static let portKey = "conops.server.port"
+    static let useTLSKey = "conops.server.useTLS"
+    static let includeInactiveKey = "conops.server.includeInactiveConventions"
+    static let showInactiveAttendeesKey = "conops.display.showInactiveAttendees"
+    static let lastAuthConventionKey = "conops.auth.lastConvention"
+    static let lastAuthUsernameKey = "conops.auth.lastUsername"
 
-    static var defaultHostname: String { "127.0.0.1" }
-    static var defaultPort: Int { 8080 }
-    static var defaultUseTLS: Bool { false }
+    static var defaultHostname: String { "furry.enterprises" }
+    static var defaultPort: Int { 443 }
+    static var defaultUseTLS: Bool { true }
     static var defaultIncludeInactive: Bool { false }
+    static var defaultShowInactiveAttendees: Bool { false }
     static var defaultLastAuthConvention: String { "" }
     static var defaultLastAuthUsername: String { "" }
 }
@@ -33,7 +35,10 @@ extension UserDefaults {
     }
 
     var serverPort: Int {
-        get { integer(forKey: ServerConfiguration.portKey) }
+        get {
+            let value = object(forKey: ServerConfiguration.portKey) as? Int
+            return value ?? ServerConfiguration.defaultPort
+        }
         set { set(newValue, forKey: ServerConfiguration.portKey) }
     }
 
@@ -51,6 +56,14 @@ extension UserDefaults {
                 ?? ServerConfiguration.defaultIncludeInactive
         }
         set { set(newValue, forKey: ServerConfiguration.includeInactiveKey) }
+    }
+
+    var showInactiveAttendees: Bool {
+        get {
+            object(forKey: ServerConfiguration.showInactiveAttendeesKey) as? Bool
+                ?? ServerConfiguration.defaultShowInactiveAttendees
+        }
+        set { set(newValue, forKey: ServerConfiguration.showInactiveAttendeesKey) }
     }
 
     var lastAuthConvention: String {

@@ -12,6 +12,10 @@ struct LoginView: View {
     @State private var conventionLoadError: String?
     @State private var isSubmitting = false
     @State private var errorMessage: String?
+    @State private var showServerSettings = false
+    @State private var serverHostname: String
+    @State private var serverPort: String
+    @State private var useTLS: Bool
 
     private let logger = Logger(subsystem: "furry.enterprises.ConopsConsole", category: "LoginView")
     private let canCancel: Bool
@@ -26,6 +30,9 @@ struct LoginView: View {
         let defaults = UserDefaults.standard
         _conventionShortName = State(initialValue: defaults.lastAuthConvention)
         _username = State(initialValue: defaults.lastAuthUsername)
+        _serverHostname = State(initialValue: defaults.serverHostname)
+        _serverPort = State(initialValue: String(defaults.serverPort))
+        _useTLS = State(initialValue: defaults.useTLS)
         self.canCancel = canCancel
         self.onAuthenticated = onAuthenticated
         self.onCancel = onCancel
@@ -38,6 +45,7 @@ struct LoginView: View {
                     conventionSection
                     credentialsSection
                     errorSection
+                    serverSettingsSection
                 }
                 .navigationTitle("Sign In")
                 .navigationBarTitleDisplayMode(.inline)
@@ -73,6 +81,7 @@ struct LoginView: View {
                     conventionSection
                     credentialsSection
                     errorSection
+                    serverSettingsSection
                 }
                 .formStyle(.grouped)
 
@@ -101,7 +110,7 @@ struct LoginView: View {
                 }
                 .padding()
             }
-            .frame(width: 400, height: 320)
+            .frame(width: 400, height: 450)
             .task {
                 await loadConventions()
             }
@@ -167,6 +176,49 @@ struct LoginView: View {
                     .foregroundStyle(.red)
             }
         }
+    }
+
+    @ViewBuilder
+    private var serverSettingsSection: some View {
+        Section {
+            DisclosureGroup("Server Settings", isExpanded: $showServerSettings) {
+                TextField("Hostname", text: $serverHostname)
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                    #endif
+
+                TextField("Port", text: $serverPort)
+                    #if os(iOS)
+                        .keyboardType(.numberPad)
+                    #endif
+
+                Toggle("Use TLS (HTTPS)", isOn: $useTLS)
+
+                Button("Save & Reload") {
+                    saveServerSettings()
+                    Task { await reloadConventions() }
+                }
+                .disabled(serverHostname.isEmpty || serverPort.isEmpty)
+            }
+        }
+    }
+
+    private func saveServerSettings() {
+        let defaults = UserDefaults.standard
+        defaults.serverHostname = serverHostname.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let port = Int(serverPort) {
+            defaults.serverPort = port
+        }
+        defaults.useTLS = useTLS
+        logger.info("Server settings saved: \(serverHostname):\(serverPort) TLS=\(useTLS)")
+    }
+
+    private func reloadConventions() async {
+        conventions = []
+        conventionLoadError = nil
+        await loadConventions()
     }
 
     private var canSubmit: Bool {

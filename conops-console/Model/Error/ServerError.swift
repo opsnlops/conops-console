@@ -19,6 +19,7 @@ public enum ServerError: Error, LocalizedError {
     case websocketError(String)
     case unprocessableEntity(String)
     case notImplemented(String)
+    case apiError(Int, String)
 
 
     public var errorDescription: String? {
@@ -34,6 +35,8 @@ public enum ServerError: Error, LocalizedError {
             .unprocessableEntity(let message),
             .notImplemented(let message):
             return message
+        case .apiError(let code, let message):
+            return "API error \(code): \(message)"
         }
     }
 }
