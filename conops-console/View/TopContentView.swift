@@ -59,7 +59,7 @@ struct TopContentView: View {
                             Button {
                                 Task {
                                     isSyncing = true
-                                    let syncResult = await performFullSync(forceFullSync: true)
+                                    let syncResult = await performSync(forceFullSync: true)
                                     isSyncing = false
                                     switch syncResult {
                                     case .success(let message):
@@ -114,7 +114,7 @@ struct TopContentView: View {
                         Button {
                             Task {
                                 isSyncing = true
-                                let syncResult = await performFullSync(forceFullSync: true)
+                                let syncResult = await performSync(forceFullSync: true)
                                 isSyncing = false
                                 switch syncResult {
                                 case .success(let message):
@@ -248,6 +248,7 @@ struct TopContentView: View {
         }
         .onAppear {
             appState.conventions = conventions
+            appState.performSync = { [self] in await performSync() }
             applyConventionSelection(from: conventions)
         }
         .onReceive(NotificationCenter.default.publisher(for: .authDidLogout)) { _ in
@@ -314,7 +315,7 @@ struct TopContentView: View {
         await MainActor.run {
             isSyncing = true
         }
-        let syncResult = await performFullSync()
+        let syncResult = await performSync()
         await MainActor.run {
             isSyncing = false
         }
@@ -337,7 +338,7 @@ struct TopContentView: View {
                 await MainActor.run {
                     isSyncing = true
                 }
-                let result = await performFullSync()
+                let result = await performSync()
                 await MainActor.run {
                     isSyncing = false
                 }

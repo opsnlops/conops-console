@@ -19,6 +19,7 @@ struct ConventionDetailView: View {
 
     @Environment(\.modelContext) var context
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var appState: AppState
 
     var convention: Convention
 
@@ -114,6 +115,14 @@ struct ConventionDetailView: View {
         .onAppear {
             logger.debug("ConventionDetailView appeared for \(convention.longName)")
         }
+        .refreshable {
+            if let performSync = appState.performSync {
+                let result = await performSync()
+                if case .failure(let error) = result {
+                    logger.error("Pull-to-refresh sync failed: \(error)")
+                }
+            }
+        }
         .alert(item: $activeAlert) { alert in
             switch alert {
             case .success:
@@ -198,4 +207,5 @@ struct ConventionDetailView: View {
 
 #Preview(traits: .modifier(AttendeePreviewModifier())) {
     ConventionDetailView(convention: .mock())
+        .environmentObject(AppState())
 }

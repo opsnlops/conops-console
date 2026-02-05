@@ -23,7 +23,7 @@ extension TopContentView {
     }
 
     /// Something is weird with this. It makes the preview provider crash by just being present in the file. It's not needed for a preview, so let's tell the compiler to leave it out
-    func performFullSync(forceFullSync: Bool = false) async -> Result<String, ServerError> {
+    func performSync(forceFullSync: Bool = false) async -> Result<String, ServerError> {
 
         logger.info("attempting to perform a full sync of the database")
 
@@ -301,7 +301,7 @@ extension TopContentView {
 
 
     //
-    //            func performFullSync() async -> Result<String, ServerError> {
-    //                return .success("performFullSync skipped")
+    //            func performSync() async -> Result<String, ServerError> {
+    //                return .success("performSync skipped")
     //            }
 }

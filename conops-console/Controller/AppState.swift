@@ -4,6 +4,9 @@ final class AppState: ObservableObject {
     @Published var selectedConventionId: ConventionIdentifier?
     @Published var conventions: [Convention] = []
 
+    /// Callback to perform an incremental sync. Set by TopContentView.
+    var performSync: (() async -> Result<String, ServerError>)?
+
     /// Cached remote printers keyed by convention short name.
     /// Cleared on logout; the user can log out and back in to refresh the list.
     private(set) var cachedRemotePrinters: [String: [String]] = [:]
