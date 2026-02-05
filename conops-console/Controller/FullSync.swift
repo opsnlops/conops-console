@@ -25,7 +25,7 @@ extension TopContentView {
     /// Something is weird with this. It makes the preview provider crash by just being present in the file. It's not needed for a preview, so let's tell the compiler to leave it out
     func performSync(forceFullSync: Bool = false) async -> Result<String, ServerError> {
 
-        logger.info("attempting to perform a full sync of the database")
+        logger.info("attempting to perform a sync of the database")
 
         let client = ConopsServerClient()
         var existingConventions = (try? context.fetch(FetchDescriptor<Convention>())) ?? []
@@ -34,12 +34,13 @@ extension TopContentView {
         let isFullSync = forceFullSync || existingConventions.isEmpty
 
         if isFullSync {
+            // Delete attendees but keep conventions alive so views referencing them
+            // don't crash from detached SwiftData objects. Conventions will be updated
+            // in-place below, and stale ones removed after fetching from the server.
             (try? context.fetch(FetchDescriptor<Attendee>()))?.forEach { context.delete($0) }
-            existingConventions.forEach { context.delete($0) }
             syncState.lastSyncTime = nil
             do {
                 try context.save()
-                existingConventions = []
             } catch {
                 logger.error("Failed to clear SwiftData cache: \(error)")
                 return .failure(.databaseError(error.localizedDescription))
@@ -83,6 +84,15 @@ extension TopContentView {
                 }
             }
             logger.info("successfully loaded the conventions from the server")
+
+            // During full sync, remove conventions that the server no longer returns
+            if isFullSync {
+                let returnedIds = Set(dtos.map(\.id))
+                for existing in existingConventions where !returnedIds.contains(existing.id) {
+                    context.delete(existing)
+                    logger.debug("Removed stale convention \(existing.shortName)")
+                }
+            }
 
             // Now go save the context
             do {
@@ -135,6 +145,21 @@ extension TopContentView {
                 {
                     conventionsToSync.append(compareToConvention.toDTO())
                 }
+            }
+        }
+
+        // Fetch server config for the primary convention only (config is server-wide,
+        // and the JWT is scoped to the auth convention so compareTo would fail auth)
+        if let primaryConvention = conventionsToSync.first {
+            let configResult = await client.getServerConfig(
+                conventionShortName: primaryConvention.shortName)
+            switch configResult {
+            case .success(let config):
+                appState.cacheServerConfig(config, for: primaryConvention.shortName)
+                logger.debug("Cached server config for \(primaryConvention.shortName)")
+            case .failure(let error):
+                logger.warning(
+                    "Failed to fetch server config for \(primaryConvention.shortName): \(error)")
             }
         }
 

@@ -44,6 +44,13 @@ struct EditAttendeeView: View {
     @State private var showActionAlert = false
     @State private var actionMessage = ""
 
+    // MARK: - Check-In State
+    @State private var checkInPaymentAmount: String = ""
+    @State private var checkInPaymentType: TransactionTypeOption = .creditCardIn
+    @State private var checkInConsentFormPresent: Bool = false
+    @State private var checkInPrintBadge: Bool = true
+    @State private var isCheckingIn: Bool = false
+
     private var isPad: Bool {
         #if os(iOS)
             return UIDevice.current.userInterfaceIdiom == .pad
@@ -52,8 +59,31 @@ struct EditAttendeeView: View {
         #endif
     }
 
+    private var useRemotePrinter: Bool {
+        appState.serverConfig(for: convention.shortName)?.useRemotePrinter ?? false
+    }
+
     let logger = Logger(
         subsystem: "furry.enterprises.CreatureConsole", category: "EditAttendeeView")
+
+    private var checkInSectionView: AnyView {
+        AnyView(
+            CheckInSection(
+                attendee: $attendee,
+                convention: convention,
+                membershipLevels: convention.membershipLevels,
+                useRemotePrinter: useRemotePrinter,
+                remotePrinters: remotePrinters,
+                paymentAmount: $checkInPaymentAmount,
+                paymentType: $checkInPaymentType,
+                consentFormPresent: $checkInConsentFormPresent,
+                printBadge: $checkInPrintBadge,
+                selectedPrinter: $selectedPrinter,
+                isCheckingIn: $isCheckingIn,
+                onCheckIn: { performCheckIn() }
+            )
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -69,7 +99,7 @@ struct EditAttendeeView: View {
                         .symbolRenderingMode(.hierarchical)
                         .help("Resend Welcome Message")
 
-                        if remotePrinters.isEmpty == false {
+                        if useRemotePrinter && !remotePrinters.isEmpty {
                             Button {
                                 presentPrintSheet()
                             } label: {
@@ -127,6 +157,7 @@ struct EditAttendeeView: View {
                 }
                 .task {
                     await loadRemotePrinters()
+                    setupCheckInDefaults()
                 }
         }
     }
@@ -143,6 +174,7 @@ struct EditAttendeeView: View {
                     transactions: attendee.transactions,
                     pendingTransactions: pendingTransactions,
                     currentBalance: attendee.currentBalance,
+                    checkInSection: checkInSectionView,
                     onAddTransaction: {
                         showTransactionSheet = true
                     }
@@ -163,6 +195,7 @@ struct EditAttendeeView: View {
                     transactions: attendee.transactions,
                     pendingTransactions: pendingTransactions,
                     currentBalance: attendee.currentBalance,
+                    checkInSection: checkInSectionView,
                     onAddTransaction: {
                         showTransactionSheet = true
                     }
@@ -179,21 +212,20 @@ struct EditAttendeeView: View {
             HStack(alignment: .top, spacing: 0) {
                 // Left column
                 Form {
-                    Section(header: Text("Basic Info")) {
-                        TextField("Badge Name", text: $attendee.badgeName)
-                            .autocorrectionDisabled(true)
-                            .textInputAutocapitalization(.never)
-                        TextField(
-                            "Badge Number",
-                            value: $attendee.badgeNumber,
-                            formatter: NumberFormatter()
-                        )
-                        .keyboardType(.numberPad)
-                        TextField("First Name", text: $attendee.firstName)
-                        TextField("Last Name", text: $attendee.lastName)
-                        DatePicker(
-                            "Birthday", selection: $attendee.birthday, displayedComponents: .date)
-                    }
+                    CheckInSection(
+                        attendee: $attendee,
+                        convention: convention,
+                        membershipLevels: convention.membershipLevels,
+                        useRemotePrinter: useRemotePrinter,
+                        remotePrinters: remotePrinters,
+                        paymentAmount: $checkInPaymentAmount,
+                        paymentType: $checkInPaymentType,
+                        consentFormPresent: $checkInConsentFormPresent,
+                        printBadge: $checkInPrintBadge,
+                        selectedPrinter: $selectedPrinter,
+                        isCheckingIn: $isCheckingIn,
+                        onCheckIn: { performCheckIn() }
+                    )
 
                     Section("Registration") {
                         if convention.membershipLevels.isEmpty {
@@ -247,6 +279,22 @@ struct EditAttendeeView: View {
 
                 // Right column
                 Form {
+                    Section(header: Text("Basic Info")) {
+                        TextField("Badge Name", text: $attendee.badgeName)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                        TextField(
+                            "Badge Number",
+                            value: $attendee.badgeNumber,
+                            formatter: NumberFormatter()
+                        )
+                        .keyboardType(.numberPad)
+                        TextField("First Name", text: $attendee.firstName)
+                        TextField("Last Name", text: $attendee.lastName)
+                        DatePicker(
+                            "Birthday", selection: $attendee.birthday, displayedComponents: .date)
+                    }
+
                     Section("Address") {
                         TextField("Street Address", text: $attendee.addressLine1)
                         TextField(
@@ -456,6 +504,126 @@ struct EditAttendeeView: View {
         }
     }
 
+    private func setupCheckInDefaults() {
+        // Pre-fill payment amount with balance if > 0
+        if attendee.currentBalance > 0 {
+            checkInPaymentAmount = String(format: "%.2f", attendee.currentBalance)
+        }
+        // Default print badge based on membership level's prePrinted flag,
+        // but only if remote printing is enabled on the server
+        if !useRemotePrinter || remotePrinters.isEmpty {
+            checkInPrintBadge = false
+        } else if let level = convention.membershipLevels.first(where: {
+            $0.id == attendee.membershipLevel
+        }) {
+            checkInPrintBadge = !level.prePrinted
+        }
+    }
+
+    func performCheckIn() {
+        guard !isCheckingIn else { return }
+        isCheckingIn = true
+
+        Task {
+            let client = ConopsServerClient()
+
+            // Step 1: Set checkInTime and save attendee with all current edits
+            attendee.checkInTime = Date()
+            let attendeeDTO = attendee.toDTO()
+
+            let updateResult = await client.updateAttendee(
+                attendeeDTO,
+                conventionShortName: convention.shortName,
+                reason: "Check-in",
+                notifyAttendee: false)
+
+            switch updateResult {
+            case .success:
+                break
+            case .failure(let error):
+                logger.error("Check-in failed to update attendee: \(error)")
+                await MainActor.run {
+                    attendee.checkInTime = nil
+                    errorMessage = "Check-in failed: \(error.localizedDescription)"
+                    activeAlert = .error
+                    isCheckingIn = false
+                }
+                return
+            }
+
+            // Step 2: Create payment transaction if balance > 0
+            if attendee.currentBalance > 0 {
+                let formatter = NumberFormatter()
+                formatter.numberStyle = .decimal
+                formatter.locale = Locale.current
+                if let amount = formatter.number(from: checkInPaymentAmount)?.floatValue, amount > 0
+                {
+                    let txnResult = await client.createTransaction(
+                        conventionShortName: convention.shortName,
+                        attendeeId: attendee.id,
+                        amount: -amount,
+                        type: checkInPaymentType,
+                        notes: "Check-in payment")
+
+                    if case .failure(let error) = txnResult {
+                        logger.error("Check-in payment failed: \(error)")
+                        await MainActor.run {
+                            errorMessage =
+                                "Checked in, but payment failed: \(error.localizedDescription)"
+                            activeAlert = .error
+                        }
+                    }
+                }
+            }
+
+            // Step 3: Print badge if toggled on and printer selected
+            if checkInPrintBadge && selectedPrinter.isEmpty == false {
+                let printResult = await client.printBadge(
+                    conventionShortName: convention.shortName,
+                    attendeeId: attendee.id,
+                    printerName: selectedPrinter)
+
+                if case .failure(let error) = printResult {
+                    logger.error("Check-in badge print failed: \(error)")
+                    await MainActor.run {
+                        errorMessage =
+                            "Checked in, but badge print failed: \(error.localizedDescription)"
+                        activeAlert = .error
+                    }
+                }
+            }
+
+            // Step 4: Refresh attendee from server
+            let refreshResult = await client.getAttendee(
+                conventionShortName: convention.shortName,
+                attendeeId: attendee.id)
+
+            await MainActor.run {
+                switch refreshResult {
+                case .success(let refreshedDTO):
+                    let refreshed = Attendee.fromDTO(refreshedDTO)
+                    attendee.update(from: refreshed)
+                    do {
+                        try context.save()
+                    } catch {
+                        logger.error("Failed to save checked-in attendee to SwiftData: \(error)")
+                    }
+                case .failure(let error):
+                    logger.error("Failed to refresh attendee after check-in: \(error)")
+                }
+
+                isCheckingIn = false
+
+                #if os(iOS)
+                    let generator = UINotificationFeedbackGenerator()
+                    generator.notificationOccurred(.success)
+                #endif
+
+                dismiss()
+            }
+        }
+    }
+
     private var saveSheet: some View {
         NavigationStack {
             Form {
@@ -642,6 +810,9 @@ struct EditAttendeeView: View {
     }
 
     private func loadRemotePrinters() async {
+        // Skip loading printers if remote printing is disabled in server config
+        guard useRemotePrinter else { return }
+
         // Check cache first
         if let cached = appState.remotePrinters(for: convention.shortName) {
             await MainActor.run {

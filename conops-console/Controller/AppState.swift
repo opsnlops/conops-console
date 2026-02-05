@@ -11,6 +11,10 @@ final class AppState: ObservableObject {
     /// Cleared on logout; the user can log out and back in to refresh the list.
     private(set) var cachedRemotePrinters: [String: [String]] = [:]
 
+    /// Cached server configuration keyed by convention short name.
+    /// Refreshed on every sync; cleared on logout.
+    private(set) var cachedServerConfig: [String: ServerConfigDTO] = [:]
+
     private var logoutObserver: NSObjectProtocol?
 
     init() {
@@ -20,6 +24,7 @@ final class AppState: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             self?.clearPrinterCache()
+            self?.clearConfigCache()
         }
     }
 
@@ -39,5 +44,17 @@ final class AppState: ObservableObject {
 
     func clearPrinterCache() {
         cachedRemotePrinters.removeAll()
+    }
+
+    func serverConfig(for conventionShortName: String) -> ServerConfigDTO? {
+        cachedServerConfig[conventionShortName]
+    }
+
+    func cacheServerConfig(_ config: ServerConfigDTO, for conventionShortName: String) {
+        cachedServerConfig[conventionShortName] = config
+    }
+
+    func clearConfigCache() {
+        cachedServerConfig.removeAll()
     }
 }

@@ -80,4 +80,13 @@ extension ConopsServerClient {
             ()
         }
     }
+
+    func getServerConfig(conventionShortName: String) async -> Result<ServerConfigDTO, ServerError>
+    {
+        return await fetchData(
+            "config/\(conventionShortName)",
+            dtoType: ServerConfigDTO.self,
+            returnType: ServerConfigDTO.self
+        ) { $0 }
+    }
 }

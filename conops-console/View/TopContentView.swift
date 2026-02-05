@@ -17,7 +17,7 @@ struct TopContentView: View {
     }
 
     @Environment(\.modelContext) var context
-    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject var appState: AppState
 
     @Query(sort: \Convention.startDate, order: .reverse)
     private var conventions: [Convention]
@@ -222,6 +222,8 @@ struct TopContentView: View {
                 // On successful authentication
                 if loginCanCancel {
                     // User was re-authenticating after clicking logout
+                    // Clear selection first so detail views stop rendering before data is deleted
+                    appState.selectedConventionId = nil
                     // Just clear the cache, don't post logout notification (which would trigger another login)
                     let clearResult = SyncCache.clear(context: context, logger: logger)
                     if case .failure(let error) = clearResult {
