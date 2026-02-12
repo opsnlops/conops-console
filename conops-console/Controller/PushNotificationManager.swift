@@ -20,6 +20,7 @@ final class PushNotificationManager: ObservableObject {
     private static let savedTokenKey = "conops.push.savedDeviceToken"
     private static let savedConventionKey = "conops.push.savedConventionShortName"
 
+    private var pendingConventionShortName: String?
     private var logoutObserver: NSObjectProtocol?
 
     private init() {
@@ -63,6 +64,12 @@ final class PushNotificationManager: ObservableObject {
         let tokenString = tokenData.map { String(format: "%02x", $0) }.joined()
         logger.info("Received APNs device token: \(tokenString.prefix(8))...")
         self.deviceToken = tokenString
+
+        // If we were waiting for a token to register with the server, do it now
+        if let conventionShortName = pendingConventionShortName {
+            pendingConventionShortName = nil
+            sendTokenToServer(conventionShortName: conventionShortName)
+        }
     }
 
     func didFailToRegisterForRemoteNotifications(error: Error) {
@@ -71,7 +78,8 @@ final class PushNotificationManager: ObservableObject {
 
     func sendTokenToServer(conventionShortName: String) {
         guard let token = deviceToken else {
-            logger.debug("No device token available to send to server")
+            logger.debug("No device token yet, will send when it arrives")
+            pendingConventionShortName = conventionShortName
             return
         }
 
