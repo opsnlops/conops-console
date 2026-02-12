@@ -245,6 +245,11 @@ struct LoginView: View {
             AuthStore.shared.save(token: response.accessToken)
             UserDefaults.standard.lastAuthConvention = conventionShortName
             UserDefaults.standard.lastAuthUsername = username
+
+            // Register for push notifications after login
+            PushNotificationManager.shared.requestPermissionAndRegister()
+            PushNotificationManager.shared.sendTokenToServer(conventionShortName: conventionShortName)
+
             dismiss()
             onAuthenticated()
         case .failure(let error):

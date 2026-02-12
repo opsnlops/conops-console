@@ -13,8 +13,15 @@ import SwiftUI
 @main
 struct ConopsConsoleApp: App {
 
+    #if os(iOS)
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #elseif os(macOS)
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #endif
+
     @StateObject private var appState = AppState()
     @StateObject private var authManager = BiometricAuthManager()
+    @StateObject private var pushManager = PushNotificationManager.shared
     @Environment(\.scenePhase) private var scenePhase
     let modelContainer: ModelContainer
 
