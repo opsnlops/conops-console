@@ -121,7 +121,7 @@ final class PushNotificationManager: ObservableObject {
         }
     }
 
-    private func handleLogout() {
+    func handleLogout() {
         guard let token = deviceToken ?? UserDefaults.standard.string(forKey: Self.savedTokenKey),
               let conventionShortName = UserDefaults.standard.string(forKey: Self.savedConventionKey),
               !conventionShortName.isEmpty
@@ -129,6 +129,9 @@ final class PushNotificationManager: ObservableObject {
             clearSavedToken()
             return
         }
+
+        // Clear saved token immediately so re-login always re-registers
+        clearSavedToken()
 
         Task {
             let client = ConopsServerClient()
@@ -143,8 +146,6 @@ final class PushNotificationManager: ObservableObject {
             case .failure(let error):
                 logger.warning("Failed to unregister device token on logout: \(error.localizedDescription)")
             }
-
-            clearSavedToken()
         }
     }
 
