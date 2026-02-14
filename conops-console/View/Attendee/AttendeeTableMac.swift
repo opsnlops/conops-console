@@ -98,7 +98,8 @@
         @Binding var sortDescriptor: AttendeeSortDescriptor
 
         private func membershipLevelName(for id: MembershipLevelIdentifier) -> String {
-            convention.membershipLevels.first { $0.id == id }?.shortName ?? ""
+            guard convention.modelContext != nil else { return "" }
+            return convention.membershipLevels.first { $0.id == id }?.shortName ?? ""
         }
 
         func makeNSView(context: Context) -> NSScrollView {
@@ -322,7 +323,11 @@
 
                 switch tableColumn?.identifier.rawValue {
                 case "badgeName":
-                    cellView.stringValue = attendee.badgeName
+                    if attendee.checkInTime != nil {
+                        cellView.stringValue = "\u{2713} \(attendee.badgeName)"
+                    } else {
+                        cellView.stringValue = attendee.badgeName
+                    }
                     cellView.textColor = .labelColor
                 case "badgeNumber":
                     cellView.stringValue = String(attendee.badgeNumber)
@@ -375,6 +380,15 @@
                 }
 
                 return cellView
+            }
+
+            func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+                guard row < attendees.count else { return nil }
+                let rowView = NSTableRowView()
+                if attendees[row].checkInTime != nil {
+                    rowView.backgroundColor = NSColor.systemGreen.withAlphaComponent(0.1)
+                }
+                return rowView
             }
 
             func tableViewSelectionDidChange(_ notification: Notification) {

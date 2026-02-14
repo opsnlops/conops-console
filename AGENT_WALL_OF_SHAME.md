@@ -19,3 +19,11 @@ Agent: OpenCode
 Date: Jan 25 2026
 
 I scattered DTO mapping logic across the codebase instead of centralizing it.
+
+---
+Agent: Claude Code Opus 4.5
+Date: Feb 1 2026
+
+I duplicated birthday formatting/parsing methods across 6+ action beans instead of
+using the existing centralized methods in Attendee.java. Had to be asked "Are you
+keeping the code DRY?" before I noticed.

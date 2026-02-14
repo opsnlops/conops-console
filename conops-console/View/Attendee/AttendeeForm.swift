@@ -13,30 +13,38 @@ struct AttendeeForm: View {
     @Binding var attendee: Attendee
     var convention: Convention?
     var membershipLevels: [MembershipLevel] = []
+    var showBadgeNumber: Bool = true
     var showTransactions: Bool = false
     var transactions: [Transaction] = []
     var pendingTransactions: [PendingTransaction] = []
     var currentBalance: Float = 0
+    var checkInSection: AnyView? = nil
     var onAddTransaction: (() -> Void)?
 
     var onSave: (() -> Void)?
 
     var body: some View {
         Form {
+            if let checkInSection {
+                checkInSection
+            }
+
             Section(header: Text("Basic Info")) {
                 TextField("Badge Name", text: $attendee.badgeName)
                     .autocorrectionDisabled(true)
                     #if os(iOS)
                         .textInputAutocapitalization(.never)
                     #endif
-                TextField(
-                    "Badge Number",
-                    value: $attendee.badgeNumber,
-                    formatter: NumberFormatter()
-                )
-                #if os(iOS)
-                    .keyboardType(.numberPad)
-                #endif
+                if showBadgeNumber {
+                    TextField(
+                        "Badge Number",
+                        value: $attendee.badgeNumber,
+                        formatter: NumberFormatter()
+                    )
+                    #if os(iOS)
+                        .keyboardType(.numberPad)
+                    #endif
+                }
                 TextField("First Name", text: $attendee.firstName)
                 TextField("Last Name", text: $attendee.lastName)
                 DatePicker("Birthday", selection: $attendee.birthday, displayedComponents: .date)
@@ -51,6 +59,21 @@ struct AttendeeForm: View {
                         ForEach(membershipLevels, id: \.id) { level in
                             Text(level.longName)
                                 .tag(level.id)
+                        }
+                    }
+                }
+
+                if let convention = convention, convention.shirtSizes.isEmpty == false {
+                    Picker(
+                        "Shirt Size",
+                        selection: Binding(
+                            get: { attendee.shirtSize ?? "" },
+                            set: { attendee.shirtSize = $0.isEmpty ? nil : $0 }
+                        )
+                    ) {
+                        Text("None").tag("")
+                        ForEach(convention.shirtSizes.sorted(), id: \.id) { size in
+                            Text(size.size).tag(size.size)
                         }
                     }
                 }

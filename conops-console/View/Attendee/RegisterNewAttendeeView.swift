@@ -62,22 +62,26 @@ struct RegisterNewAttendeeView: View {
                         AttendeeForm(
                             attendee: $attendee,
                             convention: convention,
-                            membershipLevels: membershipLevels
-                        ) {
-                            onAttendeeSave(attendee)
-                            dismiss()
-                        }
+                            membershipLevels: membershipLevels,
+                            showBadgeNumber: false,
+                            onSave: {
+                                onAttendeeSave(attendee)
+                                dismiss()
+                            }
+                        )
                     }
                 }
             #else
                 AttendeeForm(
                     attendee: $attendee,
                     convention: convention,
-                    membershipLevels: membershipLevels
-                ) {
-                    onAttendeeSave(attendee)
-                    dismiss()
-                }
+                    membershipLevels: membershipLevels,
+                    showBadgeNumber: false,
+                    onSave: {
+                        onAttendeeSave(attendee)
+                        dismiss()
+                    }
+                )
             #endif
         }
         .navigationTitle("Register New Attendee")

@@ -119,6 +119,11 @@ struct AttendeeTable: View {
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
+                                if attendee.checkInTime != nil {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.green)
+                                        .font(.caption)
+                                }
                                 Text(attendee.badgeName)
                                     .font(.headline)
                                 Text("#\(attendee.badgeNumber)")

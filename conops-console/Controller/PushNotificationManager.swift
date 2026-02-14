@@ -21,27 +21,17 @@ final class PushNotificationManager: ObservableObject {
     private static let savedConventionKey = "conops.push.savedConventionShortName"
 
     private var pendingConventionShortName: String?
-    private var logoutObserver: NSObjectProtocol?
 
-    private init() {
-        logoutObserver = NotificationCenter.default.addObserver(
-            forName: .authDidLogout,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in
-                self?.handleLogout()
-            }
-        }
-    }
+    private init() {}
 
     func requestPermissionAndRegister() {
+        logger.info("requestPermissionAndRegister() called")
         Task {
             let center = UNUserNotificationCenter.current()
             do {
                 let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
                 if granted {
-                    logger.info("Push notification permission granted")
+                    logger.info("Push notification permission granted, registering for remote notifications")
                     registerForRemoteNotifications()
                 } else {
                     logger.info("Push notification permission denied by user")
@@ -67,6 +57,7 @@ final class PushNotificationManager: ObservableObject {
 
         // If we were waiting for a token to register with the server, do it now
         if let conventionShortName = pendingConventionShortName {
+            logger.info("Had pending convention '\(conventionShortName)', sending token now")
             pendingConventionShortName = nil
             sendTokenToServer(conventionShortName: conventionShortName)
         }
@@ -77,8 +68,12 @@ final class PushNotificationManager: ObservableObject {
     }
 
     func sendTokenToServer(conventionShortName: String) {
+        logger.info(
+            "sendTokenToServer called for '\(conventionShortName)' (deviceToken=\(self.deviceToken != nil ? "present" : "nil"))"
+        )
+
         guard let token = deviceToken else {
-            logger.debug("No device token yet, will send when it arrives")
+            logger.info("No device token yet, saving pending convention '\(conventionShortName)'")
             pendingConventionShortName = conventionShortName
             return
         }
@@ -87,9 +82,13 @@ final class PushNotificationManager: ObservableObject {
         let savedToken = UserDefaults.standard.string(forKey: Self.savedTokenKey)
         let savedConvention = UserDefaults.standard.string(forKey: Self.savedConventionKey)
         if savedToken == token && savedConvention == conventionShortName {
-            logger.debug("Device token already registered for this convention, skipping")
+            logger.info("Device token already registered for '\(conventionShortName)', skipping")
             return
         }
+
+        logger.info(
+            "Registering token \(token.prefix(8))... for '\(conventionShortName)' (savedToken=\(savedToken?.prefix(8) ?? "nil"), savedConvention=\(savedConvention ?? "nil"))"
+        )
 
         #if os(iOS)
         let platform = "ios"
@@ -102,6 +101,7 @@ final class PushNotificationManager: ObservableObject {
         let deviceName = Self.currentDeviceName()
 
         Task {
+            logger.info("Starting device token registration API call")
             let client = ConopsServerClient()
             let result = await client.registerDeviceToken(
                 shortName: conventionShortName,
@@ -116,19 +116,27 @@ final class PushNotificationManager: ObservableObject {
                 UserDefaults.standard.set(token, forKey: Self.savedTokenKey)
                 UserDefaults.standard.set(conventionShortName, forKey: Self.savedConventionKey)
             case .failure(let error):
-                logger.error("Failed to register device token with server: \(error.localizedDescription)")
+                logger.error(
+                    "Failed to register device token with server: \(error.localizedDescription)")
             }
         }
     }
 
     func handleLogout() {
+        logger.info(
+            "handleLogout called (deviceToken=\(self.deviceToken != nil ? "present" : "nil"))")
+
         guard let token = deviceToken ?? UserDefaults.standard.string(forKey: Self.savedTokenKey),
-              let conventionShortName = UserDefaults.standard.string(forKey: Self.savedConventionKey),
-              !conventionShortName.isEmpty
+            let conventionShortName = UserDefaults.standard.string(forKey: Self.savedConventionKey),
+            !conventionShortName.isEmpty
         else {
+            logger.info("No token or convention to unregister, clearing saved state")
             clearSavedToken()
             return
         }
+
+        logger.info(
+            "Unregistering token \(token.prefix(8))... from '\(conventionShortName)' on logout")
 
         // Clear saved token immediately so re-login always re-registers
         clearSavedToken()
@@ -144,7 +152,8 @@ final class PushNotificationManager: ObservableObject {
             case .success:
                 logger.info("Device token unregistered from server on logout")
             case .failure(let error):
-                logger.warning("Failed to unregister device token on logout: \(error.localizedDescription)")
+                logger.warning(
+                    "Failed to unregister device token on logout: \(error.localizedDescription)")
             }
         }
     }

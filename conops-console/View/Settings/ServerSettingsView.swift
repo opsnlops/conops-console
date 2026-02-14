@@ -13,6 +13,8 @@ import SwiftUI
 struct ServerSettingsView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var appState: AppState
+    @ObservedObject private var pushManager = PushNotificationManager.shared
     @StateObject private var viewModel = ServerSettingsViewModel()
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -62,11 +64,27 @@ struct ServerSettingsView: View {
                 }
             }
 
+            Section(header: Text("Device")) {
+                if let token = pushManager.deviceToken {
+                    TextField("APNs Device Token", text: .constant(token))
+                        .textSelection(.enabled)
+                        #if os(iOS)
+                            .font(.system(.caption, design: .monospaced))
+                        #elseif os(macOS)
+                            .font(.system(.body, design: .monospaced))
+                        #endif
+                } else {
+                    Text("No device token")
+                        .foregroundColor(.secondary)
+                }
+            }
+
             Section(header: Text("Authentication")) {
                 Button {
                     Task {
                         let result = await MainActor.run {
-                            SessionManager.logout(context: context, logger: logger)
+                            SessionManager.logout(
+                                context: context, appState: appState, logger: logger)
                         }
                         if case .failure(let error) = result {
                             await MainActor.run {

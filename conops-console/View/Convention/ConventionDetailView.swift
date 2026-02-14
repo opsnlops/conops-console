@@ -154,19 +154,23 @@ struct ConventionDetailView: View {
         switch result {
         case .success(let incomingAttendee):
 
-            // Assign convention and update the local model.
-            newAttendee.conventionId = convention.id
+            // Remove the form attendee if SwiftData auto-tracked it (it has a placeholder
+            // id of 0 that must not be persisted).
+            if newAttendee.modelContext != nil {
+                context.delete(newAttendee)
+            }
 
-            let updatedAttendee = Attendee.fromDTO(incomingAttendee)
-            newAttendee.update(from: updatedAttendee)
-
-            context.insert(newAttendee)
+            // Build a fresh model from the server response so we never mutate the unique
+            // id attribute on a tracked object (undefined behavior in SwiftData).
+            let serverAttendee = Attendee.fromDTO(incomingAttendee)
+            serverAttendee.conventionId = convention.id
+            context.insert(serverAttendee)
 
             do {
                 try context.save()
                 logger.debug("Successfully saved attendee")
 
-                alertMessage = "Registered \(newAttendee.badgeName)!"
+                alertMessage = "Registered \(serverAttendee.badgeName)!"
                 activeAlert = .success
 
             } catch {

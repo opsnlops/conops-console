@@ -72,6 +72,46 @@ struct AttendeeCreateRequest: Encodable {
     let emergencyContact: String?
     let shirtSize: String?
     let referral: String?
+    let volunteer: Bool
+    let dealerInterest: Bool
+
+    init(
+        firstName: String,
+        lastName: String,
+        badgeName: String,
+        membershipLevelId: MembershipLevelIdentifier,
+        birthday: Date,
+        emailAddress: String,
+        addressLine1: String,
+        addressLine2: String?,
+        city: String,
+        state: String,
+        postalCode: String,
+        phoneNumber: String?,
+        emergencyContact: String?,
+        shirtSize: String?,
+        referral: String?,
+        volunteer: Bool = false,
+        dealerInterest: Bool = false
+    ) {
+        self.firstName = firstName
+        self.lastName = lastName
+        self.badgeName = badgeName
+        self.membershipLevelId = membershipLevelId
+        self.birthday = birthday
+        self.emailAddress = emailAddress
+        self.addressLine1 = addressLine1
+        self.addressLine2 = addressLine2
+        self.city = city
+        self.state = state
+        self.postalCode = postalCode
+        self.phoneNumber = phoneNumber
+        self.emergencyContact = emergencyContact
+        self.shirtSize = shirtSize
+        self.referral = referral
+        self.volunteer = volunteer
+        self.dealerInterest = dealerInterest
+    }
 
     enum CodingKeys: String, CodingKey {
         case firstName = "first_name"
@@ -89,6 +129,8 @@ struct AttendeeCreateRequest: Encodable {
         case emergencyContact = "emergency_contact"
         case shirtSize = "shirt_size"
         case referral
+        case volunteer
+        case dealerInterest = "dealer_interest"
     }
 
     func encode(to encoder: Encoder) throws {
@@ -108,6 +150,8 @@ struct AttendeeCreateRequest: Encodable {
         try container.encode(emergencyContact, forKey: .emergencyContact)
         try container.encode(shirtSize, forKey: .shirtSize)
         try container.encode(referral, forKey: .referral)
+        try container.encode(volunteer, forKey: .volunteer)
+        try container.encode(dealerInterest, forKey: .dealerInterest)
     }
 }
 

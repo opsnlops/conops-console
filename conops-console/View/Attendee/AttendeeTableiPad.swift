@@ -26,7 +26,8 @@
         )
 
         private func membershipLevelName(for id: MembershipLevelIdentifier) -> String {
-            convention.membershipLevels.first { $0.id == id }?.shortName ?? ""
+            guard convention.modelContext != nil else { return "" }
+            return convention.membershipLevels.first { $0.id == id }?.shortName ?? ""
         }
 
         var body: some View {
@@ -58,6 +59,11 @@
                     .width(1)
                 TableColumn("Name", value: \.badgeName) { attendee in
                     HStack {
+                        if attendee.checkInTime != nil {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                                .font(.caption)
+                        }
                         Text(attendee.badgeName)
                         if attendee.minor {
                             MinorBadge()
