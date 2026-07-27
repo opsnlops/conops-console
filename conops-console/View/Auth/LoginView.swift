@@ -19,11 +19,16 @@ struct LoginView: View {
 
     private let logger = Logger(subsystem: "furry.enterprises.ConopsConsole", category: "LoginView")
     private let canCancel: Bool
+    /// Explains why the user is being asked to sign in, when they didn't ask to.
+    /// Carried here rather than shown as an alert, since this sheet is often
+    /// presented in the same turn and the two would compete.
+    private let notice: String?
     private let onAuthenticated: () -> Void
     private let onCancel: (() -> Void)?
 
     init(
         canCancel: Bool = false,
+        notice: String? = nil,
         onAuthenticated: @escaping () -> Void,
         onCancel: (() -> Void)? = nil
     ) {
@@ -34,6 +39,7 @@ struct LoginView: View {
         _serverPort = State(initialValue: String(defaults.serverPort))
         _useTLS = State(initialValue: defaults.useTLS)
         self.canCancel = canCancel
+        self.notice = notice
         self.onAuthenticated = onAuthenticated
         self.onCancel = onCancel
     }
@@ -42,6 +48,7 @@ struct LoginView: View {
         #if os(iOS)
             NavigationStack {
                 Form {
+                    noticeSection
                     conventionSection
                     credentialsSection
                     errorSection
@@ -78,6 +85,7 @@ struct LoginView: View {
         #else
             VStack(spacing: 0) {
                 Form {
+                    noticeSection
                     conventionSection
                     credentialsSection
                     errorSection
@@ -115,6 +123,16 @@ struct LoginView: View {
                 await loadConventions()
             }
         #endif
+    }
+
+    @ViewBuilder
+    private var noticeSection: some View {
+        if let notice {
+            Section {
+                Label(notice, systemImage: "clock.badge.exclamationmark")
+                    .foregroundStyle(.orange)
+            }
+        }
     }
 
     @ViewBuilder
@@ -248,7 +266,8 @@ struct LoginView: View {
 
             // Register for push notifications after login
             PushNotificationManager.shared.requestPermissionAndRegister()
-            PushNotificationManager.shared.sendTokenToServer(conventionShortName: conventionShortName)
+            PushNotificationManager.shared.sendTokenToServer(
+                conventionShortName: conventionShortName)
 
             dismiss()
             onAuthenticated()

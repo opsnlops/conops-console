@@ -3,7 +3,11 @@ import OSLog
 import UserNotifications
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
+#endif
+
+#if canImport(AppKit)
+    import AppKit
 #endif
 
 @MainActor
@@ -29,24 +33,29 @@ final class PushNotificationManager: ObservableObject {
         Task {
             let center = UNUserNotificationCenter.current()
             do {
-                let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                let granted = try await center.requestAuthorization(options: [
+                    .alert, .sound, .badge,
+                ])
                 if granted {
-                    logger.info("Push notification permission granted, registering for remote notifications")
+                    logger.info(
+                        "Push notification permission granted, registering for remote notifications"
+                    )
                     registerForRemoteNotifications()
                 } else {
                     logger.info("Push notification permission denied by user")
                 }
             } catch {
-                logger.error("Failed to request notification permission: \(error.localizedDescription)")
+                logger.error(
+                    "Failed to request notification permission: \(error.localizedDescription)")
             }
         }
     }
 
     private func registerForRemoteNotifications() {
         #if os(iOS)
-        UIApplication.shared.registerForRemoteNotifications()
+            UIApplication.shared.registerForRemoteNotifications()
         #elseif os(macOS)
-        NSApplication.shared.registerForRemoteNotifications()
+            NSApplication.shared.registerForRemoteNotifications()
         #endif
     }
 
@@ -91,11 +100,11 @@ final class PushNotificationManager: ObservableObject {
         )
 
         #if os(iOS)
-        let platform = "ios"
+            let platform = "ios"
         #elseif os(macOS)
-        let platform = "macos"
+            let platform = "macos"
         #else
-        let platform = "ios"
+            let platform = "ios"
         #endif
 
         let deviceName = Self.currentDeviceName()
@@ -158,6 +167,18 @@ final class PushNotificationManager: ObservableObject {
         }
     }
 
+    /// Clears local push state without calling the server.
+    ///
+    /// Used when the server has already rejected our session. The unregister
+    /// request `handleLogout()` makes would be sent with the token the server
+    /// just refused, so it can only 401 — and that 401 would re-post
+    /// `.authSessionExpired`. The registration is left on the server, which
+    /// prunes it when APNs reports the token as no longer valid.
+    func handleSessionExpired() {
+        logger.info("Session expired; clearing saved push token without contacting the server")
+        clearSavedToken()
+    }
+
     private func clearSavedToken() {
         UserDefaults.standard.removeObject(forKey: Self.savedTokenKey)
         UserDefaults.standard.removeObject(forKey: Self.savedConventionKey)
@@ -165,11 +186,11 @@ final class PushNotificationManager: ObservableObject {
 
     private static func currentDeviceName() -> String {
         #if os(iOS)
-        return UIDevice.current.name
+            return UIDevice.current.name
         #elseif os(macOS)
-        return Host.current().localizedName ?? "Mac"
+            return Host.current().localizedName ?? "Mac"
         #else
-        return "Unknown"
+            return "Unknown"
         #endif
     }
 }
