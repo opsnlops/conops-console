@@ -14,9 +14,9 @@ import SwiftUI
 struct ConopsConsoleApp: App {
 
     #if os(iOS)
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+        @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     #elseif os(macOS)
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+        @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     #endif
 
     @StateObject private var appState = AppState()
@@ -32,6 +32,8 @@ struct ConopsConsoleApp: App {
 
     init() {
         Self.initializeDefaults()
+
+        Self.purgeStoreIfCredentialsMayBeResident()
 
         // Create model container with schema migration handling
         do {
@@ -62,6 +64,42 @@ struct ConopsConsoleApp: App {
                 fatalError("Could not create ModelContainer: \(error)")
             }
         }
+    }
+
+    /// Bump this when a change requires wiping every device's local store.
+    private static let storePurgeGeneration = 1
+    private static let storePurgeGenerationKey = "conops.store.purgeGeneration"
+
+    /// Deletes the local store once, the first time a device runs a build whose
+    /// purge generation is newer than the one it last completed.
+    ///
+    /// Generation 1: until 1.2.0 the Convention model persisted third-party
+    /// service credentials (Slack, Postmark, Twilio, PayPal, messaging) in
+    /// plaintext. Dropping those properties stops new syncs from writing them,
+    /// but it does not guarantee the old values are gone — depending on how
+    /// SwiftData migrates, the bytes can survive in freed SQLite pages and in
+    /// the -wal journal. Deleting the store is the only way to be certain.
+    ///
+    /// The cost is one full re-sync from the server on first launch after the
+    /// upgrade, which is the same path the migration-failure fallback below
+    /// already relies on.
+    private static func purgeStoreIfCredentialsMayBeResident() {
+        let defaults = UserDefaults.standard
+        let completed = defaults.integer(forKey: storePurgeGenerationKey)
+        guard completed < storePurgeGeneration else { return }
+
+        let schema = Schema([Attendee.self, Convention.self, SyncState.self])
+        let storeURL = ModelConfiguration(schema: schema).url
+
+        try? FileManager.default.removeItem(at: storeURL)
+        try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("wal"))
+        try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("shm"))
+
+        // Record completion even if the files were already absent (fresh
+        // install), so this runs at most once per generation.
+        defaults.set(storePurgeGeneration, forKey: storePurgeGenerationKey)
+        logger.info(
+            "Purged local store for generation \(storePurgeGeneration); will re-sync from server")
     }
 
     private static func initializeDefaults() {
