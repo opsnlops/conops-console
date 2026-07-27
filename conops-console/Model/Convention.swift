@@ -31,21 +31,15 @@ final class Convention {
     var badgeClass: String?
     var contactEmailAddress: String?
     var replicationMode: String?
-    var slackWebHook: String?
-    var postmarkServerToken: String?
-    var messagingServiceEndpoint: String?
-    var messagingServiceApiKey: String?
-    var twilioAccountSID: String?
-    var twilioAuthToken: String?
-    var twilioOutgoingNumber: String?
+    // Third-party service credentials (Slack, Postmark, Twilio, PayPal, generic
+    // messaging service) are intentionally not persisted on the client. They
+    // were previously synced in plaintext to SwiftData, which exposed working
+    // credentials to anyone with physical access to a staff device.
     var compareTo: ConventionIdentifier?
     var minBadgeNumber: UInt32
     var dealersDenPresent: Bool
     var dealersDenRegText: String?
     var timeZone: String
-    var paypalAPIUserName: String?
-    var paypalAPIPassword: String?
-    var paypalAPISignature: String?
 
     // For membershipLevels, shirtSizes, and mailTemplates,
     // SwiftData might require special handling.
@@ -78,21 +72,11 @@ final class Convention {
         badgeClass: String? = nil,
         contactEmailAddress: String? = nil,
         replicationMode: String? = nil,
-        slackWebHook: String? = nil,
-        postmarkServerToken: String? = nil,
-        messagingServiceEndpoint: String? = nil,
-        messagingServiceApiKey: String? = nil,
-        twilioAccountSID: String? = nil,
-        twilioAuthToken: String? = nil,
-        twilioOutgoingNumber: String? = nil,
         compareTo: ConventionIdentifier? = nil,
         minBadgeNumber: UInt32,
         dealersDenPresent: Bool,
         dealersDenRegText: String? = nil,
         timeZone: String = "America/Chicago",
-        paypalAPIUserName: String? = nil,
-        paypalAPIPassword: String? = nil,
-        paypalAPISignature: String? = nil,
         membershipLevels: [MembershipLevel],
         shirtSizes: [ShirtSize],
         mailTemplates: [String: String]
@@ -114,21 +98,11 @@ final class Convention {
         self.badgeClass = badgeClass
         self.contactEmailAddress = contactEmailAddress
         self.replicationMode = replicationMode
-        self.slackWebHook = slackWebHook
-        self.postmarkServerToken = postmarkServerToken
-        self.messagingServiceEndpoint = messagingServiceEndpoint
-        self.messagingServiceApiKey = messagingServiceApiKey
-        self.twilioAccountSID = twilioAccountSID
-        self.twilioAuthToken = twilioAuthToken
-        self.twilioOutgoingNumber = twilioOutgoingNumber
         self.compareTo = compareTo
         self.minBadgeNumber = minBadgeNumber
         self.dealersDenPresent = dealersDenPresent
         self.dealersDenRegText = dealersDenRegText
         self.timeZone = timeZone
-        self.paypalAPIUserName = paypalAPIUserName
-        self.paypalAPIPassword = paypalAPIPassword
-        self.paypalAPISignature = paypalAPISignature
         self.membershipLevels = membershipLevels
         self.shirtSizes = shirtSizes
         self.mailTemplates = mailTemplates
@@ -162,21 +136,11 @@ extension Convention {
             badgeClass: dto.badgeClass,
             contactEmailAddress: dto.contactEmailAddress,
             replicationMode: dto.replicationMode,
-            slackWebHook: dto.slackWebHook,
-            postmarkServerToken: dto.postmarkServerToken,
-            messagingServiceEndpoint: dto.messagingServiceEndpoint,
-            messagingServiceApiKey: dto.messagingServiceApiKey,
-            twilioAccountSID: dto.twilioAccountSID,
-            twilioAuthToken: dto.twilioAuthToken,
-            twilioOutgoingNumber: dto.twilioOutgoingNumber,
             compareTo: dto.compareTo,
             minBadgeNumber: dto.minBadgeNumber,
             dealersDenPresent: dto.dealersDenPresent,
             dealersDenRegText: dto.dealersDenRegText,
             timeZone: dto.timeZone,
-            paypalAPIUserName: dto.paypalAPIUserName,
-            paypalAPIPassword: dto.paypalAPIPassword,
-            paypalAPISignature: dto.paypalAPISignature,
             membershipLevels: dto.membershipLevels,
             shirtSizes: dto.shirtSizes,
             mailTemplates: dto.mailTemplates
@@ -203,21 +167,11 @@ extension Convention {
             badgeClass: self.badgeClass,
             contactEmailAddress: self.contactEmailAddress,
             replicationMode: self.replicationMode,
-            slackWebHook: self.slackWebHook,
-            postmarkServerToken: self.postmarkServerToken,
-            messagingServiceEndpoint: self.messagingServiceEndpoint,
-            messagingServiceApiKey: self.messagingServiceApiKey,
-            twilioAccountSID: self.twilioAccountSID,
-            twilioAuthToken: self.twilioAuthToken,
-            twilioOutgoingNumber: self.twilioOutgoingNumber,
             compareTo: self.compareTo,
             minBadgeNumber: self.minBadgeNumber,
             dealersDenPresent: self.dealersDenPresent,
             dealersDenRegText: self.dealersDenRegText,
             timeZone: self.timeZone,
-            paypalAPIUserName: self.paypalAPIUserName,
-            paypalAPIPassword: self.paypalAPIPassword,
-            paypalAPISignature: self.paypalAPISignature,
             membershipLevels: self.membershipLevels,
             shirtSizes: self.shirtSizes,
             mailTemplates: self.mailTemplates
@@ -244,21 +198,11 @@ extension Convention {
         self.badgeClass = updated.badgeClass
         self.contactEmailAddress = updated.contactEmailAddress
         self.replicationMode = updated.replicationMode
-        self.slackWebHook = updated.slackWebHook
-        self.postmarkServerToken = updated.postmarkServerToken
-        self.messagingServiceEndpoint = updated.messagingServiceEndpoint
-        self.messagingServiceApiKey = updated.messagingServiceApiKey
-        self.twilioAccountSID = updated.twilioAccountSID
-        self.twilioAuthToken = updated.twilioAuthToken
-        self.twilioOutgoingNumber = updated.twilioOutgoingNumber
         self.compareTo = updated.compareTo
         self.minBadgeNumber = updated.minBadgeNumber
         self.dealersDenPresent = updated.dealersDenPresent
         self.dealersDenRegText = updated.dealersDenRegText
         self.timeZone = updated.timeZone
-        self.paypalAPIUserName = updated.paypalAPIUserName
-        self.paypalAPIPassword = updated.paypalAPIPassword
-        self.paypalAPISignature = updated.paypalAPISignature
         self.membershipLevels = updated.membershipLevels
         self.shirtSizes = updated.shirtSizes
         self.mailTemplates = updated.mailTemplates
@@ -299,20 +243,10 @@ extension Convention {
                     badgeClass: Optional<String>.none,
                     contactEmailAddress: "bunny\(i)@example.com",
                     replicationMode: Optional<String>.none,
-                    slackWebHook: Optional<String>.none,
-                    postmarkServerToken: Optional<String>.none,
-                    messagingServiceEndpoint: Optional<String>.none,
-                    messagingServiceApiKey: Optional<String>.none,
-                    twilioAccountSID: Optional<String>.none,
-                    twilioAuthToken: Optional<String>.none,
-                    twilioOutgoingNumber: Optional<String>.none,
                     compareTo: Optional<ConventionIdentifier>.none,
                     minBadgeNumber: UInt32(i),
                     dealersDenPresent: false,
                     dealersDenRegText: Optional<String>.none,
-                    paypalAPIUserName: Optional<String>.none,
-                    paypalAPIPassword: Optional<String>.none,
-                    paypalAPISignature: Optional<String>.none,
                     membershipLevels: [],
                     shirtSizes: [],
                     mailTemplates: [:]
@@ -344,21 +278,11 @@ extension Convention: Codable {
         case badgeClass
         case contactEmailAddress
         case replicationMode
-        case slackWebHook
-        case postmarkServerToken
-        case messagingServiceEndpoint
-        case messagingServiceApiKey
-        case twilioAccountSID
-        case twilioAuthToken
-        case twilioOutgoingNumber
         case compareTo
         case minBadgeNumber
         case dealersDenPresent
         case dealersDenRegText
         case timeZone
-        case paypalAPIUserName
-        case paypalAPIPassword
-        case paypalAPISignature
         case membershipLevels
         case shirtSizes
         case mailTemplates
@@ -384,21 +308,11 @@ extension Convention: Codable {
         try container.encode(badgeClass, forKey: .badgeClass)
         try container.encode(contactEmailAddress, forKey: .contactEmailAddress)
         try container.encode(replicationMode, forKey: .replicationMode)
-        try container.encode(slackWebHook, forKey: .slackWebHook)
-        try container.encode(postmarkServerToken, forKey: .postmarkServerToken)
-        try container.encode(messagingServiceEndpoint, forKey: .messagingServiceEndpoint)
-        try container.encode(messagingServiceApiKey, forKey: .messagingServiceApiKey)
-        try container.encode(twilioAccountSID, forKey: .twilioAccountSID)
-        try container.encode(twilioAuthToken, forKey: .twilioAuthToken)
-        try container.encode(twilioOutgoingNumber, forKey: .twilioOutgoingNumber)
         try container.encode(compareTo, forKey: .compareTo)
         try container.encode(minBadgeNumber, forKey: .minBadgeNumber)
         try container.encode(dealersDenPresent, forKey: .dealersDenPresent)
         try container.encode(dealersDenRegText, forKey: .dealersDenRegText)
         try container.encode(timeZone, forKey: .timeZone)
-        try container.encode(paypalAPIUserName, forKey: .paypalAPIUserName)
-        try container.encode(paypalAPIPassword, forKey: .paypalAPIPassword)
-        try container.encode(paypalAPISignature, forKey: .paypalAPISignature)
         try container.encode(membershipLevels, forKey: .membershipLevels)
         try container.encode(shirtSizes, forKey: .shirtSizes)
         try container.encode(mailTemplates, forKey: .mailTemplates)
@@ -424,17 +338,6 @@ extension Convention: Codable {
         let contactEmailAddress = try container.decodeIfPresent(
             String.self, forKey: .contactEmailAddress)
         let replicationMode = try container.decodeIfPresent(String.self, forKey: .replicationMode)
-        let slackWebHook = try container.decodeIfPresent(String.self, forKey: .slackWebHook)
-        let postmarkServerToken = try container.decodeIfPresent(
-            String.self, forKey: .postmarkServerToken)
-        let messagingServiceEndpoint = try container.decodeIfPresent(
-            String.self, forKey: .messagingServiceEndpoint)
-        let messagingServiceApiKey = try container.decodeIfPresent(
-            String.self, forKey: .messagingServiceApiKey)
-        let twilioAccountSID = try container.decodeIfPresent(String.self, forKey: .twilioAccountSID)
-        let twilioAuthToken = try container.decodeIfPresent(String.self, forKey: .twilioAuthToken)
-        let twilioOutgoingNumber = try container.decodeIfPresent(
-            String.self, forKey: .twilioOutgoingNumber)
         let compareTo = try container.decodeIfPresent(ConventionIdentifier.self, forKey: .compareTo)
         let minBadgeNumber = try container.decode(UInt32.self, forKey: .minBadgeNumber)
         let dealersDenPresent = try container.decode(Bool.self, forKey: .dealersDenPresent)
@@ -442,12 +345,6 @@ extension Convention: Codable {
             String.self, forKey: .dealersDenRegText)
         let timeZone =
             try container.decodeIfPresent(String.self, forKey: .timeZone) ?? "America/Chicago"
-        let paypalAPIUserName = try container.decodeIfPresent(
-            String.self, forKey: .paypalAPIUserName)
-        let paypalAPIPassword = try container.decodeIfPresent(
-            String.self, forKey: .paypalAPIPassword)
-        let paypalAPISignature = try container.decodeIfPresent(
-            String.self, forKey: .paypalAPISignature)
         let membershipLevels = try container.decode(
             [MembershipLevel].self, forKey: .membershipLevels)
         let shirtSizes = try container.decode([ShirtSize].self, forKey: .shirtSizes)
@@ -471,21 +368,11 @@ extension Convention: Codable {
             badgeClass: badgeClass,
             contactEmailAddress: contactEmailAddress,
             replicationMode: replicationMode,
-            slackWebHook: slackWebHook,
-            postmarkServerToken: postmarkServerToken,
-            messagingServiceEndpoint: messagingServiceEndpoint,
-            messagingServiceApiKey: messagingServiceApiKey,
-            twilioAccountSID: twilioAccountSID,
-            twilioAuthToken: twilioAuthToken,
-            twilioOutgoingNumber: twilioOutgoingNumber,
             compareTo: compareTo,
             minBadgeNumber: minBadgeNumber,
             dealersDenPresent: dealersDenPresent,
             dealersDenRegText: dealersDenRegText,
             timeZone: timeZone,
-            paypalAPIUserName: paypalAPIUserName,
-            paypalAPIPassword: paypalAPIPassword,
-            paypalAPISignature: paypalAPISignature,
             membershipLevels: membershipLevels,
             shirtSizes: shirtSizes,
             mailTemplates: mailTemplates
@@ -516,21 +403,11 @@ extension Convention {
             badgeClass: "standard",
             contactEmailAddress: "contact@mockcon.com",
             replicationMode: "primary",
-            slackWebHook: nil,
-            postmarkServerToken: nil,
-            messagingServiceEndpoint: nil,
-            messagingServiceApiKey: nil,
-            twilioAccountSID: nil,
-            twilioAuthToken: nil,
-            twilioOutgoingNumber: nil,
             compareTo: nil,
             minBadgeNumber: 1000,
             dealersDenPresent: false,
             dealersDenRegText: nil,
             timeZone: "America/Chicago",
-            paypalAPIUserName: nil,
-            paypalAPIPassword: nil,
-            paypalAPISignature: nil,
             membershipLevels: [
                 MembershipLevel.mock(), MembershipLevel.mock(), MembershipLevel.mock(),
                 MembershipLevel.mock(),

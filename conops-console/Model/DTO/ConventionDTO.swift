@@ -14,8 +14,8 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let active: Bool
     let longName: String
     let shortName: String
-    let startDate: String      // YYYY-MM-DD format (date-only, no timezone issues)
-    let endDate: String        // YYYY-MM-DD format (date-only, no timezone issues)
+    let startDate: String  // YYYY-MM-DD format (date-only, no timezone issues)
+    let endDate: String  // YYYY-MM-DD format (date-only, no timezone issues)
     let preRegStartDate: Date
     let preRegEndDate: Date
     let registrationOpen: Bool
@@ -26,21 +26,18 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
     let badgeClass: String?
     let contactEmailAddress: String?
     let replicationMode: String?
-    let slackWebHook: String?
-    let postmarkServerToken: String?
-    let messagingServiceEndpoint: String?
-    let messagingServiceApiKey: String?
-    let twilioAccountSID: String?
-    let twilioAuthToken: String?
-    let twilioOutgoingNumber: String?
+    // Third-party service credentials (Slack / Postmark / Twilio / PayPal /
+    // generic messaging) are deliberately absent from this DTO. The server
+    // may still include them in its JSON response; Codable ignores unknown
+    // keys, which is exactly what we want — they never land on the client.
+    // Corollary: the PUT body for updateConvention won't include these fields
+    // either, so the server must treat missing credential fields as
+    // "unchanged" rather than null-out.
     let compareTo: ConventionIdentifier?
     let minBadgeNumber: UInt32
     let dealersDenPresent: Bool
     let dealersDenRegText: String?
     let timeZone: String
-    let paypalAPIUserName: String?
-    let paypalAPIPassword: String?
-    let paypalAPISignature: String?
     let membershipLevels: [MembershipLevel]
     let shirtSizes: [ShirtSize]
     let mailTemplates: [String: String]
@@ -63,21 +60,11 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
         case badgeClass = "badge_class"
         case contactEmailAddress = "contact_email_address"
         case replicationMode = "replication_mode"
-        case slackWebHook = "slack_web_hook"
-        case postmarkServerToken = "postmark_server_token"
-        case messagingServiceEndpoint = "messaging_service_endpoint"
-        case messagingServiceApiKey = "messaging_service_api_key"
-        case twilioAccountSID = "twilio_account_sid"
-        case twilioAuthToken = "twilio_auth_token"
-        case twilioOutgoingNumber = "twilio_outgoing_number"
         case compareTo = "compare_to"
         case minBadgeNumber = "min_badge_number"
         case dealersDenPresent = "dealers_den_present"
         case dealersDenRegText = "dealers_den_reg_text"
         case timeZone = "time_zone"
-        case paypalAPIUserName = "paypal_api_user_name"
-        case paypalAPIPassword = "paypal_api_password"
-        case paypalAPISignature = "paypal_api_signature"
         case membershipLevels = "membership_levels"
         case shirtSizes = "shirt_sizes"
         case mailTemplates = "mail_templates"
@@ -122,21 +109,11 @@ struct ConventionDTO: Codable, Identifiable, Comparable, Hashable, Sendable {
             badgeClass: "standard",
             contactEmailAddress: "mock@convention.com",
             replicationMode: "primary",
-            slackWebHook: "https://mock.slack.webhook",
-            postmarkServerToken: "mock-postmark-token",
-            messagingServiceEndpoint: "https://mock.messaging.service",
-            messagingServiceApiKey: "mock-messaging-key",
-            twilioAccountSID: "mock-sid",
-            twilioAuthToken: "mock-auth-token",
-            twilioOutgoingNumber: "+1234567890",
             compareTo: nil,
             minBadgeNumber: 100,
             dealersDenPresent: false,
             dealersDenRegText: nil,
             timeZone: "America/Chicago",
-            paypalAPIUserName: nil,
-            paypalAPIPassword: nil,
-            paypalAPISignature: nil,
             membershipLevels: [MembershipLevel.mock()],
             shirtSizes: [ShirtSize.mock()],
             mailTemplates: ["welcome": "Welcome to MockCon!"]

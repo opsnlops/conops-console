@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 100;
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
@@ -50,24 +50,18 @@
 /* Begin PBXFrameworksBuildPhase section */
 		11F772C22D29E8AC0054529F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		11F772D52D29E8AD0054529F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		11F772DF2D29E8AD0054529F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -105,14 +99,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				11F772C72D29E8AC0054529F /* conops-console */,
 			);
 			name = "Conops Console";
-			packageProductDependencies = (
-			);
 			productName = "conops-console";
 			productReference = 11F772C52D29E8AC0054529F /* Conops Console.app */;
 			productType = "com.apple.product-type.application";
@@ -134,8 +124,6 @@
 				11F772DB2D29E8AD0054529F /* conops-consoleTests */,
 			);
 			name = "conops-consoleTests";
-			packageProductDependencies = (
-			);
 			productName = "conops-consoleTests";
 			productReference = 11F772D82D29E8AD0054529F /* conops-consoleTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -157,8 +145,6 @@
 				11F772E52D29E8AD0054529F /* conops-consoleUITests */,
 			);
 			name = "conops-consoleUITests";
-			packageProductDependencies = (
-			);
 			productName = "conops-consoleUITests";
 			productReference = 11F772E22D29E8AD0054529F /* conops-consoleUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -197,7 +183,7 @@
 			);
 			mainGroup = 11F772BC2D29E8AC0054529F;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 100;
 			productRefGroup = 11F772C62D29E8AC0054529F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -212,48 +198,36 @@
 /* Begin PBXResourcesBuildPhase section */
 		11F772C32D29E8AC0054529F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		11F772D62D29E8AD0054529F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		11F772E02D29E8AD0054529F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		11F772C12D29E8AC0054529F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		11F772D42D29E8AD0054529F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		11F772DE2D29E8AD0054529F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -271,7 +245,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		11E12A802D40AAC20000EB0C /* Preview */ = {
+		11E12A802D40AAC20000EB0C /* Preview configuration for PBXProject "Conops Console" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -335,7 +309,7 @@
 			};
 			name = Preview;
 		};
-		11E12A812D40AAC20000EB0C /* Preview */ = {
+		11E12A812D40AAC20000EB0C /* Preview configuration for PBXNativeTarget "Conops Console" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -343,7 +317,7 @@
 				CODE_SIGN_ENTITLEMENTS = "conops-console/conops_console.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010103;
+				CURRENT_PROJECT_VERSION = 010200;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"conops-console/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
@@ -368,7 +342,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "furry.enterprises.conops-console";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -382,7 +356,7 @@
 			};
 			name = Preview;
 		};
-		11E12A822D40AAC20000EB0C /* Preview */ = {
+		11E12A822D40AAC20000EB0C /* Preview configuration for PBXNativeTarget "conops-consoleTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -405,7 +379,7 @@
 			};
 			name = Preview;
 		};
-		11E12A832D40AAC20000EB0C /* Preview */ = {
+		11E12A832D40AAC20000EB0C /* Preview configuration for PBXNativeTarget "conops-consoleUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -427,7 +401,7 @@
 			};
 			name = Preview;
 		};
-		11F772EA2D29E8AD0054529F /* Debug */ = {
+		11F772EA2D29E8AD0054529F /* Debug configuration for PBXProject "Conops Console" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -491,7 +465,7 @@
 			};
 			name = Debug;
 		};
-		11F772EB2D29E8AD0054529F /* Release */ = {
+		11F772EB2D29E8AD0054529F /* Release configuration for PBXProject "Conops Console" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -547,7 +521,7 @@
 			};
 			name = Release;
 		};
-		11F772ED2D29E8AD0054529F /* Debug */ = {
+		11F772ED2D29E8AD0054529F /* Debug configuration for PBXNativeTarget "Conops Console" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -555,7 +529,7 @@
 				CODE_SIGN_ENTITLEMENTS = "conops-console/conops_console.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010103;
+				CURRENT_PROJECT_VERSION = 010200;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"conops-console/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
@@ -580,7 +554,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "furry.enterprises.conops-console";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -594,7 +568,7 @@
 			};
 			name = Debug;
 		};
-		11F772EE2D29E8AD0054529F /* Release */ = {
+		11F772EE2D29E8AD0054529F /* Release configuration for PBXNativeTarget "Conops Console" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -602,7 +576,7 @@
 				CODE_SIGN_ENTITLEMENTS = "conops-console/conops_console.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 010103;
+				CURRENT_PROJECT_VERSION = 010200;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"conops-console/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
@@ -627,7 +601,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "furry.enterprises.conops-console";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -641,7 +615,7 @@
 			};
 			name = Release;
 		};
-		11F772F02D29E8AD0054529F /* Debug */ = {
+		11F772F02D29E8AD0054529F /* Debug configuration for PBXNativeTarget "conops-consoleTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -664,7 +638,7 @@
 			};
 			name = Debug;
 		};
-		11F772F12D29E8AD0054529F /* Release */ = {
+		11F772F12D29E8AD0054529F /* Release configuration for PBXNativeTarget "conops-consoleTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -687,7 +661,7 @@
 			};
 			name = Release;
 		};
-		11F772F32D29E8AD0054529F /* Debug */ = {
+		11F772F32D29E8AD0054529F /* Debug configuration for PBXNativeTarget "conops-consoleUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -709,7 +683,7 @@
 			};
 			name = Debug;
 		};
-		11F772F42D29E8AD0054529F /* Release */ = {
+		11F772F42D29E8AD0054529F /* Release configuration for PBXNativeTarget "conops-consoleUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -737,41 +711,37 @@
 		11F772C02D29E8AC0054529F /* Build configuration list for PBXProject "Conops Console" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				11F772EA2D29E8AD0054529F /* Debug */,
-				11E12A802D40AAC20000EB0C /* Preview */,
-				11F772EB2D29E8AD0054529F /* Release */,
+				11F772EA2D29E8AD0054529F /* Debug configuration for PBXProject "Conops Console" */,
+				11E12A802D40AAC20000EB0C /* Preview configuration for PBXProject "Conops Console" */,
+				11F772EB2D29E8AD0054529F /* Release configuration for PBXProject "Conops Console" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		11F772EC2D29E8AD0054529F /* Build configuration list for PBXNativeTarget "Conops Console" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				11F772ED2D29E8AD0054529F /* Debug */,
-				11E12A812D40AAC20000EB0C /* Preview */,
-				11F772EE2D29E8AD0054529F /* Release */,
+				11F772ED2D29E8AD0054529F /* Debug configuration for PBXNativeTarget "Conops Console" */,
+				11E12A812D40AAC20000EB0C /* Preview configuration for PBXNativeTarget "Conops Console" */,
+				11F772EE2D29E8AD0054529F /* Release configuration for PBXNativeTarget "Conops Console" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		11F772EF2D29E8AD0054529F /* Build configuration list for PBXNativeTarget "conops-consoleTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				11F772F02D29E8AD0054529F /* Debug */,
-				11E12A822D40AAC20000EB0C /* Preview */,
-				11F772F12D29E8AD0054529F /* Release */,
+				11F772F02D29E8AD0054529F /* Debug configuration for PBXNativeTarget "conops-consoleTests" */,
+				11E12A822D40AAC20000EB0C /* Preview configuration for PBXNativeTarget "conops-consoleTests" */,
+				11F772F12D29E8AD0054529F /* Release configuration for PBXNativeTarget "conops-consoleTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		11F772F22D29E8AD0054529F /* Build configuration list for PBXNativeTarget "conops-consoleUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				11F772F32D29E8AD0054529F /* Debug */,
-				11E12A832D40AAC20000EB0C /* Preview */,
-				11F772F42D29E8AD0054529F /* Release */,
+				11F772F32D29E8AD0054529F /* Debug configuration for PBXNativeTarget "conops-consoleUITests" */,
+				11E12A832D40AAC20000EB0C /* Preview configuration for PBXNativeTarget "conops-consoleUITests" */,
+				11F772F42D29E8AD0054529F /* Release configuration for PBXNativeTarget "conops-consoleUITests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
