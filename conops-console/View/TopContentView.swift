@@ -30,7 +30,6 @@ struct TopContentView: View {
     @State private var eventStream = ConopsEventStream()
     @State private var isSyncing = false
     @State private var isShowingLogin = false
-    @State private var loginCanCancel = false
     @State private var loginNotice: String?
     @State private var hasStartedSession = false
 
@@ -89,8 +88,7 @@ struct TopContentView: View {
                             }
 
                             Button(role: .destructive) {
-                                loginCanCancel = true
-                                isShowingLogin = true
+                                performLogout()
                             } label: {
                                 Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
                             }
@@ -141,8 +139,7 @@ struct TopContentView: View {
                         Spacer()
 
                         Button {
-                            loginCanCancel = true
-                            isShowingLogin = true
+                            performLogout()
                         } label: {
                             Image(systemName: "rectangle.portrait.and.arrow.right")
                         }
@@ -219,32 +216,19 @@ struct TopContentView: View {
             }
         }
         .sheet(isPresented: $isShowingLogin) {
-            LoginView(canCancel: loginCanCancel, notice: loginNotice) {
+            // Not cancellable: this sheet only appears when there is no usable
+            // session, so there is nothing to go back to. Logout and expiry both
+            // clear the cache before presenting it.
+            LoginView(canCancel: false, notice: loginNotice) {
                 // On successful authentication
                 loginNotice = nil
-                if loginCanCancel {
-                    // User was re-authenticating after clicking logout
-                    // Clear selection first so detail views stop rendering before data is deleted
-                    appState.selectedConventionId = nil
-                    // Just clear the cache, don't post logout notification (which would trigger another login)
-                    let clearResult = SyncCache.clear(context: context, logger: logger)
-                    if case .failure(let error) = clearResult {
-                        logger.error("Failed to clear old session cache: \(error)")
-                    }
-                    hasStartedSession = false
-                }
-                loginCanCancel = false
                 Task {
                     await startSession()
                 }
-            } onCancel: {
-                loginCanCancel = false
-                loginNotice = nil
             }
         }
         .task {
             if !AuthStore.shared.hasToken {
-                loginCanCancel = false
                 isShowingLogin = true
                 return
             }
@@ -262,7 +246,6 @@ struct TopContentView: View {
                     eventStream.stop()
                     hasStartedSession = false
                     isSyncing = false
-                    loginCanCancel = false
                     isShowingLogin = true
                 }
             }
@@ -300,6 +283,26 @@ struct TopContentView: View {
         }
         .onDisappear {
             eventStream.stop()
+        }
+    }
+
+    /// Ends the session for real: clears the keychain token, the local cache,
+    /// the event stream, and the push registration.
+    ///
+    /// This used to just set `isShowingLogin`, which meant the token and the
+    /// cached attendee data survived until the user finished re-authenticating
+    /// — and survived indefinitely if they cancelled. `SessionManager.logout`
+    /// posts `.authDidLogout`, and the observer above presents the login sheet,
+    /// so the same path serves this button and the one in Server Settings.
+    private func performLogout() {
+        logger.info("User requested logout")
+        let result = SessionManager.logout(context: context, appState: appState, logger: logger)
+        if case .failure(let error) = result {
+            // Reported through the login sheet rather than an alert, which would
+            // compete with the sheet the .authDidLogout observer is presenting.
+            logger.error("Logout failed to clear local cache: \(error)")
+            loginNotice =
+                "Logged out, but clearing local data failed: \(error.localizedDescription)"
         }
     }
 
