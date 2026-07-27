@@ -146,10 +146,29 @@ final class ConopsServerClient: ConopsServerProtocol {
             logger.error(
                 "HTTP error \(statusCode): \(bodyString.prefix(500), privacy: .public)")
 
+            // A 401 on an authenticated endpoint means our session is no longer
+            // valid. Fire a notification so the app can log the user out and
+            // clear any local data they should no longer be able to browse.
+            // Skip when there's no token (nothing to expire) or when this is
+            // the auth/token endpoint itself (wrong password on login).
+            if statusCode == 401,
+                AuthStore.shared.hasToken,
+                httpResponse.url?.path.contains("auth/token") != true
+            {
+                logger.warning("Received 401 on authenticated request; session expired")
+                // This runs on whatever thread resumed the URLSession
+                // continuation, and NotificationCenter delivers on the posting
+                // thread. The observer tears down SwiftData objects and touches
+                // view state, so the post has to land on the main actor.
+                Task { @MainActor in
+                    NotificationCenter.default.post(name: .authSessionExpired, object: nil)
+                }
+            }
+
             // Try to parse as API error response if it's JSON
             if contentType.contains("application/json"),
-               let serverStatus = try? JSONDecoder().decode(
-                ServerStatus<EmptyDTO>.self, from: data)
+                let serverStatus = try? JSONDecoder().decode(
+                    ServerStatus<EmptyDTO>.self, from: data)
             {
                 let message = serverStatus.message ?? "HTTP \(statusCode)"
                 return .failure(.apiError(statusCode, message))
@@ -157,7 +176,8 @@ final class ConopsServerClient: ConopsServerProtocol {
 
             // Handle HTML error pages (WAF, proxy errors, etc.)
             if contentType.contains("text/html") {
-                let friendlyMessage = extractHtmlErrorMessage(from: bodyString, statusCode: statusCode)
+                let friendlyMessage = extractHtmlErrorMessage(
+                    from: bodyString, statusCode: statusCode)
                 return .failure(.apiError(statusCode, friendlyMessage))
             }
 
@@ -292,7 +312,9 @@ final class ConopsServerClient: ConopsServerProtocol {
     private func extractHtmlErrorMessage(from html: String, statusCode: Int) -> String {
         // Try to extract <title> content
         if let titleRange = html.range(of: "<title>"),
-           let titleEndRange = html.range(of: "</title>", range: titleRange.upperBound..<html.endIndex) {
+            let titleEndRange = html.range(
+                of: "</title>", range: titleRange.upperBound..<html.endIndex)
+        {
             let title = String(html[titleRange.upperBound..<titleEndRange.lowerBound])
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             if !title.isEmpty && title.count < 100 {

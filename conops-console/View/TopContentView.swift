@@ -31,6 +31,7 @@ struct TopContentView: View {
     @State private var isSyncing = false
     @State private var isShowingLogin = false
     @State private var loginCanCancel = false
+    @State private var loginNotice: String?
     @State private var hasStartedSession = false
 
     let logger = Logger(subsystem: "furry.enterprises.CreatureConsole", category: "TopContentView")
@@ -218,8 +219,9 @@ struct TopContentView: View {
             }
         }
         .sheet(isPresented: $isShowingLogin) {
-            LoginView(canCancel: loginCanCancel) {
+            LoginView(canCancel: loginCanCancel, notice: loginNotice) {
                 // On successful authentication
+                loginNotice = nil
                 if loginCanCancel {
                     // User was re-authenticating after clicking logout
                     // Clear selection first so detail views stop rendering before data is deleted
@@ -237,6 +239,7 @@ struct TopContentView: View {
                 }
             } onCancel: {
                 loginCanCancel = false
+                loginNotice = nil
             }
         }
         .task {
@@ -261,6 +264,37 @@ struct TopContentView: View {
                     isSyncing = false
                     loginCanCancel = false
                     isShowingLogin = true
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .authSessionExpired)) { _ in
+            // Server rejected our token. Clear local data so the next user can't
+            // browse it, then drop the user at the login screen.
+            //
+            // NotificationCenter delivers on the posting thread, and API 401s
+            // are posted from a URLSession continuation. Hop to the main actor
+            // before touching SwiftData or view state. Hopping also serializes
+            // these handlers, which is what makes the re-entry guard below
+            // reliable when several in-flight requests all return 401 at once.
+            Task {
+                await MainActor.run {
+                    guard AuthStore.shared.hasToken else { return }
+                    logger.warning("Session expired; clearing local data and forcing re-login")
+                    eventStream.stop()
+                    // Shown inside the login sheet rather than as an alert. The
+                    // sheet is presented in the same turn by the .authDidLogout
+                    // handler, and a simultaneous alert would leave one of the
+                    // two unpresented.
+                    loginNotice = "Your session has expired. Please log in again."
+                    let result = SessionManager.logout(
+                        context: context,
+                        appState: appState,
+                        logger: logger,
+                        sessionIsValid: false
+                    )
+                    if case .failure(let error) = result {
+                        logger.error("Failed to clear cache after session expiry: \(error)")
+                    }
                 }
             }
         }

@@ -48,6 +48,12 @@ final class ConopsEventStream {
                         self.logger.error(
                             "SSE connection failed (status \(httpResponse.statusCode)): \(errorBody, privacy: .public)"
                         )
+                        if httpResponse.statusCode == 401 {
+                            self.logger.warning("SSE received 401; session expired")
+                            NotificationCenter.default.post(
+                                name: .authSessionExpired, object: nil)
+                            return
+                        }
                         await self.sleepBeforeReconnect()
                         continue
                     }
